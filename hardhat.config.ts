@@ -14,6 +14,9 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
   }
 });
 
+const INFURA_URL = process.env.RPC_URL;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
 const config: HardhatUserConfig = {
@@ -53,10 +56,16 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: process.env["RPC_URL"] ? process.env["RPC_URL"] : "http://127.0.0.1:8545",
+        blockNumber: 12640151 // https://etherscan.io/block/12640151
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true,
     },
+    kovan: {
+      url: INFURA_URL,
+      accounts: [`0x${PRIVATE_KEY}`],
+      blockGasLimit: 20000000
+    }
   },
   mocha: {
     timeout: 1200000,
