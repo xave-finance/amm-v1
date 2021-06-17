@@ -57,6 +57,7 @@ async function main() {
 
   const curvesLib = await CurvesLib.deploy();
   console.log('Curves Contract address: ', curvesLib.address)
+
   const orchestratorLib = await OrchestratorLib.deploy();
   console.log('Orchestrator Contract address: ', orchestratorLib.address)
   const proportionalLiquidityLib = await ProportionalLiquidityLib.deploy();
@@ -102,222 +103,275 @@ async function main() {
   const curveFactory = (await CurveFactory.deploy({ gasLimit: 12000000 })) as CurveFactory;
   console.log('CurveFactory Contract address: ', curveFactory.address)
 
-  console.log('Verifying Factory Contract');
+  const router = (await RouterFactory.deploy(curveFactory.address, { gasLimit: 12000000 })) as Router;
+  console.log('Router Contract address: ', router.address)
+
+  console.log('-------------------- Verifying Curves Contract');
+  await hre.run('verify:verify', {
+    address: curvesLib.address
+  })
+
+  console.log('-------------------- Verifying Orchestrator Contract');
+  await hre.run('verify:verify', {
+    address: orchestratorLib.address
+  })
+
+  console.log('-------------------- Verifying ProportionalLiquidity Contract');
+  await hre.run('verify:verify', {
+    address: proportionalLiquidityLib.address
+  })
+
+  console.log('-------------------- Verifying Swaps Contract');
+  await hre.run('verify:verify', {
+    address: swapsLib.address
+  })
+
+  console.log('-------------------- Verifying ViewLiquidity Contract');
+  await hre.run('verify:verify', {
+    address: viewLiquidityLib.address
+  })
+
+  console.log('-------------------- Verifying CadcToUsdAssimilator Contract');
+  await hre.run('verify:verify', {
+    address: cadcToUsdAssimilator.address
+  })
+
+  console.log('-------------------- Verifying UsdcToUsdAssimilator Contract');
+  await hre.run('verify:verify', {
+    address: usdcToUsdAssimilator.address
+  })
+
+  console.log('-------------------- Verifying EursToUsdAssimilator Contract');
+  await hre.run('verify:verify', {
+    address: eursToUsdAssimilator.address
+  })
+
+  console.log('-------------------- Verifying XsgdToUsdAssimilator Contract');
+  await hre.run('verify:verify', {
+    address: xsgdToUsdAssimilator.address
+  })
+
+  console.log('-------------------- Verifying CurveFactory Contract');
   await hre.run('verify:verify', {
     address: curveFactory.address
   })
 
+  console.log('-------------------- Verifying Router Contract');
+  await hre.run('verify:verify', {
+    address: "0xC5B8F7b0d67d66b04ABCD3210524fdb03B4D532C",
+    constructorArguments: [
+      "0x1361B1d9A4cCE04E384F65E0739923a7b2202B6f"
+    ]
+  })
 
-  const router = (await RouterFactory.deploy(curveFactory.address, { gasLimit: 12000000 })) as Router;
-  console.log('Router Contract address: ', router.address)
+  // const createCurve = async function ({
+  //   name,
+  //   symbol,
+  //   base,
+  //   quote,
+  //   baseWeight,
+  //   quoteWeight,
+  //   baseAssimilator,
+  //   quoteAssimilator,
+  // }: {
+  //   name: string;
+  //   symbol: string;
+  //   base: string;
+  //   quote: string;
+  //   baseWeight: BigNumberish;
+  //   quoteWeight: BigNumberish;
+  //   baseAssimilator: string;
+  //   quoteAssimilator: string;
+  // }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
+  //   const tx = await curveFactory.newCurve(
+  //     name,
+  //     symbol,
+  //     base,
+  //     quote,
+  //     baseWeight,
+  //     quoteWeight,
+  //     baseAssimilator,
+  //     quoteAssimilator,
+  //     {
+  //       gasLimit: 12000000,
+  //     },
+  //   );
+  //   await tx.wait();
 
-  const createCurve = async function ({
-    name,
-    symbol,
-    base,
-    quote,
-    baseWeight,
-    quoteWeight,
-    baseAssimilator,
-    quoteAssimilator,
-  }: {
-    name: string;
-    symbol: string;
-    base: string;
-    quote: string;
-    baseWeight: BigNumberish;
-    quoteWeight: BigNumberish;
-    baseAssimilator: string;
-    quoteAssimilator: string;
-  }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
-    const tx = await curveFactory.newCurve(
-      name,
-      symbol,
-      base,
-      quote,
-      baseWeight,
-      quoteWeight,
-      baseAssimilator,
-      quoteAssimilator,
-      {
-        gasLimit: 12000000,
-      },
-    );
-    await tx.wait();
+  //   console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
 
-    console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+  //   // Get curve address
+  //   const curveAddress = await curveFactory.curves(
+  //     ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
+  //   );
+  //   console.log('CurveFactory#curves TX Hash: ', curveAddress)
+  //   const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
+  //   const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
-    // Get curve address
-    const curveAddress = await curveFactory.curves(
-      ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
-    );
-    console.log('CurveFactory#curves TX Hash: ', curveAddress)
-    const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
-    const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
+  //   const turnOffWhitelisting = await curve.turnOffWhitelisting();
+  //   console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
 
-    const turnOffWhitelisting = await curve.turnOffWhitelisting();
-    console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
+  //   return {
+  //     curve,
+  //     curveLpToken,
+  //   };
+  // };
 
-    return {
-      curve,
-      curveLpToken,
-    };
-  };
+  // const createCurveAndSetParams = async function ({
+  //   name,
+  //   symbol,
+  //   base,
+  //   quote,
+  //   baseWeight,
+  //   quoteWeight,
+  //   baseAssimilator,
+  //   quoteAssimilator,
+  //   params,
+  // }: {
+  //   name: string;
+  //   symbol: string;
+  //   base: string;
+  //   quote: string;
+  //   baseWeight: BigNumberish;
+  //   quoteWeight: BigNumberish;
+  //   baseAssimilator: string;
+  //   quoteAssimilator: string;
+  //   params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  // }) {
+  //   const { curve, curveLpToken } = await createCurve({
+  //     name,
+  //     symbol,
+  //     base,
+  //     quote,
+  //     baseWeight,
+  //     quoteWeight,
+  //     baseAssimilator,
+  //     quoteAssimilator,
+  //   });
 
-  const createCurveAndSetParams = async function ({
-    name,
-    symbol,
-    base,
-    quote,
-    baseWeight,
-    quoteWeight,
-    baseAssimilator,
-    quoteAssimilator,
-    params,
-  }: {
-    name: string;
-    symbol: string;
-    base: string;
-    quote: string;
-    baseWeight: BigNumberish;
-    quoteWeight: BigNumberish;
-    baseAssimilator: string;
-    quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  }) {
-    const { curve, curveLpToken } = await createCurve({
-      name,
-      symbol,
-      base,
-      quote,
-      baseWeight,
-      quoteWeight,
-      baseAssimilator,
-      quoteAssimilator,
-    });
+  //   const tx = await curve.setParams(...params, { gasLimit: 12000000 });
+  //   // const tx = await curve.setParams(...params, { gasLimit: 0xfffffffffff });
+  //   console.log('Curve#setParams TX Hash: ', tx.hash)
+  //   await tx.wait();
 
-    const tx = await curve.setParams(...params, { gasLimit: 12000000 });
-    // const tx = await curve.setParams(...params, { gasLimit: 0xfffffffffff });
-    console.log('Curve#setParams TX Hash: ', tx.hash)
-    await tx.wait();
+  //   return {
+  //     curve,
+  //     curveLpToken,
+  //   };
+  // };
 
-    return {
-      curve,
-      curveLpToken,
-    };
-  };
+  // const mintAndApprove = async function (
+  //   tokenAddress: string,
+  //   minter: Signer,
+  //   amount: BigNumberish,
+  //   recipient: string,
+  // ) {
+  //   const minterAddress = await minter.getAddress();
 
-  const mintAndApprove = async function (
-    tokenAddress: string,
-    minter: Signer,
-    amount: BigNumberish,
-    recipient: string,
-  ) {
-    const minterAddress = await minter.getAddress();
+  //   if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
+  //     await mintUSDC(minterAddress, amount);
+  //   }
 
-    if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
-      await mintUSDC(minterAddress, amount);
-    }
+  //   if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
+  //     await mintCADC(minterAddress, amount);
+  //   }
 
-    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
-      await mintCADC(minterAddress, amount);
-    }
+  //   if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
+  //     await mintEURS(minterAddress, amount);
+  //   }
 
-    if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
-      await mintEURS(minterAddress, amount);
-    }
+  //   if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
+  //     await mintXSGD(minterAddress, amount);
+  //   }
 
-    if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
-      await mintXSGD(minterAddress, amount);
-    }
+  //   await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
+  // };
 
-    await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
-  };
+  // const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
+  //   for (let i = 0; i < requests.length; i++) {
+  //     await mintAndApprove(...requests[i]);
+  //   }
+  // };
 
-  const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
-    for (let i = 0; i < requests.length; i++) {
-      await mintAndApprove(...requests[i]);
-    }
-  };
+  // const { curve: curveCADC } = await createCurveAndSetParams({
+  //   name: NAME,
+  //   symbol: SYMBOL,
+  //   base: cadc.address,
+  //   quote: usdc.address,
+  //   baseWeight: parseUnits("0.5"),
+  //   quoteWeight: parseUnits("0.5"),
+  //   baseAssimilator: cadcToUsdAssimilator.address,
+  //   quoteAssimilator: usdcToUsdAssimilator.address,
+  //   params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+  // });
 
-  const { curve: curveCADC } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
-    base: cadc.address,
-    quote: usdc.address,
-    baseWeight: parseUnits("0.5"),
-    quoteWeight: parseUnits("0.5"),
-    baseAssimilator: cadcToUsdAssimilator.address,
-    quoteAssimilator: usdcToUsdAssimilator.address,
-    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  });
+  // const { curve: curveXSGD } = await createCurveAndSetParams({
+  //   name: NAME,
+  //   symbol: SYMBOL,
+  //   base: xsgd.address,
+  //   quote: usdc.address,
+  //   baseWeight: parseUnits("0.5"),
+  //   quoteWeight: parseUnits("0.5"),
+  //   baseAssimilator: xsgdToUsdAssimilator.address,
+  //   quoteAssimilator: usdcToUsdAssimilator.address,
+  //   params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+  // });
 
-  const { curve: curveXSGD } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
-    base: xsgd.address,
-    quote: usdc.address,
-    baseWeight: parseUnits("0.5"),
-    quoteWeight: parseUnits("0.5"),
-    baseAssimilator: xsgdToUsdAssimilator.address,
-    quoteAssimilator: usdcToUsdAssimilator.address,
-    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  });
+  // const { curve: curveEURS } = await createCurveAndSetParams({
+  //   name: NAME,
+  //   symbol: SYMBOL,
+  //   base: eurs.address,
+  //   quote: usdc.address,
+  //   baseWeight: parseUnits("0.5"),
+  //   quoteWeight: parseUnits("0.5"),
+  //   baseAssimilator: eursToUsdAssimilator.address,
+  //   quoteAssimilator: usdcToUsdAssimilator.address,
+  //   params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+  // });
 
-  const { curve: curveEURS } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
-    base: eurs.address,
-    quote: usdc.address,
-    baseWeight: parseUnits("0.5"),
-    quoteWeight: parseUnits("0.5"),
-    baseAssimilator: eursToUsdAssimilator.address,
-    quoteAssimilator: usdcToUsdAssimilator.address,
-    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  });
+  // // Supply liquidity to the pools
+  // // Mint tokens and approve
+  // await multiMintAndApprove([
+  //   [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveCADC.address],
+  //   [TOKENS.CADC.address, deployer, parseUnits("10000000", TOKENS.CADC.decimals), curveCADC.address],
+  //   [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveXSGD.address],
+  //   [TOKENS.XSGD.address, deployer, parseUnits("10000000", TOKENS.XSGD.decimals), curveXSGD.address],
+  //   [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveEURS.address],
+  //   [TOKENS.EURS.address, deployer, parseUnits("10000000", TOKENS.EURS.decimals), curveEURS.address],
+  //   [TOKENS.EURS.address, user1, parseUnits("5000000", TOKENS.EURS.decimals), curveEURS.address],
+  // ]);
 
-  // Supply liquidity to the pools
-  // Mint tokens and approve
-  await multiMintAndApprove([
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveCADC.address],
-    [TOKENS.CADC.address, deployer, parseUnits("10000000", TOKENS.CADC.decimals), curveCADC.address],
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveXSGD.address],
-    [TOKENS.XSGD.address, deployer, parseUnits("10000000", TOKENS.XSGD.decimals), curveXSGD.address],
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveEURS.address],
-    [TOKENS.EURS.address, deployer, parseUnits("10000000", TOKENS.EURS.decimals), curveEURS.address],
-    [TOKENS.EURS.address, user1, parseUnits("5000000", TOKENS.EURS.decimals), curveEURS.address],
-  ]);
+  // await curveCADC
+  //   .connect(deployer)
+  //   .deposit(parseUnits("10000000"), await getFutureTime())
+  //   .then(x => x.wait());
 
-  await curveCADC
-    .connect(deployer)
-    .deposit(parseUnits("10000000"), await getFutureTime())
-    .then(x => x.wait());
+  // await curveXSGD
+  //   .connect(deployer)
+  //   .deposit(parseUnits("10000000"), await getFutureTime())
+  //   .then(x => x.wait());
 
-  await curveXSGD
-    .connect(deployer)
-    .deposit(parseUnits("10000000"), await getFutureTime())
-    .then(x => x.wait());
+  // await curveEURS
+  //   .connect(deployer)
+  //   .deposit(parseUnits("5000000"), await getFutureTime())
+  //   .then(x => x.wait());
 
-  await curveEURS
-    .connect(deployer)
-    .deposit(parseUnits("5000000"), await getFutureTime())
-    .then(x => x.wait());
+  // console.log(`Scaffolding done. Each pool is initialized with 10mil USD liquidity`);
+  // console.log(
+  //   JSON.stringify(
+  //     {
+  //       curveFactory: curveFactory.address,
+  //       curveCADC: curveCADC.address,
+  //       curveXSGD: curveXSGD.address,
+  //       curveEURS: curveEURS.address,
+  //       router: router.address,
+  //     },
+  //     null,
+  //     4,
+  //   ),
+  // );
 
-  console.log(`Scaffolding done. Each pool is initialized with 10mil USD liquidity`);
-  console.log(
-    JSON.stringify(
-      {
-        curveFactory: curveFactory.address,
-        curveCADC: curveCADC.address,
-        curveXSGD: curveXSGD.address,
-        curveEURS: curveEURS.address,
-        router: router.address,
-      },
-      null,
-      4,
-    ),
-  );
-
+  // -------- Commented out by default
   // console.log("ALPHA", formatUnits(ALPHA));
   // console.log("BETA", formatUnits(BETA));
   // console.log("MAX", formatUnits(MAX));
