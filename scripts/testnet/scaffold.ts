@@ -10,6 +10,8 @@ import { Router } from "../../typechain/Router";
 import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
+const hre = require("hardhat")
+
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
 
@@ -99,6 +101,13 @@ async function main() {
 
   const curveFactory = (await CurveFactory.deploy({ gasLimit: 12000000 })) as CurveFactory;
   console.log('CurveFactory Contract address: ', curveFactory.address)
+
+  console.log('Verifying Factory Contract');
+  await hre.run('verify:verify', {
+    address: curveFactory.address
+  })
+
+
   const router = (await RouterFactory.deploy(curveFactory.address, { gasLimit: 12000000 })) as Router;
   console.log('Router Contract address: ', router.address)
 
