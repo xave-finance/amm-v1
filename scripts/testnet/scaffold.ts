@@ -54,10 +54,15 @@ async function main() {
   const ViewLiquidityLib = await ethers.getContractFactory("ViewLiquidity");
 
   const curvesLib = await CurvesLib.deploy();
+  console.log('Curves Contract address: ', curvesLib.address)
   const orchestratorLib = await OrchestratorLib.deploy();
+  console.log('Orchestrator Contract address: ', orchestratorLib.address)
   const proportionalLiquidityLib = await ProportionalLiquidityLib.deploy();
+  console.log('ProportionalLiquidity Contract address: ', proportionalLiquidityLib.address)
   const swapsLib = await SwapsLib.deploy();
+  console.log('Swaps Contract address: ', swapsLib.address)
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
+  console.log('ViewLiquidity Contract address: ', viewLiquidityLib.address)
 
   const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
@@ -65,9 +70,13 @@ async function main() {
   const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
 
   const cadcToUsdAssimilator = await CadcToUsdAssimilator.deploy({ gasLimit: 12000000 });
+  console.log('CadcToUsdAssimilator Contract address: ', cadcToUsdAssimilator.address)
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy({ gasLimit: 12000000 });
+  console.log('UsdcToUsdAssimilator Contract address: ', usdcToUsdAssimilator.address)
   const eursToUsdAssimilator = await EursToUsdAssimilator.deploy({ gasLimit: 12000000 });
+  console.log('EursToUsdAssimilator Contract address: ', eursToUsdAssimilator.address)
   const xsgdToUsdAssimilator = await XsgdToUsdAssimilator.deploy({ gasLimit: 12000000 });
+  console.log('XsgdToUsdAssimilator Contract address: ', xsgdToUsdAssimilator.address)
 
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
   const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
@@ -89,7 +98,9 @@ async function main() {
   const RouterFactory = await ethers.getContractFactory("Router");
 
   const curveFactory = (await CurveFactory.deploy({ gasLimit: 12000000 })) as CurveFactory;
+  console.log('CurveFactory Contract address: ', curveFactory.address)
   const router = (await RouterFactory.deploy(curveFactory.address, { gasLimit: 12000000 })) as Router;
+  console.log('Router Contract address: ', router.address)
 
   const createCurve = async function ({
     name,
@@ -125,14 +136,18 @@ async function main() {
     );
     await tx.wait();
 
+    console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+
     // Get curve address
     const curveAddress = await curveFactory.curves(
       ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
     );
+    console.log('CurveFactory#curves TX Hash: ', curveAddress)
     const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
     const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
-    await curve.turnOffWhitelisting();
+    const turnOffWhitelisting = await curve.turnOffWhitelisting();
+    console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
 
     return {
       curve,
@@ -173,6 +188,8 @@ async function main() {
     });
 
     const tx = await curve.setParams(...params, { gasLimit: 12000000 });
+    // const tx = await curve.setParams(...params, { gasLimit: 0xfffffffffff });
+    console.log('Curve#setParams TX Hash: ', tx.hash)
     await tx.wait();
 
     return {
