@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
+import { Signer } from "ethers";
 
 import { CurveFactory } from "../../typechain/CurveFactory";
 import { Router } from "../../typechain/Router";
-import { Signer } from "ethers";
 
 export const getDeployer = async (): Promise<{
   deployer: Signer;
@@ -18,6 +18,7 @@ async function main() {
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await deployer.getBalance()}`)
 
   const CurvesLib = await ethers.getContractFactory("Curves");
   const OrchestratorLib = await ethers.getContractFactory("Orchestrator");
@@ -66,6 +67,8 @@ async function main() {
   console.log(`CONTRACT_XSGDTOUSDASSIMILATOR_ADDR=${xsgdToUsdAssimilator.address}`)
   console.log(`CONTRACT_CURVE_FACTORY_ADDR=${curveFactory.address}`)
   console.log(`CONTRACT_ROUTER_ADDR=${router.address}`)
+
+  console.log(`Deployer balance: ${await deployer.getBalance()}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

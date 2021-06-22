@@ -43,6 +43,7 @@ async function main() {
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await deployer.getBalance()}`)
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
@@ -150,6 +151,8 @@ async function main() {
     quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
+
+  console.log(`Deployer balance: ${await deployer.getBalance()}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
