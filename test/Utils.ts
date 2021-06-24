@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { ethers } from "hardhat";
 import { TOKENS } from "./Constants";
 import { BigNumber, BigNumberish, ContractReceipt, Signer } from "ethers";
@@ -8,9 +9,10 @@ import EURSABI from "./abi/EURSABI.json";
 import FiatTokenV1ABI from "./abi/FiatTokenV1ABI.json";
 import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
 import { Result } from "ethers/lib/utils";
-
-const { provider } = ethers;
 const { parseUnits } = ethers.utils;
+
+const LOCAL_NODE = process.env.LOCAL_NODE;
+const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
 
 const sendETH = async (address, amount = 0.1) => {
   const signer = await provider.getSigner(0);
@@ -209,7 +211,7 @@ export const expectEventIn = (txRecp: ContractReceipt, eventName: string, eventA
 
 export const expectRevert = async (promise: Promise<unknown>, expectedError: string): Promise<void> => {
   // eslint-disable-next-line
-  promise.catch(() => {}); // Catch all exceptions
+  promise.catch(() => { }); // Catch all exceptions
 
   try {
     await promise;
