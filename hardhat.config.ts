@@ -18,6 +18,7 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 const INFURA_URL = process.env.RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const LOCAL_NODE = process.env.LOCAL_NODE;
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -33,7 +34,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: LOCAL_NODE,
       timeout: 1200000,
       accounts: [
         process.env["PRIVATE_KEY"]
@@ -42,7 +43,7 @@ const config: HardhatUserConfig = {
       ],
     },
     remote: {
-      url: process.env["REMOTE_URL"] ? process.env["REMOTE_URL"] : "http://127.0.0.1:8545",
+      url: process.env["REMOTE_URL"] ? process.env["REMOTE_URL"] : LOCAL_NODE,
       accounts: [
         process.env["PRIVATE_KEY"]
           ? process.env["PRIVATE_KEY"]
@@ -57,7 +58,7 @@ const config: HardhatUserConfig = {
       },
       forking: {
         enabled: true,
-        url: process.env["RPC_URL"] ? process.env["RPC_URL"] : "http://127.0.0.1:8545",
+        url: process.env["RPC_URL"] ? process.env["RPC_URL"] : LOCAL_NODE,
         blockNumber: 12640151 // https://etherscan.io/block/12640151
       },
       blockGasLimit: 20000000,

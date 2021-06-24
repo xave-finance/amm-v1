@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { ethers } from "hardhat";
 
 import { TOKENS } from "../../test/Constants";
@@ -30,6 +31,9 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
+const LOCAL_NODE = process.env.LOCAL_NODE;
+const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
+
 export const getDeployer = async (): Promise<{
   deployer: Signer;
   user1: Signer;
@@ -44,9 +48,9 @@ export const getDeployer = async (): Promise<{
 };
 
 async function main() {
-  const { deployer, user1 } = await getDeployer();
-
-  console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
+  const deployer = await provider.getSigner();
+  const user1 = await provider.getSigner(1);
+  console.log(`Setting up scaffolding at network ${provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
 
   const CurvesLib = await ethers.getContractFactory("Curves");
