@@ -27,33 +27,37 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
+const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+
 export const getDeployer = async (): Promise<{
   deployer: Signer;
+  user1: Signer;
 }> => {
-  const [deployer] = await ethers.getSigners();
+  const [deployer, user1] = await ethers.getSigners();
   return {
-    deployer
+    deployer,
+    user1
   };
 };
 
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_CADCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_CADCTOUSDASSIMILATOR_ADDR;
+const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
 async function main() {
-  // const curve = (await ethers.getContractAt("Curves", "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1")) as Curve;
-  // console.log(curve.address)
-
-  const { deployer } = await getDeployer();
+  const { deployer, user1 } = await getDeployer();
+  // const deployer = await provider.getSigner();
+  // const user1 = await provider.getSigner(1);
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
   console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  console.log(`User1 account: ${await user1.getAddress()}`);
+  console.log(`User1 balance: ${await user1.getBalance()}`);
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
-  const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
 
   const createCurve = async function ({
     name,
@@ -125,73 +129,25 @@ async function main() {
     };
   };
 
-  const mintAndApprove = async function (
-    tokenAddress: string,
-    minter: Signer,
-    amount: BigNumberish,
-    recipient: string,
-  ) {
-    const minterAddress = await minter.getAddress();
-
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    console.log('tokenAddress', tokenAddress)
-    console.log('minter', minterAddress)
-    console.log('amount', amount.toString())
-    console.log('recipient', recipient)
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-
-    if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
-      await mintUSDC(minterAddress, amount);
-    }
-
-    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
-      await mintCADC(minterAddress, amount);
-    }
-
-    await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
-  };
-
-  const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
-    for (let i = 0; i < requests.length; i++) {
-      await mintAndApprove(...requests[i]);
-    }
-  };
-
-  const { curve: curveCADC } = await createCurveAndSetParams({
+  const { curve: curveEURS } = await createCurveAndSetParams({
     name: NAME,
     symbol: SYMBOL,
-    base: cadc.address,
+    base: eurs.address,
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
     quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_CADCTOUSDASSIMILATOR_ADDR,
+    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
     quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
-  // Supply liquidity to the pools
-  // Mint tokens and approve
-  const approval = await multiMintAndApprove([
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveCADC.address],
-    [TOKENS.CADC.address, deployer, parseUnits("10000000", TOKENS.CADC.decimals), curveCADC.address]
-  ]);
-  console.log('Mint Approval: ', approval)
-
-  const depositToCurveCADC = await curveCADC
-    .connect(deployer)
-    .deposit(parseUnits("10000000"), await getFutureTime())
-    .then(x => x.wait());
-
-  console.log('Deposit: ', depositToCurveCADC)
-
-
   console.log("Swapping 1000000 EUR to USDC");
   console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
-  // await eurs.connect(user1).approve(curveEURS.address, ethers.constants.MaxUint256);
-  // await curveEURS
-  //   .connect(user1)
-  //   .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS.EURS.decimals), 0, await getFutureTime());
-  // console.log("After USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
+  await eurs.connect(user1).approve(curveEURS.address, ethers.constants.MaxUint256);
+  await curveEURS
+    .connect(user1)
+    .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS.EURS.decimals), 0, await getFutureTime());
+  console.log("After USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
 
   console.log(`Deployer balance: ${await deployer.getBalance()}`);
 }
