@@ -17,6 +17,7 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 
 const INFURA_URL = process.env.RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY2 = process.env.PRIVATE_KEY2;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const LOCAL_NODE = process.env.LOCAL_NODE;
 
@@ -66,7 +67,7 @@ const config: HardhatUserConfig = {
     },
     kovan: {
       url: INFURA_URL,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
       blockGasLimit: 20000000
     }
   },
