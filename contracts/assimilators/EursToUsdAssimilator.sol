@@ -28,10 +28,15 @@ contract EursToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    // Mainnet
+    // IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
+    // IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    // IERC20 private constant eurs = IERC20(0xdB25f211AB05b1c97D595516F45794528a807ad8);
 
-    IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
-    IERC20 private constant eurs = IERC20(0xdB25f211AB05b1c97D595516F45794528a807ad8);
+    // Kovan
+    IOracle private constant oracle = IOracle(0x0c15Ab9A0DB086e062194c273CC79f41597Bbf13);
+    IERC20 private constant usdc = IERC20(0x6c252e440374Ca48D92592636d44761E6eC55531);
+    IERC20 private constant eurs = IERC20(0x20776EDCa8390010eA2E9B91ddfB3ac4E2e24d20);
 
     // solhint-disable-next-line
     constructor() {}

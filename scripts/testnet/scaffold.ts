@@ -9,7 +9,7 @@ import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { Router } from "../../typechain/Router";
 import { BigNumberish, Signer } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseUnits, formatUnits } from "ethers/lib/utils";
 
 const hre = require("hardhat")
 
@@ -380,13 +380,14 @@ async function main() {
   // console.log("MAX", formatUnits(MAX));
   // console.log("EPSILON", formatUnits(EPSILON));
   // console.log("LAMBDA", formatUnits(LAMBDA));
-  // console.log("Swapping 1000000 EUR to USDC");
-  // console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
-  // await eurs.connect(user1).approve(curveEURS.address, ethers.constants.MaxUint256);
-  // await curveEURS
-  //   .connect(user1)
-  //   .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS.EURS.decimals), 0, await getFutureTime());
-  // console.log("After USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
+
+  console.log("Swapping 1000000 EUR to USDC");
+  console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
+  await eurs.connect(user1).approve(curveEURS.address, ethers.constants.MaxUint256);
+  await curveEURS
+    .connect(user1)
+    .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS.EURS.decimals), 0, await getFutureTime());
+  console.log("After USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
