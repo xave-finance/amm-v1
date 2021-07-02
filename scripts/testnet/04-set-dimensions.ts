@@ -36,7 +36,7 @@ export const getDeployer = async (): Promise<{
 };
 
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_CADCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_CADCTOUSDASSIMILATOR_ADDR;
+const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
 async function main() {
@@ -49,7 +49,8 @@ async function main() {
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
+  // const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
 
   const createCurve = async function ({
     name,
@@ -125,14 +126,14 @@ async function main() {
     };
   };
 
-  const { curve: curveCADC } = await createCurveAndSetParams({
+  const { curve: curveEURS } = await createCurveAndSetParams({
     name: NAME,
     symbol: SYMBOL,
-    base: cadc.address,
+    base: eurs.address,
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
     quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_CADCTOUSDASSIMILATOR_ADDR,
+    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
     quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });

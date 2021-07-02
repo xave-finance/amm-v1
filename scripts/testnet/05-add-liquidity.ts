@@ -2,7 +2,7 @@ require("dotenv").config();
 import { ethers } from "hardhat";
 
 import { TOKENS } from "../../test/Constants";
-import { mintCADC, mintUSDC, getFutureTime } from "../../test/Utils";
+import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
@@ -37,7 +37,7 @@ export const getDeployer = async (): Promise<{
 };
 
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_CADCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_CADCTOUSDASSIMILATOR_ADDR;
+const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
 async function main() {
@@ -52,7 +52,7 @@ async function main() {
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   const createCurve = async function ({
@@ -144,8 +144,8 @@ async function main() {
       await mintUSDC(minterAddress, amount);
     }
 
-    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
-      await mintCADC(minterAddress, amount);
+    if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
+      await mintEURS(minterAddress, amount);
     }
 
     await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
@@ -153,23 +153,18 @@ async function main() {
 
   const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
     for (let i = 0; i < requests.length; i++) {
-
-      // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-      // console.log('requests[i]', requests[i])
-      // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-
       await mintAndApprove(...requests[i]);
     }
   };
 
-  const { curve: curveCADC } = await createCurveAndSetParams({
+  const { curve: curveEURS } = await createCurveAndSetParams({
     name: NAME,
     symbol: SYMBOL,
-    base: cadc.address,
+    base: eurs.address,
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
     quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_CADCTOUSDASSIMILATOR_ADDR,
+    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
     quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
@@ -177,17 +172,17 @@ async function main() {
   // Supply liquidity to the pools
   // Mint tokens and approve
   const approval = await multiMintAndApprove([
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveCADC.address],
-    [TOKENS.CADC.address, deployer, parseUnits("10000000", TOKENS.CADC.decimals), curveCADC.address]
+    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveEURS.address],
+    [TOKENS.EURS.address, deployer, parseUnits("10000000", TOKENS.EURS.decimals), curveEURS.address]
   ]);
   console.log('Mint Approval: ', approval)
 
-  const depositToCurveCADC = await curveCADC
+  const depositToCurveEURS = await curveEURS
     .connect(deployer)
-    .deposit(parseUnits("10000000"), await getFutureTime())
+    .deposit(parseUnits("5000000"), await getFutureTime())
     .then(x => x.wait());
 
-  console.log('Deposit: ', depositToCurveCADC)
+  console.log('Deposit: ', depositToCurveEURS)
 
   console.log(`Deployer balance: ${await deployer.getBalance()}`);
 }
