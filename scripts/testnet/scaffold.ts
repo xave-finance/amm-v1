@@ -1,7 +1,6 @@
 require("dotenv").config();
 import { ethers } from "hardhat";
 
-import { TOKENS } from "../../test/Constants";
 import { mintCADC, mintEURS, mintUSDC, mintXSGD, getFutureTime } from "../../test/Utils";
 
 import { CurveFactory } from "../../typechain/CurveFactory";
@@ -31,8 +30,20 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
+const netObj = JSON.parse(process.env.npm_config_argv).original;
+const NETWORK = netObj[netObj.length - 1];
+
 const LOCAL_NODE = process.env.LOCAL_NODE;
 const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
+
+const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
+const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
+const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
+
+let TOKEN_USDC: string;
+let TOKEN_EURS: string;
+const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
+const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
 export const getDeployer = async (): Promise<{
   deployer: Signer;
@@ -48,10 +59,23 @@ export const getDeployer = async (): Promise<{
 };
 
 async function main() {
-  const deployer = await provider.getSigner();
-  const user1 = await provider.getSigner(1);
-  console.log(`Setting up scaffolding at network ${provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
+  let _deployer: any;
+  let _user1: any;
+
+  if (NETWORK === 'localhost') {
+    _deployer = await provider.getSigner();
+    _user1 = await provider.getSigner(1);
+
+    TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
+    TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR
+  } else {
+    const { deployer, user1 } = await getDeployer();
+    _deployer = deployer;
+    _user1 = user1;
+
+    TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+    TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR
+  }
 
   const CurvesLib = await ethers.getContractFactory("Curves");
   const OrchestratorLib = await ethers.getContractFactory("Orchestrator");
@@ -71,24 +95,16 @@ async function main() {
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
   console.log('ViewLiquidity Contract address: ', viewLiquidityLib.address)
 
-  const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
   const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
 
-  const cadcToUsdAssimilator = await CadcToUsdAssimilator.deploy({ gasLimit: 12000000 });
-  console.log('CadcToUsdAssimilator Contract address: ', cadcToUsdAssimilator.address)
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy({ gasLimit: 12000000 });
   console.log('UsdcToUsdAssimilator Contract address: ', usdcToUsdAssimilator.address)
   const eursToUsdAssimilator = await EursToUsdAssimilator.deploy({ gasLimit: 12000000 });
   console.log('EursToUsdAssimilator Contract address: ', eursToUsdAssimilator.address)
-  const xsgdToUsdAssimilator = await XsgdToUsdAssimilator.deploy({ gasLimit: 12000000 });
-  console.log('XsgdToUsdAssimilator Contract address: ', xsgdToUsdAssimilator.address)
 
-  const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
-  const xsgd = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
+  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
 
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
@@ -271,20 +287,12 @@ async function main() {
   ) {
     const minterAddress = await minter.getAddress();
 
-    if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
+    if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
       await mintUSDC(minterAddress, amount);
     }
 
-    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
-      await mintCADC(minterAddress, amount);
-    }
-
-    if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
+    if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
       await mintEURS(minterAddress, amount);
-    }
-
-    if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
-      await mintXSGD(minterAddress, amount);
     }
 
     await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
@@ -295,30 +303,6 @@ async function main() {
       await mintAndApprove(...requests[i]);
     }
   };
-
-  const { curve: curveCADC } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
-    base: cadc.address,
-    quote: usdc.address,
-    baseWeight: parseUnits("0.5"),
-    quoteWeight: parseUnits("0.5"),
-    baseAssimilator: cadcToUsdAssimilator.address,
-    quoteAssimilator: usdcToUsdAssimilator.address,
-    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  });
-
-  const { curve: curveXSGD } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
-    base: xsgd.address,
-    quote: usdc.address,
-    baseWeight: parseUnits("0.5"),
-    quoteWeight: parseUnits("0.5"),
-    baseAssimilator: xsgdToUsdAssimilator.address,
-    quoteAssimilator: usdcToUsdAssimilator.address,
-    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  });
 
   const { curve: curveEURS } = await createCurveAndSetParams({
     name: NAME,
@@ -335,27 +319,13 @@ async function main() {
   // Supply liquidity to the pools
   // Mint tokens and approve
   await multiMintAndApprove([
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveCADC.address],
-    [TOKENS.CADC.address, deployer, parseUnits("10000000", TOKENS.CADC.decimals), curveCADC.address],
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveXSGD.address],
-    [TOKENS.XSGD.address, deployer, parseUnits("10000000", TOKENS.XSGD.decimals), curveXSGD.address],
-    [TOKENS.USDC.address, deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveEURS.address],
-    [TOKENS.EURS.address, deployer, parseUnits("10000000", TOKENS.EURS.decimals), curveEURS.address],
-    [TOKENS.EURS.address, user1, parseUnits("5000000", TOKENS.EURS.decimals), curveEURS.address],
+    [TOKEN_USDC, _deployer, parseUnits("10000000", TOKENS_USDC_DECIMALS), curveEURS.address],
+    [TOKEN_EURS, _deployer, parseUnits("10000000", TOKENS_EURS_DECIMALS), curveEURS.address],
+    [TOKEN_EURS, _user1, parseUnits("5000000", TOKENS_EURS_DECIMALS), curveEURS.address],
   ]);
 
-  await curveCADC
-    .connect(deployer)
-    .deposit(parseUnits("10000000"), await getFutureTime())
-    .then(x => x.wait());
-
-  await curveXSGD
-    .connect(deployer)
-    .deposit(parseUnits("10000000"), await getFutureTime())
-    .then(x => x.wait());
-
   await curveEURS
-    .connect(deployer)
+    .connect(_deployer)
     .deposit(parseUnits("5000000"), await getFutureTime())
     .then(x => x.wait());
 
@@ -364,8 +334,6 @@ async function main() {
     JSON.stringify(
       {
         curveFactory: curveFactory.address,
-        curveCADC: curveCADC.address,
-        curveXSGD: curveXSGD.address,
         curveEURS: curveEURS.address,
         router: router.address,
       },
@@ -382,12 +350,12 @@ async function main() {
   // console.log("LAMBDA", formatUnits(LAMBDA));
 
   console.log("Swapping 1000000 EUR to USDC");
-  console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
-  await eurs.connect(user1).approve(curveEURS.address, ethers.constants.MaxUint256);
+  console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await _user1.getAddress()), 6));
+  await eurs.connect(_user1).approve(curveEURS.address, ethers.constants.MaxUint256);
   await curveEURS
-    .connect(user1)
-    .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS.EURS.decimals), 0, await getFutureTime());
-  console.log("After USDC bal", formatUnits(await usdc.balanceOf(await user1.getAddress()), 6));
+    .connect(_user1)
+    .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS_EURS_DECIMALS), 0, await getFutureTime());
+  console.log("After USDC bal", formatUnits(await usdc.balanceOf(await _user1.getAddress()), 6));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
