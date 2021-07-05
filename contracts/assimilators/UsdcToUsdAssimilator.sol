@@ -26,12 +26,12 @@ contract UsdcToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for uint256;
 
     // Mainnet
-    // IOracle private constant oracle = IOracle(0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6);
-    // IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IOracle private constant oracle = IOracle(0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
     // Kovan
-    IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
-    IERC20 private constant usdc = IERC20(0x6c252e440374Ca48D92592636d44761E6eC55531);
+    // IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
+    // IERC20 private constant usdc = IERC20(0x6c252e440374Ca48D92592636d44761E6eC55531);
 
     // solhint-disable-next-line
     constructor() {}
