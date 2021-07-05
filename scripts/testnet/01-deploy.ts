@@ -1,24 +1,45 @@
+require("dotenv").config();
 import { ethers } from "hardhat";
 import { Signer } from "ethers";
 
 import { CurveFactory } from "../../typechain/CurveFactory";
 import { Router } from "../../typechain/Router";
 
+const netObj = JSON.parse(process.env.npm_config_argv).original;
+const NETWORK = netObj[netObj.length - 1]
+
+const LOCAL_NODE = process.env.LOCAL_NODE;
+const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
+
 export const getDeployer = async (): Promise<{
   deployer: Signer;
+  user1: Signer
 }> => {
-  const [deployer] = await ethers.getSigners();
+  const [deployer, user1] = await ethers.getSigners();
   return {
-    deployer
+    deployer,
+    user1
   };
 };
 
 async function main() {
-  const { deployer } = await getDeployer();
+  let _deployer: any;
+  let _user1: any;
+
+  if (NETWORK === 'localhost') {
+    _deployer = await provider.getSigner();
+    _user1 = await provider.getSigner(1);
+  } else {
+    const { deployer, user1 } = await getDeployer();
+    _deployer = deployer;
+    _user1 = user1;
+  }
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await deployer.getBalance()}`)
+  console.log(`Deployer account: ${await _deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`)
+  console.log(`User1 account: ${await _user1.getAddress()}`);
+  console.log(`User1 balance: ${await _user1.getBalance()}`)
 
   const CurvesLib = await ethers.getContractFactory("Curves");
   const OrchestratorLib = await ethers.getContractFactory("Orchestrator");
@@ -68,7 +89,7 @@ async function main() {
   console.log(`CONTRACT_CURVE_FACTORY_ADDR=${curveFactory.address}`)
   console.log(`CONTRACT_ROUTER_ADDR=${router.address}`)
 
-  console.log(`Deployer balance: ${await deployer.getBalance()}`)
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
