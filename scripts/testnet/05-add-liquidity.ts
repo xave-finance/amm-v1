@@ -1,7 +1,6 @@
 require("dotenv").config();
 import { ethers } from "hardhat";
 
-import { TOKENS } from "../../test/Constants";
 import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 
 import { Curve } from "../../typechain/Curve";
@@ -37,6 +36,11 @@ const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
 const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
+let TOKEN_USDC: string;
+let TOKEN_EURS: string;
+const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
+const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
+
 export const getDeployer = async (): Promise<{
   deployer: Signer;
   user1: Signer;
@@ -55,10 +59,16 @@ async function main() {
   if (NETWORK === 'localhost') {
     _deployer = await provider.getSigner();
     _user1 = await provider.getSigner(1);
+
+    TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
+    TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR
   } else {
     const { deployer, user1 } = await getDeployer();
     _deployer = deployer;
     _user1 = user1;
+
+    TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+    TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR
   }
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
@@ -68,8 +78,8 @@ async function main() {
   console.log(`User1 balance: ${await _user1.getBalance()}`);
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
-  const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
+  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   const createCurve = async function ({
@@ -150,11 +160,11 @@ async function main() {
   ) {
     const minterAddress = await minter.getAddress();
 
-    if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
+    if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
       await mintUSDC(minterAddress, amount);
     }
 
-    if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
+    if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
       await mintEURS(minterAddress, amount);
     }
 
@@ -182,9 +192,9 @@ async function main() {
   // Supply liquidity to the pools
   // Mint tokens and approve
   const approval = await multiMintAndApprove([
-    [TOKENS.USDC.address, _deployer, parseUnits("10000000", TOKENS.USDC.decimals), curveEURS.address],
-    [TOKENS.EURS.address, _deployer, parseUnits("10000000", TOKENS.EURS.decimals), curveEURS.address],
-    [TOKENS.EURS.address, _user1, parseUnits("5000000", TOKENS.EURS.decimals), curveEURS.address],
+    [TOKEN_USDC, _deployer, parseUnits("10000000", TOKENS_USDC_DECIMALS), curveEURS.address],
+    [TOKEN_EURS, _deployer, parseUnits("10000000", TOKENS_EURS_DECIMALS), curveEURS.address],
+    [TOKEN_EURS, _user1, parseUnits("5000000", TOKENS_EURS_DECIMALS), curveEURS.address],
   ]);
   console.log('Mint Approval: ', approval)
 
