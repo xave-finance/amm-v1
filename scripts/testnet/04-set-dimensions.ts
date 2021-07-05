@@ -26,31 +26,49 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-}> => {
-  const [deployer] = await ethers.getSigners();
-  return {
-    deployer
-  };
-};
+const netObj = JSON.parse(process.env.npm_config_argv).original;
+const NETWORK = netObj[netObj.length - 1]
+
+const LOCAL_NODE = process.env.LOCAL_NODE;
+const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
 
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
 const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
+export const getDeployer = async (): Promise<{
+  deployer: Signer;
+  user1: Signer;
+}> => {
+  const [deployer, user1] = await ethers.getSigners();
+  return {
+    deployer,
+    user1
+  };
+};
+
 async function main() {
-  const { deployer } = await getDeployer();
+  let _deployer: any;
+  let _user1: any;
+
+  if (NETWORK === 'localhost') {
+    _deployer = await provider.getSigner();
+    _user1 = await provider.getSigner(1);
+  } else {
+    const { deployer, user1 } = await getDeployer();
+    _deployer = deployer;
+    _user1 = user1;
+  }
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await deployer.getBalance()}`)
+  console.log(`Deployer account: ${await _deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+  console.log(`User1 account: ${await _user1.getAddress()}`);
+  console.log(`User1 balance: ${await _user1.getBalance()}`);
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
   const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
-  // const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
 
   const createCurve = async function ({
     name,
@@ -138,7 +156,7 @@ async function main() {
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
-  console.log(`Deployer balance: ${await deployer.getBalance()}`)
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
