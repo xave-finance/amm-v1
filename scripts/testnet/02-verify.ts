@@ -55,11 +55,6 @@ async function main() {
     address: CONTRACT_VIEW_LIQUIDITY_ADDR
   })
 
-  console.log('-------------------- Verifying CadcToUsdAssimilator Contract');
-  await hre.run('verify:verify', {
-    address: CONTRACT_CADCTOUSDASSIMILATOR_ADDR
-  })
-
   console.log('-------------------- Verifying UsdcToUsdAssimilator Contract');
   await hre.run('verify:verify', {
     address: CONTRACT_USDCTOUSDASSIMILATOR_ADDR
@@ -68,11 +63,6 @@ async function main() {
   console.log('-------------------- Verifying EursToUsdAssimilator Contract');
   await hre.run('verify:verify', {
     address: CONTRACT_EURSTOUSDASSIMILATOR_ADDR
-  })
-
-  console.log('-------------------- Verifying XsgdToUsdAssimilator Contract');
-  await hre.run('verify:verify', {
-    address: CONTRACT_XSGDTOUSDASSIMILATOR_ADDR
   })
 
   console.log('-------------------- Verifying CurveFactory Contract');
