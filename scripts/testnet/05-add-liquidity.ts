@@ -160,12 +160,15 @@ async function main() {
   ) {
     const minterAddress = await minter.getAddress();
 
-    if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
-      await mintUSDC(minterAddress, amount);
-    }
+    // Use only on localhost or mainnet, or of FiatTokenV2 is deployed in the network
+    if (NETWORK === 'localhost') {
+      if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
+        await mintUSDC(minterAddress, amount);
+      }
 
-    if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
-      await mintEURS(minterAddress, amount);
+      if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
+        await mintEURS(minterAddress, amount);
+      }
     }
 
     await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
