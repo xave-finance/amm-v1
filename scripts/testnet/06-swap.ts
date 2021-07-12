@@ -162,13 +162,29 @@ async function main() {
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
+  // console.log("Swapping 1000000 EUR to USDC");
+  // console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await _user1.getAddress()), 6));
+  // await eurs.connect(_user1).approve(curveEURS.address, ethers.constants.MaxUint256);
+  // console.log("Approved...")
+  // await curveEURS
+  //   .connect(_user1)
+  //   .originSwap(eurs.address, usdc.address, 10000, 0, await getFutureTime());
+  // console.log("After USDC bal", formatUnits(await usdc.balanceOf(await _user1.getAddress()), 6));
+
+  // console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+
   console.log("Swapping 1000000 EUR to USDC");
-  console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await _user1.getAddress()), 6));
-  await eurs.connect(_user1).approve(curveEURS.address, ethers.constants.MaxUint256);
-  await curveEURS
-    .connect(_user1)
-    .originSwap(eurs.address, usdc.address, parseUnits("1000000", TOKENS_EURS_DECIMALS), 0, await getFutureTime());
-  console.log("After USDC bal", formatUnits(await usdc.balanceOf(await _user1.getAddress()), 6));
+  console.log("Before USDC bal", formatUnits(await usdc.balanceOf(await _deployer.getAddress()), 18));
+  console.log("Before EURS bal", formatUnits(await eurs.balanceOf(await _deployer.getAddress()), 18));
+  await eurs.connect(_deployer).approve(curveEURS.address, ethers.constants.MaxUint256, {
+    gasLimit: 1000000,
+  });
+  console.log("approved");
+
+  await curveEURS.connect(_deployer).originSwap(eurs.address, usdc.address, 10000, 0, await getFutureTime(), {
+    gasLimit: 3000000,
+  });
+  console.log("After USDC bal", formatUnits(await usdc.balanceOf(await _deployer.getAddress()), 18));
 
   console.log(`Deployer balance: ${await _deployer.getBalance()}`);
 }

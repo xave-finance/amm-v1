@@ -16,11 +16,9 @@ const NETWORK = netObj[netObj.length - 1];
 let _provider;
 
 if (NETWORK === 'localhost') {
-  console.log('UTILS localhost');
   const LOCAL_NODE = process.env.LOCAL_NODE;
   _provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
 } else {
-  console.log('UTILS kovan');
   const { provider } = ethers;
   _provider = provider
 }
