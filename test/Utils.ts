@@ -11,11 +11,22 @@ import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
 import { Result } from "ethers/lib/utils";
 const { parseUnits } = ethers.utils;
 
-const LOCAL_NODE = process.env.LOCAL_NODE;
-const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
+const netObj = JSON.parse(process.env.npm_config_argv).original;
+const NETWORK = netObj[netObj.length - 1];
+let _provider;
+
+if (NETWORK === 'localhost') {
+  console.log('UTILS localhost');
+  const LOCAL_NODE = process.env.LOCAL_NODE;
+  _provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
+} else {
+  console.log('UTILS kovan');
+  const { provider } = ethers;
+  _provider = provider
+}
 
 const sendETH = async (address, amount = 0.1) => {
-  const signer = await provider.getSigner(0);
+  const signer = await _provider.getSigner(0);
   await signer.sendTransaction({
     to: address,
     value: parseUnits(amount.toString(), 18),
@@ -35,9 +46,9 @@ export function snapshotAndRevert() {
 }
 
 export const unlockAccountAndGetSigner = async (address: string): Promise<Signer> => {
-  await provider.send("hardhat_impersonateAccount", [address]);
+  await _provider.send("hardhat_impersonateAccount", [address]);
 
-  return provider.getSigner(address);
+  return _provider.getSigner(address);
 };
 
 // eslint-disable-next-line
@@ -45,7 +56,7 @@ export const mintFiatTokenV2 = async ({ ownerAddress, tokenAddress, recipient, a
   // Send owner some ETH
   await sendETH(ownerAddress);
 
-  const minter = await provider.getSigner(8);
+  const minter = await _provider.getSigner(8);
   const minterAddress = await minter.getAddress();
 
   const owner = await unlockAccountAndGetSigner(ownerAddress);
@@ -123,8 +134,8 @@ export const updateOracleAnswer = async (oracleAddress: string, amount: BigNumbe
 };
 
 export const getLatestBlockTime = async (): Promise<number> => {
-  const blockNumber = await provider.getBlockNumber();
-  const block = await provider.getBlock(blockNumber);
+  const blockNumber = await _provider.getBlockNumber();
+  const block = await _provider.getBlock(blockNumber);
 
   if (block) {
     return block.timestamp;
