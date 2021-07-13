@@ -31,11 +31,11 @@ const LOCAL_NODE = process.env.LOCAL_NODE;
 const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
 
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
+const CONTRACT_JPYTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_JPYTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
 let TOKEN_USDC: string;
-let TOKEN_EURS: string;
+let TOKEN_JPY: string;
 
 export const getDeployer = async (): Promise<{
   deployer: Signer;
@@ -57,14 +57,14 @@ async function main() {
     _user1 = await provider.getSigner(1);
 
     TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR
+    TOKEN_JPY = process.env.TOKENS_JPY_MAINNET_ADDR
   } else {
     const { deployer, user1 } = await getDeployer();
     _deployer = deployer;
     _user1 = user1;
 
     TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR
+    TOKEN_JPY = process.env.TOKENS_JPY_BSC_ADDR
   }
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
@@ -75,7 +75,7 @@ async function main() {
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
+  const jpy = (await ethers.getContractAt("ERC20", TOKEN_JPY)) as ERC20;
 
   const createCurve = async function ({
     name,
@@ -171,14 +171,14 @@ async function main() {
     };
   };
 
-  const { curve: curveEURS } = await createCurveAndSetParams({
+  const { curve: curveJPY } = await createCurveAndSetParams({
     name: NAME,
     symbol: SYMBOL,
-    base: eurs.address,
+    base: jpy.address,
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
     quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
+    baseAssimilator: CONTRACT_JPYTOUSDASSIMILATOR_ADDR,
     quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });

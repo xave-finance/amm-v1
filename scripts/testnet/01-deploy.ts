@@ -54,14 +54,10 @@ async function main() {
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
 
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  // const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
-  // const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
+  const JpyToUsdAssimilator = await ethers.getContractFactory("JpyToUsdAssimilator");
 
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy({ gasLimit: 12000000 });
-  const eursToUsdAssimilator = await EursToUsdAssimilator.deploy({ gasLimit: 12000000 });
-  // const cadcToUsdAssimilator = await CadcToUsdAssimilator.deploy({ gasLimit: 12000000 });
-  // const xsgdToUsdAssimilator = await XsgdToUsdAssimilator.deploy({ gasLimit: 12000000 });
+  const jpyToUsdAssimilator = await JpyToUsdAssimilator.deploy({ gasLimit: 12000000 });
 
   const CurveFactory = await ethers.getContractFactory("CurveFactory", {
     libraries: {
@@ -83,9 +79,7 @@ async function main() {
   console.log(`CONTRACT_SWAPS_ADDR=${swapsLib.address}`)
   console.log(`CONTRACT_VIEW_LIQUIDITY_ADDR=${viewLiquidityLib.address}`)
   console.log(`CONTRACT_USDCTOUSDASSIMILATOR_ADDR=${usdcToUsdAssimilator.address}`)
-  console.log(`CONTRACT_EURSTOUSDASSIMILATOR_ADDR=${eursToUsdAssimilator.address}`)
-  // console.log(`CONTRACT_CADCTOUSDASSIMILATOR_ADDR=${cadcToUsdAssimilator.address}`)
-  // console.log(`CONTRACT_XSGDTOUSDASSIMILATOR_ADDR=${xsgdToUsdAssimilator.address}`)
+  console.log(`CONTRACT_JPYTOUSDASSIMILATOR_ADDR=${jpyToUsdAssimilator.address}`)
   console.log(`CONTRACT_CURVE_FACTORY_ADDR=${curveFactory.address}`)
   console.log(`CONTRACT_ROUTER_ADDR=${router.address}`)
 
