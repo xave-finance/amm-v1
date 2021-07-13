@@ -22,6 +22,10 @@ const PRIVATE_KEY_KOVAN = process.env.PRIVATE_KEY_KOVAN;
 const PRIVATE_KEY2_KOVAN = process.env.PRIVATE_KEY2_KOVAN;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const LOCAL_NODE = process.env.LOCAL_NODE;
+const BSC_MNEMONIC_MAINNET = process.env.BSC_MNEMONIC_MAINNET;
+const BSC_MNEMONIC_TESTNET = process.env.BSC_MNEMONIC_TESTNET;
+const BSC_URL_MAINNET = process.env.BSC_URL_MAINNET;
+const BSC_URL_TESTNET = process.env.BSC_URL_TESTNET;
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -67,6 +71,22 @@ const config: HardhatUserConfig = {
       url: INFURA_URL,
       accounts: [`0x${PRIVATE_KEY_KOVAN}`, `0x${PRIVATE_KEY2_KOVAN}`],
       blockGasLimit: 20000000
+    },
+    bsc_testnet: {
+      url: BSC_URL_TESTNET,
+      chainId: 97,
+      gasPrice: 20000000000,
+      accounts: {
+        mnemonic: BSC_MNEMONIC_TESTNET
+      }
+    },
+    bsc_mainnet: {
+      url: BSC_URL_MAINNET,
+      chainId: 56,
+      gasPrice: 20000000000,
+      accounts: {
+        mnemonic: BSC_MNEMONIC_MAINNET
+      }
     }
   },
   etherscan: {
