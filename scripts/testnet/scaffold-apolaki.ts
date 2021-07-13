@@ -195,25 +195,6 @@ async function main() {
     };
   };
 
-  const mintAndApprove = async function (
-    tokenAddress: string,
-    minter: Signer,
-    amount: BigNumberish,
-    recipient: string,
-  ) {
-    // ERROR: When adding or minting to curve, there is a reverting error
-    console.log("Processing ", recipient);
-
-    const approveTxn = await erc20.attach(tokenAddress).approve(recipient, amount);
-    console.log(await approveTxn);
-  };
-
-  const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
-    for (let i = 0; i < requests.length; i++) {
-      await mintAndApprove(...requests[i]);
-    }
-  };
-
   console.log("4 - Creating EURS curve and setting params.");
   const { curve: curveEURS } = await createCurveAndSetParams({
     name: NAME,
@@ -235,8 +216,9 @@ async function main() {
   console.log("6- Adding liqudity, minting DFX Tokens");
   console.log("Checking token value for deposit");
   const depositToCurveEURS = await curveEURS.connect(_deployer).viewDeposit(parseUnits("5000000000000000"));
-  console.log(formatEther(depositToCurveEURS[1][0]));
-  console.log(formatEther(depositToCurveEURS[1][1]));
+  // Amount of tokens for each address required
+  console.log(formatEther(depositToCurveEURS[1][0]), " EUR");
+  console.log(formatEther(depositToCurveEURS[1][1]), " USDC");
 
   await curveEURS
     .connect(_deployer)
