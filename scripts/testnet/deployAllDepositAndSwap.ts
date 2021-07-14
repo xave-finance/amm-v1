@@ -1,23 +1,13 @@
 require("dotenv").config();
 import { ethers } from "hardhat";
-import { getFutureTime } from "../../test/Utils";
 import { CurveFactory } from "../../typechain/CurveFactory";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { Router } from "../../typechain/Router";
 import { BigNumberish, Signer } from "ethers";
 import { parseUnits, formatUnits, parseEther, formatEther } from "ethers/lib/utils";
+import { formatCurrency, getFutureTime, parseCurrency, TOKEN_DECIMAL, TOKEN_NAME } from "../utils";
 
-/**
- * Values based on mainnet EURS-USDC
- * https://etherscan.io/address/0x1a4Ffe0DCbDB4d551cfcA61A5626aFD190731347#readContract
- * alpha|int128 :  14757395258967641311 -- check decimals?
- * beta|int128 :  9223372036854775826
- * delta|int128 :  4611686018427387921
- * epsilon|int128 :  9223372036854794
- * lambda|int128 :  5534023222112865503
- * totalSupply|uint256 :  4746601093598744202044526
- */
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
 const ALPHA = parseUnits("0.8");
@@ -26,34 +16,12 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
-let TOKEN_USDC: string;
-let TOKEN_EURS: string;
-//const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
-//const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
-
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-  user1: Signer;
-  user2: Signer;
-}> => {
-  const [deployer, user1, user2] = await ethers.getSigners();
-  return {
-    deployer,
-    user1,
-    user2,
-  };
-};
-
 async function main() {
-  let _deployer: any;
-  let _user1: any;
+  const [_deployer, _user1] = await ethers.getSigners();
+  const provider = _deployer.provider; // get provider instance from deployer or account[0]
 
-  const { deployer, user1 } = await getDeployer();
-  _deployer = deployer;
-  _user1 = user1;
-
-  TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
-  TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR;
+  const TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+  const TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR;
 
   console.log("1 - Deploying DFX Contracts");
   const CurvesLib = await ethers.getContractFactory("Curves");
@@ -214,16 +182,25 @@ async function main() {
   await eurs.connect(_user1).approve(curveEURS.address, ethers.constants.MaxUint256);
 
   console.log("6- Adding liqudity, minting DFX Tokens");
-  console.log("Checking token value for deposit");
-  const depositToCurveEURS = await curveEURS.connect(_deployer).viewDeposit(parseUnits("5000000000000000"));
-  // Amount of tokens for each address required
-  console.log(formatUnits(depositToCurveEURS[1][0], "2"), " EUR");
-  console.log(formatUnits(depositToCurveEURS[1][1], "6"), " USDC");
 
-  await curveEURS
-    .connect(_deployer)
-    .deposit(parseUnits("5000000000000000"), await getFutureTime())
-    .then(x => x.wait());
+  const LP_TOKENS_AMOUNT = "5000";
+  const LP_TOKENS_TO_MINT = parseEther(LP_TOKENS_AMOUNT); // 18 precision
+  console.log(`Checking how much liquidity to provide minting ${LP_TOKENS_AMOUNT}`);
+  const depositToCurveEURS = await curveEURS.connect(_deployer).viewDeposit(LP_TOKENS_TO_MINT);
+  console.log(
+    `You will provide ${formatCurrency(
+      TOKEN_NAME.EURS,
+      TOKEN_DECIMAL.EURS,
+      depositToCurveEURS[1][0],
+    )} in EURS and ${formatCurrency(
+      TOKEN_NAME.USDC,
+      TOKEN_DECIMAL.USDC,
+      depositToCurveEURS[1][1],
+    )} in USDC to receive ${LP_TOKENS_AMOUNT} LP Tokens. Depositing..`,
+  );
+
+  const depositTxn = await curveEURS.connect(_deployer).deposit(LP_TOKENS_TO_MINT, await getFutureTime(provider));
+  console.log(await depositTxn.wait());
 
   console.log(`Scaffolding done. Each pool is initialized with 2k USD liquidity`);
   console.log(
@@ -238,28 +215,31 @@ async function main() {
     ),
   );
 
-  console.log("Checking curve values");
-  const viewCurves = await curveEURS.connect(_deployer).viewCurve();
-  console.log("Alpha: ", formatEther(viewCurves[0]));
-  console.log("Beta: ", formatEther(viewCurves[1]));
-  console.log("Max: ", formatEther(viewCurves[2]));
-  console.log("Epsilon: ", formatEther(viewCurves[3]));
-  console.log("Lambda: ", formatEther(viewCurves[4]));
-
-  // TODO: Check why this small, check math?
   console.log("7 - Swapping 10 EUR to USDC");
+  const eurAmount = "10";
+  console.log(`Exchanging ${eurAmount} EURS to USDC.`);
   const beforeBalance = await usdc.balanceOf(await _deployer.getAddress());
-  console.log("Before USDC bal", formatUnits(beforeBalance, "6"));
+  console.log("Before USDC bal", formatCurrency(TOKEN_NAME.USDC, TOKEN_DECIMAL.USDC, beforeBalance));
 
   const swapTxn = await curveEURS
     .connect(_deployer)
-    .originSwap(eurs.address, usdc.address, 1000, 0, await getFutureTime(), {
-      gasLimit: 3000000,
-    });
+    .originSwap(
+      eurs.address,
+      usdc.address,
+      parseCurrency(TOKEN_NAME.EURS, TOKEN_DECIMAL.EURS, "10"),
+      0,
+      await getFutureTime(provider),
+      {
+        gasLimit: 3000000,
+      },
+    );
 
   console.log(await swapTxn.wait());
   const afterBalance = await usdc.balanceOf(await _deployer.getAddress());
-  console.log("Difference after swap:", formatUnits(afterBalance.sub(beforeBalance), 6));
+  console.log(
+    "Difference after swap:",
+    formatCurrency(TOKEN_NAME.USDC, TOKEN_DECIMAL.USDC, afterBalance.sub(beforeBalance)),
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
