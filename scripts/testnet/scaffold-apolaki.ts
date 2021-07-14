@@ -217,8 +217,8 @@ async function main() {
   console.log("Checking token value for deposit");
   const depositToCurveEURS = await curveEURS.connect(_deployer).viewDeposit(parseUnits("5000000000000000"));
   // Amount of tokens for each address required
-  console.log(formatEther(depositToCurveEURS[1][0]), " EUR");
-  console.log(formatEther(depositToCurveEURS[1][1]), " USDC");
+  console.log(formatUnits(depositToCurveEURS[1][0], "2"), " EUR");
+  console.log(formatUnits(depositToCurveEURS[1][1], "6"), " USDC");
 
   await curveEURS
     .connect(_deployer)
@@ -247,19 +247,19 @@ async function main() {
   console.log("Lambda: ", formatEther(viewCurves[4]));
 
   // TODO: Check why this small, check math?
-  console.log("7 - Swapping 0.000000000001 EUR to USDC");
+  console.log("7 - Swapping 10 EUR to USDC");
   const beforeBalance = await usdc.balanceOf(await _deployer.getAddress());
-  console.log("Before USDC bal", formatUnits(beforeBalance));
+  console.log("Before USDC bal", formatUnits(beforeBalance, "6"));
 
   const swapTxn = await curveEURS
     .connect(_deployer)
-    .originSwap(eurs.address, usdc.address, 1000000, 0, await getFutureTime(), {
+    .originSwap(eurs.address, usdc.address, 1000, 0, await getFutureTime(), {
       gasLimit: 3000000,
     });
 
   console.log(await swapTxn.wait());
   const afterBalance = await usdc.balanceOf(await _deployer.getAddress());
-  console.log("Difference after swap:", formatUnits(afterBalance.sub(beforeBalance)));
+  console.log("Difference after swap:", formatUnits(afterBalance.sub(beforeBalance), 6));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

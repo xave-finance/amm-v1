@@ -1,73 +1,22 @@
 require("dotenv").config();
 import { ethers } from "hardhat";
-
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
-import { BigNumberish, Signer } from "ethers";
+import { BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-
-const NAME = "DFX V1";
-const SYMBOL = "DFX-V1";
-
-// Weights are always 50/50
-
-// Pool must respect a 10/90 ratio
-// i.e. value of one pair cannot exceed 90% of the pools value
-const ALPHA = parseUnits("0.8");
-
-// Slippage (fees) will that will be introduced when one of the tokens's ratio:
-// - exceeds 75% of the pool value
-// - goes under 25% of the pool value
-const BETA = parseUnits("0.5");
-
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0005"); // 5 basis point
-const LAMBDA = parseUnits("0.3");
-
-const netObj = JSON.parse(process.env.npm_config_argv).original;
-const NETWORK = netObj[netObj.length - 1]
-
-const LOCAL_NODE = process.env.LOCAL_NODE;
-const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
+import { NAME, SYMBOL, ALPHA, BETA, MAX, EPSILON, LAMBDA } from "../constants";
 
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
 const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
-let TOKEN_USDC: string;
-let TOKEN_EURS: string;
-
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-  user1: Signer;
-}> => {
-  const [deployer, user1] = await ethers.getSigners();
-  return {
-    deployer,
-    user1
-  };
-};
-
 async function main() {
-  let _deployer: any;
-  let _user1: any;
+  const [_deployer, _user1] = await ethers.getSigners();
 
-  if (NETWORK === 'localhost') {
-    _deployer = await provider.getSigner();
-    _user1 = await provider.getSigner(1);
+  // replace env or address
+  const TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+  const TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR;
 
-    TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR
-  } else {
-    const { deployer, user1 } = await getDeployer();
-    _deployer = deployer;
-    _user1 = user1;
-
-    TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR
-  }
-
-  console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await _deployer.getAddress()}`);
   console.log(`Deployer balance: ${await _deployer.getBalance()}`);
   console.log(`User1 account: ${await _user1.getAddress()}`);
@@ -111,18 +60,18 @@ async function main() {
     );
     await tx.wait();
 
-    console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+    console.log("CurveFactory#newCurve TX Hash: ", tx.hash);
 
     // Get curve address
     const curveAddress = await curveFactory.curves(
       ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
     );
-    console.log('Curve Address: ', curveAddress)
+    console.log("Curve Address: ", curveAddress);
     const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
     const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
     const turnOffWhitelisting = await curve.turnOffWhitelisting();
-    console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
+    console.log("Curve#turnOffWhitelisting TX Hash: ", turnOffWhitelisting.hash);
 
     return {
       curve,
@@ -139,8 +88,8 @@ async function main() {
     quoteWeight,
     baseAssimilator,
     quoteAssimilator,
-    params,
-  }: {
+  }: // params, -- we can actually set dimenstions here already or we can use script 3
+  {
     name: string;
     symbol: string;
     base: string;
@@ -161,7 +110,7 @@ async function main() {
       baseAssimilator,
       quoteAssimilator,
     });
-    // Set parameters/dimensions here
+    // Set parameters/dimensions here --
     // const tx = await curve.setParams(...params, { gasLimit: 12000000 });
     // console.log('Curve#setParams TX Hash: ', tx.hash)
     // await tx.wait();
@@ -183,7 +132,10 @@ async function main() {
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
-  console.log(`Deployer balance: ${await _deployer.getBalance()}`)
+  console.log(curveEURS);
+  console.log("New curve created. Run next script to set dimension");
+
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
