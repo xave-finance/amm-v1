@@ -6,7 +6,7 @@ import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { BigNumberish, Signer } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseUnits, formatUnits } from "ethers/lib/utils";
 
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
@@ -29,57 +29,27 @@ const LAMBDA = parseUnits("0.3");
 const netObj = JSON.parse(process.env.npm_config_argv).original;
 const NETWORK = netObj[netObj.length - 1]
 
-const LOCAL_NODE = process.env.LOCAL_NODE;
-const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
-
 const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
+const CONTRACT_JPYTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_JPYTOUSDASSIMILATOR_ADDR;
 const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
-let TOKEN_USDC: string;
-let TOKEN_EURS: string;
+const TOKEN_USDC = process.env.TOKENS_USDC_BSC_ADDR;
+const TOKEN_JPY = process.env.TOKENS_JPY_BSC_ADDR;
 const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-  user1: Signer;
-}> => {
-  const [deployer, user1] = await ethers.getSigners();
-  return {
-    deployer,
-    user1
-  };
-};
-
 async function main() {
-  let _deployer: any;
-  let _user1: any;
-
-  if (NETWORK === 'localhost') {
-    _deployer = await provider.getSigner();
-    _user1 = await provider.getSigner(1);
-
-    TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR
-  } else {
-    const { deployer, user1 } = await getDeployer();
-    _deployer = deployer;
-    _user1 = user1;
-
-    TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR
-  }
+  const [deployer, user1] = await ethers.getSigners()
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await _deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
-  console.log(`User1 account: ${await _user1.getAddress()}`);
-  console.log(`User1 balance: ${await _user1.getBalance()}`);
+  console.log(`Deployer account: ${await deployer.getAddress()}`);
+  console.log(`Deployer balance: ${formatUnits(await deployer.getBalance())}`);
+  console.log(`User1 account: ${await user1.getAddress()}`);
+  console.log(`User1 balance: ${formatUnits(await user1.getBalance())}`);
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
+  const jpy = (await ethers.getContractAt("ERC20", TOKEN_JPY)) as ERC20;
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   const createCurve = async function ({
@@ -166,7 +136,7 @@ async function main() {
         await mintUSDC(minterAddress, amount);
       }
 
-      if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
+      if (tokenAddress.toLowerCase() === TOKEN_JPY.toLowerCase()) {
         await mintEURS(minterAddress, amount);
       }
     }
@@ -180,14 +150,16 @@ async function main() {
     }
   };
 
-  const { curve: curveEURS } = await createCurveAndSetParams({
+  console.log('jpy.address', jpy.address)
+
+  const { curve: curveJPY } = await createCurveAndSetParams({
     name: NAME,
     symbol: SYMBOL,
-    base: eurs.address,
+    base: jpy.address,
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
     quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
+    baseAssimilator: CONTRACT_JPYTOUSDASSIMILATOR_ADDR,
     quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
@@ -195,20 +167,21 @@ async function main() {
   // Supply liquidity to the pools
   // Mint tokens and approve
   const approval = await multiMintAndApprove([
-    [TOKEN_USDC, _deployer, parseUnits("10000000", TOKENS_USDC_DECIMALS), curveEURS.address],
-    [TOKEN_EURS, _deployer, parseUnits("10000000", TOKENS_EURS_DECIMALS), curveEURS.address],
-    [TOKEN_EURS, _user1, parseUnits("5000000", TOKENS_EURS_DECIMALS), curveEURS.address],
+    [TOKEN_USDC, deployer, parseUnits("10000000", TOKENS_USDC_DECIMALS), curveJPY.address],
+    [TOKEN_JPY, deployer, parseUnits("10000000", TOKENS_EURS_DECIMALS), curveJPY.address],
+    // [TOKEN_JPY, _user1, parseUnits("5000000", TOKENS_EURS_DECIMALS), curveJPY.address],
   ]);
-  console.log('Mint Approval: ', approval)
 
-  const depositToCurveEURS = await curveEURS
-    .connect(_deployer)
-    .deposit(parseUnits("5000000"), await getFutureTime())
+  const depositToCurveJPY = await curveJPY
+    .connect(deployer)
+    .deposit(parseUnits("5000000"), await getFutureTime(), {
+      gasLimit: 3000000,
+    })
     .then(x => x.wait());
 
-  console.log('Deposit: ', depositToCurveEURS)
+  console.log('Deposit: ', depositToCurveJPY)
 
-  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+  console.log(`Deployer balance: ${await deployer.getBalance()}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
