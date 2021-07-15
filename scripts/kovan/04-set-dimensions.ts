@@ -24,146 +24,61 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
-const netObj = JSON.parse(process.env.npm_config_argv).original;
-const NETWORK = netObj[netObj.length - 1]
-
-const LOCAL_NODE = process.env.LOCAL_NODE;
-const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
-
-const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
-const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
-
-let TOKEN_USDC: string;
-let TOKEN_EURS: string;
-
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-  user1: Signer;
-}> => {
-  const [deployer, user1] = await ethers.getSigners();
-  return {
-    deployer,
-    user1
-  };
-};
+// Curve Contract Addresses
+const CONTRACT_CURVE_AUD_ADDR = process.env.CONTRACT_CURVE_AUD_ADDR;
+const CONTRACT_CURVE_CHF_ADDR = process.env.CONTRACT_CURVE_CHF_ADDR;
+const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
+const CONTRACT_CURVE_GBP_ADDR = process.env.CONTRACT_CURVE_GBP_ADDR;
+const CONTRACT_CURVE_JPY_ADDR = process.env.CONTRACT_CURVE_JPY_ADDR;
+const CONTRACT_CURVE_KRW_ADDR = process.env.CONTRACT_CURVE_KRW_ADDR;
+const CONTRACT_CURVE_PKR_ADDR = process.env.CONTRACT_CURVE_PKR_ADDR;
 
 async function main() {
-  let _deployer: any;
-  let _user1: any;
-
-  if (NETWORK === 'localhost') {
-    _deployer = await provider.getSigner();
-    _user1 = await provider.getSigner(1);
-
-    TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR
-  } else {
-    const { deployer, user1 } = await getDeployer();
-    _deployer = deployer;
-    _user1 = user1;
-
-    TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
-    TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR
-  }
+  const [deployer, user1] = await ethers.getSigners();
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await _deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
-  console.log(`User1 account: ${await _user1.getAddress()}`);
-  console.log(`User1 balance: ${await _user1.getBalance()}`);
+  console.log(`Deployer account: ${await deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  console.log(`User1 account: ${await user1.getAddress()}`);
+  console.log(`User1 balance: ${await user1.getBalance()}`);
 
-  const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
-  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
+  const curveAUD = (await ethers.getContractAt("Curve", CONTRACT_CURVE_AUD_ADDR)) as Curve;
+  const txAUD = await curveAUD.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txAUD.wait();
 
-  const createCurve = async function ({
-    name,
-    symbol,
-    base,
-    quote,
-    baseWeight,
-    quoteWeight,
-    baseAssimilator,
-    quoteAssimilator,
-  }: {
-    name: string;
-    symbol: string;
-    base: string;
-    quote: string;
-    baseWeight: BigNumberish;
-    quoteWeight: BigNumberish;
-    baseAssimilator: string;
-    quoteAssimilator: string;
-  }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
-    const curveAddress = await curveFactory.curves(
-      ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
-    );
-    console.log('CurveFactory#curves Address: ', curveAddress)
-    const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
-    const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
+  const curveCHF = (await ethers.getContractAt("Curve", CONTRACT_CURVE_CHF_ADDR)) as Curve;
+  const txCHF = await curveCHF.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txCHF.wait();
 
-    return {
-      curve,
-      curveLpToken,
-    };
-  };
+  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
+  const txEURS = await curveEURS.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txEURS.wait();
 
-  const createCurveAndSetParams = async function ({
-    name,
-    symbol,
-    base,
-    quote,
-    baseWeight,
-    quoteWeight,
-    baseAssimilator,
-    quoteAssimilator,
-    params,
-  }: {
-    name: string;
-    symbol: string;
-    base: string;
-    quote: string;
-    baseWeight: BigNumberish;
-    quoteWeight: BigNumberish;
-    baseAssimilator: string;
-    quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  }) {
-    const { curve, curveLpToken } = await createCurve({
-      name,
-      symbol,
-      base,
-      quote,
-      baseWeight,
-      quoteWeight,
-      baseAssimilator,
-      quoteAssimilator,
-    });
+  const curveGBP = (await ethers.getContractAt("Curve", CONTRACT_CURVE_GBP_ADDR)) as Curve;
+  const txGBP = await curveGBP.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txGBP.wait();
 
-    const tx = await curve.setParams(...params, { gasLimit: 12000000 });
-    console.log('Curve#setParams TX Hash: ', tx.hash)
-    await tx.wait();
+  const curveJPY = (await ethers.getContractAt("Curve", CONTRACT_CURVE_JPY_ADDR)) as Curve;
+  const txJPY = await curveJPY.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txJPY.wait();
 
-    return {
-      curve,
-      curveLpToken,
-    };
-  };
+  const curveKRW = (await ethers.getContractAt("Curve", CONTRACT_CURVE_KRW_ADDR)) as Curve;
+  const txKRW = await curveKRW.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txKRW.wait();
 
-  const { curve: curveEURS } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
-    base: eurs.address,
-    quote: usdc.address,
-    baseWeight: parseUnits("0.5"),
-    quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
-    quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
-    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  });
+  const curvePKR = (await ethers.getContractAt("Curve", CONTRACT_CURVE_PKR_ADDR)) as Curve;
+  const txPKR = await curvePKR.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txPKR.wait();
 
-  console.log(`Deployer balance: ${await _deployer.getBalance()}`)
+  console.log('CurveAUD#setParams TX Hash: ', txAUD.hash);
+  console.log('CurveCHF#setParams TX Hash: ', txCHF.hash);
+  console.log('CurveEURS#setParams TX Hash: ', txEURS.hash);
+  console.log('CurveGBP#setParams TX Hash: ', txGBP.hash);
+  console.log('CurveJPY#setParams TX Hash: ', txJPY.hash);
+  console.log('CurveKRW#setParams TX Hash: ', txKRW.hash);
+  console.log('CurvePKR#setParams TX Hash: ', txPKR.hash);
+
+  console.log(`Deployer balance: ${await deployer.getBalance()}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
