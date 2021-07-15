@@ -27,7 +27,7 @@ contract UsdcToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
-    IERC20 private constant usdc = IERC20(0x6c252e440374Ca48D92592636d44761E6eC55531);
+    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
 
     // solhint-disable-next-line
     constructor() {}
