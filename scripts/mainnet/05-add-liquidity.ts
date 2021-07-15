@@ -1,12 +1,12 @@
 require("dotenv").config();
 import { ethers } from "hardhat";
 
-import { mintCADC, mintUSDC, getFutureTime } from "../../test/Utils";
+import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { BigNumberish, Signer } from "ethers";
-import { parseUnits, formatUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
@@ -27,7 +27,7 @@ const EPSILON = parseUnits("0.0005"); // 5 basis point
 const LAMBDA = parseUnits("0.3");
 
 const netObj = JSON.parse(process.env.npm_config_argv).original;
-const NETWORK = netObj[netObj.length - 1];
+const NETWORK = netObj[netObj.length - 1]
 
 const LOCAL_NODE = process.env.LOCAL_NODE;
 const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE);
@@ -38,6 +38,7 @@ const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMIL
 
 let TOKEN_USDC: string;
 let TOKEN_EURS: string;
+const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
 export const getDeployer = async (): Promise<{
@@ -79,6 +80,7 @@ async function main() {
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
   const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
+  const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   const createCurve = async function ({
     name,
@@ -150,6 +152,34 @@ async function main() {
     };
   };
 
+  const mintAndApprove = async function (
+    tokenAddress: string,
+    minter: Signer,
+    amount: BigNumberish,
+    recipient: string,
+  ) {
+    const minterAddress = await minter.getAddress();
+
+    // Use only on localhost or mainnet, or of FiatTokenV2 is deployed in the network
+    if (NETWORK === 'localhost') {
+      if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
+        await mintUSDC(minterAddress, amount);
+      }
+
+      if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
+        await mintEURS(minterAddress, amount);
+      }
+    }
+
+    await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
+  };
+
+  const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
+    for (let i = 0; i < requests.length; i++) {
+      await mintAndApprove(...requests[i]);
+    }
+  };
+
   const { curve: curveEURS } = await createCurveAndSetParams({
     name: NAME,
     symbol: SYMBOL,
@@ -162,20 +192,20 @@ async function main() {
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
-  const eurAmt = 20000;
-  console.log(`Swapping ${eurAmt} EUR to USDC`);
+  // Supply liquidity to the pools
+  // Mint tokens and approve
+  const approval = await multiMintAndApprove([
+    [TOKEN_USDC, _deployer, parseUnits("10000000", TOKENS_USDC_DECIMALS), curveEURS.address],
+    [TOKEN_EURS, _deployer, parseUnits("10000000", TOKENS_EURS_DECIMALS), curveEURS.address]
+  ]);
+  console.log('Mint Approval: ', approval)
 
-  const eursBefore = await eurs.balanceOf(await _deployer.getAddress());
-  console.log("Before EURS bal", eursBefore.toString());
-
-  await curveEURS
+  const depositToCurveEURS = await curveEURS
     .connect(_deployer)
-    .originSwap(eurs.address, usdc.address, eurAmt, 0, await getFutureTime(), {
-      gasLimit: 3000000,
-    });
+    .deposit(parseUnits("5000000"), await getFutureTime())
+    .then(x => x.wait());
 
-  const eursAfter = await eurs.balanceOf(await _deployer.getAddress());
-  console.log("After EURS bal", eursAfter.toString());
+  console.log('Deposit: ', depositToCurveEURS)
 
   console.log(`Deployer balance: ${await _deployer.getBalance()}`);
 }
