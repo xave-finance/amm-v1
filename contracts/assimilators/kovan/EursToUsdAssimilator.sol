@@ -30,8 +30,8 @@ contract EursToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0x0c15Ab9A0DB086e062194c273CC79f41597Bbf13);
-    IERC20 private constant usdc = IERC20(0x6c252e440374Ca48D92592636d44761E6eC55531);
-    IERC20 private constant eurs = IERC20(0x20776EDCa8390010eA2E9B91ddfB3ac4E2e24d20);
+    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
+    IERC20 private constant eurs = IERC20(0xccC914f9f35Ee1419c6B385548183BF3C022Af99);
 
     // solhint-disable-next-line
     constructor() {}
