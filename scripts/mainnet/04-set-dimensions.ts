@@ -35,9 +35,9 @@ async function main() {
   console.log(`User1 account: ${await user1.getAddress()}`);
   console.log(`User1 balance: ${await user1.getBalance()}`);
 
-  const curveAUD = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
-  const txAUD = await curveAUD.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txAUD.wait();
+  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
+  const txEURS = await curveEURS.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
+  await txEURS.wait();
 
   console.log(`Deployer balance: ${await deployer.getBalance()}`)
 }
