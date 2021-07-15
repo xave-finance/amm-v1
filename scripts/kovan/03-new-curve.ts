@@ -246,13 +246,13 @@ async function main() {
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
-  console.log(`curveAUD.address: `, curveAUD.address);
-  console.log(`curveCHF.address: `, curveCHF.address);
-  console.log(`curveEURS.address`, curveEURS.address);
-  console.log(`curveGBP.address: `, curveGBP.address);
-  console.log(`curveJPY.address: `, curveJPY.address);
-  console.log(`curveKRW.address: `, curveKRW.address);
-  console.log(`curvePKR.address: `, curvePKR.address);
+  console.log(`CONTRACT_CURVE_AUD_ADDR=${curveAUD.address}`);
+  console.log(`CONTRACT_CURVE_CHF_ADDR=${curveCHF.address}`);
+  console.log(`CONTRACT_CURVE_EURS_ADDR=${curveEURS.address}`);
+  console.log(`CONTRACT_CURVE_GBP_ADDR=${curveGBP.address}`);
+  console.log(`CONTRACT_CURVE_JPY_ADDR=${curveJPY.address}`);
+  console.log(`CONTRACT_CURVE_KRW_ADDR=${curveKRW.address}`);
+  console.log(`CONTRACT_CURVE_PKR_ADDR=${curvePKR.address}`);
 
   console.log(`Deployer balance: ${await deployer.getBalance()}`)
 }
