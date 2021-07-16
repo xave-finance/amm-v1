@@ -35,14 +35,14 @@ const CONTRACT_ASSIMILATOR_KRWTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_KRWT
 const CONTRACT_ASSIMILATOR_PKRTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_PKRTOUSD_ADDR;
 const CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR;
 
-let TOKEN_AUD = process.env.TOKENS_KOVAN_AUD_ADDR;
-let TOKEN_CHF = process.env.TOKENS_KOVAN_CHF_ADDR;
-let TOKEN_EURS = process.env.TOKENS_KOVAN_EURS_ADDR;
-let TOKEN_GBP = process.env.TOKENS_KOVAN_GBP_ADDR;
-let TOKEN_JPY = process.env.TOKENS_KOVAN_JPY_ADDR;
-let TOKEN_KRW = process.env.TOKENS_KOVAN_KRW_ADDR;
-let TOKEN_PKR = process.env.TOKENS_KOVAN_PKR_ADDR;
-let TOKEN_USDC = process.env.TOKENS_KOVAN_USDC_ADDR;
+let TOKEN_AUD = process.env.TOKENS_AUD_ADDR;
+let TOKEN_CHF = process.env.TOKENS_CHF_ADDR;
+let TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
+let TOKEN_GBP = process.env.TOKENS_GBP_ADDR;
+let TOKEN_JPY = process.env.TOKENS_JPY_ADDR;
+let TOKEN_KRW = process.env.TOKENS_KRW_ADDR;
+let TOKEN_PKR = process.env.TOKENS_PKR_ADDR;
+let TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
 
 async function main() {
   const [deployer, user1] = await ethers.getSigners();

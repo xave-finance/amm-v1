@@ -9,8 +9,8 @@ import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
 const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
-const TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-const TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR;
+const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
+const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
 const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
