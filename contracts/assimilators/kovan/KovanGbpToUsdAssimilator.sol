@@ -30,8 +30,8 @@ contract GbpToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0x28b0061f44E6A9780224AA61BEc8C3Fcb0d37de9);
-    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
-    IERC20 private constant gbp = IERC20(0xbd42aAE1EE380412b2b0629074059E8A785B3b24);
+    IERC20 private constant usdc = IERC20(0x72a97313cF25FDFdb1CeCD597CC12809c9851Ca0);
+    IERC20 private constant gbp = IERC20(0xeFA46Ca0819C4216f4FD47d3EB2b06deaCE06Bb2);
 
     // solhint-disable-next-line
     constructor() {}

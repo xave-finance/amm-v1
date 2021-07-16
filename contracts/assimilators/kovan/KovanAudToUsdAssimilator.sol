@@ -30,8 +30,8 @@ contract AudToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0x5813A90f826e16dB392abd2aF7966313fc1fd5B8);
-    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
-    IERC20 private constant aud = IERC20(0x6Ecc3Eb1689845269fA88F643E4BFCD454d6a75b);
+    IERC20 private constant usdc = IERC20(0x72a97313cF25FDFdb1CeCD597CC12809c9851Ca0);
+    IERC20 private constant aud = IERC20(0x5D9469026A1B0109EeCAB7583fd6F5f2Cc74f375);
 
     // solhint-disable-next-line
     constructor() {}

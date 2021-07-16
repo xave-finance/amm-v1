@@ -30,8 +30,8 @@ contract ChfToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0xed0616BeF04D374969f302a34AE4A63882490A8C);
-    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
-    IERC20 private constant chf = IERC20(0x7a8eE703eA7C9Da22773f40E26d23F4eEb277364);
+    IERC20 private constant usdc = IERC20(0x72a97313cF25FDFdb1CeCD597CC12809c9851Ca0);
+    IERC20 private constant chf = IERC20(0x6E4E54419957c386bF089b99849D1e1c923446DE);
 
     // solhint-disable-next-line
     constructor() {}

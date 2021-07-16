@@ -30,8 +30,8 @@ contract JpyToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0xD627B1eF3AC23F1d3e576FA6206126F3c1Bd0942);
-    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
-    IERC20 private constant jpy = IERC20(0x7A42fe8768da90Ad6fAb15fABa444f1B4Ef4a9a0);
+    IERC20 private constant usdc = IERC20(0x72a97313cF25FDFdb1CeCD597CC12809c9851Ca0);
+    IERC20 private constant jpy = IERC20(0xcD34e5d78be153938a6F7b9acfa0857acC7BFe37);
 
     // solhint-disable-next-line
     constructor() {}

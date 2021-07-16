@@ -1,81 +1,104 @@
-require("dotenv").config();
-import { ethers } from "hardhat";
-import { Signer } from "ethers";
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.kovan') });
 
-const hre = require("hardhat")
+const hre = require("hardhat");
 
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-  user1: Signer;
-  user2: Signer;
-}> => {
-  const [deployer, user1, user2] = await ethers.getSigners();
-  return {
-    deployer,
-    user1,
-    user2,
-  };
-};
+// Core Contracts
+const CONTRACT_CORE_CURVES_ADDR = process.env.CONTRACT_CORE_CURVES_ADDR;
+const CONTRACT_CORE_ORCHESTRATOR_ADDR = process.env.CONTRACT_CORE_ORCHESTRATOR_ADDR;
+const CONTRACT_CORE_PROPORTIONAL_LIQUIDITY_ADDR = process.env.CONTRACT_CORE_PROPORTIONAL_LIQUIDITY_ADDR;
+const CONTRACT_CORE_SWAPS_ADDR = process.env.CONTRACT_CORE_SWAPS_ADDR;
+const CONTRACT_CORE_VIEW_LIQUIDITY_ADDR = process.env.CONTRACT_CORE_VIEW_LIQUIDITY_ADDR;
+const CONTRACT_CORE_CURVE_FACTORY_ADDR = process.env.CONTRACT_CORE_CURVE_FACTORY_ADDR;
+const CONTRACT_CORE_ROUTER_ADDR = process.env.CONTRACT_CORE_ROUTER_ADDR;
 
-const CONTRACT_CURVES_ADDR = process.env.CONTRACT_CURVES_ADDR;
-const CONTRACT_ORCHESTRATOR_ADDR = process.env.CONTRACT_ORCHESTRATOR_ADDR;
-const CONTRACT_PROPORTIONAL_LIQUIDITY_ADDR = process.env.CONTRACT_PROPORTIONAL_LIQUIDITY_ADDR;
-const CONTRACT_SWAPS_ADDR = process.env.CONTRACT_SWAPS_ADDR;
-const CONTRACT_VIEW_LIQUIDITY_ADDR = process.env.CONTRACT_VIEW_LIQUIDITY_ADDR;
-const CONTRACT_CADCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_CADCTOUSDASSIMILATOR_ADDR;
-const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
-const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
-const CONTRACT_XSGDTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_XSGDTOUSDASSIMILATOR_ADDR;
-const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
-const CONTRACT_ROUTER_ADDR = process.env.CONTRACT_ROUTER_ADDR;
+// Assimilator Contracts
+const CONTRACT_ASSIMILATOR_AUDTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_AUDTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_CHFTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_CHFTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_GBPTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_GBPTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_JPYTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_JPYTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_KRWTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_KRWTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_PKRTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_PKRTOUSD_ADDR;
+const CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR;
 
 async function main() {
-  console.log('-------------------- Verifying Curves Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_CURVES_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_CURVES_ADDR
+    address: CONTRACT_CORE_CURVES_ADDR
   })
 
-  console.log('-------------------- Verifying Orchestrator Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_ORCHESTRATOR_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_ORCHESTRATOR_ADDR
+    address: CONTRACT_CORE_ORCHESTRATOR_ADDR
   })
 
-  console.log('-------------------- Verifying ProportionalLiquidity Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_PROPORTIONAL_LIQUIDITY_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_PROPORTIONAL_LIQUIDITY_ADDR
+    address: CONTRACT_CORE_PROPORTIONAL_LIQUIDITY_ADDR
   })
 
-  console.log('-------------------- Verifying Swaps Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_SWAPS_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_SWAPS_ADDR
+    address: CONTRACT_CORE_SWAPS_ADDR
   })
 
-  console.log('-------------------- Verifying ViewLiquidity Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_VIEW_LIQUIDITY_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_VIEW_LIQUIDITY_ADDR
+    address: CONTRACT_CORE_VIEW_LIQUIDITY_ADDR
   })
 
-  console.log('-------------------- Verifying UsdcToUsdAssimilator Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_CURVE_FACTORY_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_USDCTOUSDASSIMILATOR_ADDR
+    address: CONTRACT_CORE_CURVE_FACTORY_ADDR
   })
 
-  console.log('-------------------- Verifying EursToUsdAssimilator Contract');
+  console.log('-------------------- Verifying CONTRACT_CORE_ROUTER_ADDR Contract');
   await hre.run('verify:verify', {
-    address: CONTRACT_EURSTOUSDASSIMILATOR_ADDR
-  })
-
-  console.log('-------------------- Verifying CurveFactory Contract');
-  await hre.run('verify:verify', {
-    address: CONTRACT_CURVE_FACTORY_ADDR
-  })
-
-  console.log('-------------------- Verifying Router Contract');
-  await hre.run('verify:verify', {
-    address: CONTRACT_ROUTER_ADDR,
+    address: CONTRACT_CORE_ROUTER_ADDR,
     constructorArguments: [
-      CONTRACT_CURVE_FACTORY_ADDR
+      CONTRACT_CORE_CURVE_FACTORY_ADDR
     ]
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_AUDTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_AUDTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_CHFTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_CHFTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_GBPTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_GBPTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_JPYTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_JPYTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_KRWTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_KRWTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_PKRTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_PKRTOUSD_ADDR
+  })
+
+  console.log('-------------------- Verifying CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR Contract');
+  await hre.run('verify:verify', {
+    address: CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR
   })
 }
 
