@@ -6,7 +6,7 @@ import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { BigNumberish, Signer } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseUnits, parseEther, formatEther, formatUnits } from "ethers/lib/utils";
 
 const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
 const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
@@ -56,6 +56,15 @@ async function main() {
 
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
 
+  const eurAmt = parseEther("1");
+  console.log(eurAmt);
+  console.log(formatEther(eurAmt));
+  const viewDepositCurveEURS = await curveEURS.connect(deployer).viewDeposit(eurAmt);
+
+  console.log('INPUT: ', formatEther(eurAmt));
+  console.log('EURS AMT: ', formatUnits(viewDepositCurveEURS[1][0]));
+  console.log('USDC AMT: ', formatUnits(viewDepositCurveEURS[1][1]));
+
   // Supply liquidity to the pools
   const depositCurveEURS = await curveEURS
     .connect(deployer)
@@ -63,6 +72,16 @@ async function main() {
     .then(x => x.wait());
 
   console.log('Deposit: ', depositCurveEURS)
+
+  // Check pool liquidity
+  const viewLiquidity = await curveEURS
+    .connect(deployer)
+    .liquidity()
+
+  console.log(formatEther(viewLiquidity.total_))
+  console.log(formatEther(viewLiquidity.individual_[0]))
+  console.log(formatEther(viewLiquidity.individual_[1]))
+
 
   console.log(`Deployer balance: ${await deployer.getBalance()}`);
 }
