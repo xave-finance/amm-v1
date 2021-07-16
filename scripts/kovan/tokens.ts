@@ -1,4 +1,6 @@
-require("dotenv").config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.kovan') });
+
 import { ethers } from "hardhat";
 
 async function main() {
@@ -7,7 +9,6 @@ async function main() {
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
   console.log(`Deployer balance: ${await deployer.getBalance()}`);
-
 
   const AUD = await ethers.getContractFactory("TokenKovanAud");
   const CHF = await ethers.getContractFactory("TokenKovanChf");

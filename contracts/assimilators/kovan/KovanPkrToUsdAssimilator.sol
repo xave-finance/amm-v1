@@ -30,8 +30,8 @@ contract PkrToUsdAssimilator is IAssimilator {
 
     // Kovan
     IOracle private constant oracle = IOracle(0x0bf79F617988C472DcA68ff41eFe1338955b9A80);
-    IERC20 private constant usdc = IERC20(0x63d5b2257ad52Fe99a12db54fE3F017D952FDA9D);
-    IERC20 private constant pkr = IERC20(0x0D1319E5F09cC350e0983cCa75AEAB1b92e56e1d);
+    IERC20 private constant usdc = IERC20(0x72a97313cF25FDFdb1CeCD597CC12809c9851Ca0);
+    IERC20 private constant pkr = IERC20(0xB521Ea0D600019402eA514707bba0C6e54a50dE3);
 
     // solhint-disable-next-line
     constructor() {}
