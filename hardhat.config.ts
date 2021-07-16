@@ -1,6 +1,7 @@
-const netObj = JSON.parse(process.env.npm_config_argv).original;
-const NETWORK = netObj[netObj.length - 1];
 const path = require('path');
+const netObj = JSON.parse(process.env.npm_config_argv).original;
+const NETWORK = netObj[0] === 'hh:node' ? 'localhost' : netObj[netObj.length - 1];
+
 require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${NETWORK}`) });
 
 import "hardhat-typechain";
