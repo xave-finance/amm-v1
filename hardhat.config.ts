@@ -1,27 +1,20 @@
-require("dotenv").config(); // eslint-disable-line
+const netObj = JSON.parse(process.env.npm_config_argv).original;
+const NETWORK = netObj[netObj.length - 1];
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${NETWORK}`) });
+
 import "hardhat-typechain";
 import { HardhatUserConfig } from "hardhat/config";
-import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (args, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(await account.address);
-  }
-});
-
-const INFURA_URL = process.env.RPC_URL_KOVAN;
+const RPC_URL_KOVAN = process.env.RPC_URL_KOVAN;
+const LOCAL_NODE = process.env.LOCAL_NODE;
 const PRIVATE_KEY_MAINNET = process.env.PRIVATE_KEY_MAINNET;
 const PRIVATE_KEY2_MAINNET = process.env.PRIVATE_KEY2_MAINNET;
 const PRIVATE_KEY_KOVAN = process.env.PRIVATE_KEY_KOVAN;
 const PRIVATE_KEY2_KOVAN = process.env.PRIVATE_KEY2_KOVAN;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-const LOCAL_NODE = process.env.LOCAL_NODE;
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -64,7 +57,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     kovan: {
-      url: INFURA_URL,
+      url: RPC_URL_KOVAN,
       accounts: [`0x${PRIVATE_KEY_KOVAN}`, `0x${PRIVATE_KEY2_KOVAN}`],
       blockGasLimit: 20000000
     }
