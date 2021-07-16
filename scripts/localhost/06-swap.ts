@@ -7,8 +7,8 @@ import { getFutureTime } from "../../test/Utils";
 import { ERC20 } from "../../typechain/ERC20";
 
 const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
-const TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-const TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR;
+const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
+const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
 
 async function main() {
   const [deployer] = await ethers.getSigners();
