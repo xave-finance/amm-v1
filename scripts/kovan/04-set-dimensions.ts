@@ -1,13 +1,9 @@
-require("dotenv").config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.kovan') });
+
 import { ethers } from "hardhat";
-
 import { Curve } from "../../typechain/Curve";
-import { ERC20 } from "../../typechain/ERC20";
-import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-
-const NAME = "DFX V1";
-const SYMBOL = "DFX-V1";
 
 // Weights are always 50/50
 
