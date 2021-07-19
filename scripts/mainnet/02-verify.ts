@@ -1,21 +1,5 @@
 require("dotenv").config();
-import { ethers } from "hardhat";
-import { Signer } from "ethers";
-
-const hre = require("hardhat")
-
-export const getDeployer = async (): Promise<{
-  deployer: Signer;
-  user1: Signer;
-  user2: Signer;
-}> => {
-  const [deployer, user1, user2] = await ethers.getSigners();
-  return {
-    deployer,
-    user1,
-    user2,
-  };
-};
+const hre = require("hardhat");
 
 const CONTRACT_CORE_CURVES_ADDR = process.env.CONTRACT_CORE_CURVES_ADDR;
 const CONTRACT_CORE_ORCHESTRATOR_ADDR = process.env.CONTRACT_CORE_ORCHESTRATOR_ADDR;
