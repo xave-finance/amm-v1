@@ -6,9 +6,6 @@ import { ERC20 } from "../../typechain/ERC20";
 import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
-const NAME = "DFX V1";
-const SYMBOL = "DFX-V1";
-
 // Weights are always 50/50
 
 // Pool must respect a 10/90 ratio
@@ -137,8 +134,8 @@ async function main() {
   };
 
   const { curve: curveEURS } = await createCurveAndSetParams({
-    name: NAME,
-    symbol: SYMBOL,
+    name: 'STASIS EURS Token',
+    symbol: 'EURS',
     base: eurs.address,
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
