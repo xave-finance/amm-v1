@@ -13,11 +13,9 @@ const RPC_URL_MAINNET = process.env.RPC_URL_MAINNET;
 const RPC_URL_KOVAN = process.env.RPC_URL_KOVAN;
 const LOCAL_NODE = process.env.LOCAL_NODE;
 
-const MNEMONIC_SEED_MAINNET = process.env.MNEMONIC_SEED_MAINNET;
+const MNEMONIC_SEED = process.env.MNEMONIC_SEED;
 const PRIVATE_KEY_MAINNET = process.env.PRIVATE_KEY_MAINNET;
 const PRIVATE_KEY2_MAINNET = process.env.PRIVATE_KEY2_MAINNET;
-const PRIVATE_KEY_KOVAN = process.env.PRIVATE_KEY_KOVAN;
-const PRIVATE_KEY2_KOVAN = process.env.PRIVATE_KEY2_KOVAN;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
 // You need to export an object to set up your config
@@ -33,13 +31,6 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    mainnet: {
-      url: RPC_URL_MAINNET,
-      chainId: 1,
-      accounts: {
-        mnemonic: MNEMONIC_SEED_MAINNET
-      }
-    },
     localhost: {
       url: LOCAL_NODE,
       timeout: 1200000,
@@ -67,9 +58,18 @@ const config: HardhatUserConfig = {
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true,
     },
+    mainnet: {
+      url: RPC_URL_MAINNET,
+      chainId: 1,
+      accounts: {
+        mnemonic: MNEMONIC_SEED
+      }
+    },
     kovan: {
       url: RPC_URL_KOVAN,
-      accounts: [`0x${PRIVATE_KEY_KOVAN}`, `0x${PRIVATE_KEY2_KOVAN}`],
+      accounts: {
+        mnemonic: MNEMONIC_SEED
+      },
       blockGasLimit: 20000000
     }
   },
