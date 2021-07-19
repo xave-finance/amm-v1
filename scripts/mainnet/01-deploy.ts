@@ -5,13 +5,11 @@ import { CurveFactory } from "../../typechain/CurveFactory";
 import { Router } from "../../typechain/Router";
 
 async function main() {
-  const [deployer, user1] = await ethers.getSigners();
+  const [deployer] = await ethers.getSigners();
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
   console.log(`Deployer balance: ${await deployer.getBalance()}`)
-  console.log(`User1 account: ${await user1.getAddress()}`);
-  console.log(`User1 balance: ${await user1.getBalance()}`)
 
   const CurvesLib = await ethers.getContractFactory("Curves");
   const OrchestratorLib = await ethers.getContractFactory("Orchestrator");

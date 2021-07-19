@@ -28,17 +28,15 @@ const CONTRACT_CORE_CURVE_FACTORY_ADDR = process.env.CONTRACT_CORE_CURVE_FACTORY
 const CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR;
 const CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR;
 
-const TOKEN_USDC = process.env.TOKENS_USDC_MAINNET_ADDR;
-const TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR;
+const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
+const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
 
 async function main() {
-  const [deployer, user1] = await ethers.getSigners();
+  const [deployer] = await ethers.getSigners();
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
   console.log(`Deployer account: ${await deployer.getAddress()}`);
   console.log(`Deployer balance: ${await deployer.getBalance()}`);
-  console.log(`User1 account: ${await user1.getAddress()}`);
-  console.log(`User1 balance: ${await user1.getBalance()}`);
 
   const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CORE_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
