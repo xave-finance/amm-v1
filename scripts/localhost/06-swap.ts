@@ -4,11 +4,13 @@ require('dotenv').config({ path: path.resolve(process.cwd(), '.env.localhost') }
 import { ethers } from "hardhat";
 import { Curve } from "../../typechain/Curve";
 import { getFutureTime } from "../../test/Utils";
+import { parseEther, formatUnits } from "ethers/lib/utils";
 import { ERC20 } from "../../typechain/ERC20";
 
 const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
 const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
 const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
+const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -21,7 +23,18 @@ async function main() {
   const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
 
-  const eurAmt = 30000000;
+  const viewCurveSwapEURS = await curveEURS
+    .connect(deployer)
+    .viewOriginSwap(eurs.address, usdc.address, "5");
+  console.log('View Origin Swap: ', formatUnits(viewCurveSwapEURS, TOKENS_EURS_DECIMALS));
+
+  // const viewCurveSwapEURS = await curveEURS
+  //   .connect(deployer)
+  //   .getOriginSwapData(eurs.address, usdc.address, "5");
+  // input, output, assim, amt
+  // getOriginSwapData(curve, _o.ix, _t.ix, _o.addr, _originAmount);
+
+  const eurAmt = parseEther("1");
   console.log(`Swapping ${eurAmt} EUR to USDC`);
 
   const eursBefore = await eurs.balanceOf(await deployer.getAddress());
@@ -29,7 +42,7 @@ async function main() {
 
   await curveEURS
     .connect(deployer)
-    .originSwap(eurs.address, usdc.address, eurAmt, 0, await getFutureTime(), {
+    .originSwap(eurs.address, usdc.address, "1", 0, await getFutureTime(), {
       gasLimit: 3000000,
     });
 

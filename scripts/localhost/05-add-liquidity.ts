@@ -56,31 +56,35 @@ async function main() {
 
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
 
-  const eurAmt = parseEther("1");
+  const eurAmt = parseEther("20");
   console.log(eurAmt);
   console.log(formatEther(eurAmt));
   const viewDepositCurveEURS = await curveEURS.connect(deployer).viewDeposit(eurAmt);
 
+  console.log('-----------------------------------------------------------------------');
+  console.log('Liquidity To Deposit');
+  console.log('-----------------------------------------------------------------------');
   console.log('INPUT: ', formatEther(eurAmt));
-  console.log('EURS AMT: ', formatUnits(viewDepositCurveEURS[1][0]));
-  console.log('USDC AMT: ', formatUnits(viewDepositCurveEURS[1][1]));
+  console.log('EURS AMT: ', formatUnits(viewDepositCurveEURS[1][0], TOKENS_EURS_DECIMALS));
+  console.log('USDC AMT: ', formatUnits(viewDepositCurveEURS[1][1], TOKENS_USDC_DECIMALS));
 
   // Supply liquidity to the pools
   const depositCurveEURS = await curveEURS
     .connect(deployer)
-    .deposit(parseUnits("5000000"), await getFutureTime())
+    .deposit(eurAmt, await getFutureTime())
     .then(x => x.wait());
-
-  console.log('Deposit: ', depositCurveEURS)
 
   // Check pool liquidity
   const viewLiquidity = await curveEURS
     .connect(deployer)
-    .liquidity()
+    .liquidity();
 
-  console.log(formatEther(viewLiquidity.total_))
-  console.log(formatEther(viewLiquidity.individual_[0]))
-  console.log(formatEther(viewLiquidity.individual_[1]))
+  console.log('-----------------------------------------------------------------------');
+  console.log('Liquidity Balance');
+  console.log('-----------------------------------------------------------------------');
+  console.log('Total: ', formatUnits(viewLiquidity.total_));
+  console.log('EURS: ', formatUnits(viewLiquidity.individual_[0], TOKENS_EURS_DECIMALS));
+  console.log('USDC: ', formatUnits(viewLiquidity.individual_[1], TOKENS_USDC_DECIMALS))
 
 
   console.log(`Deployer balance: ${await deployer.getBalance()}`);

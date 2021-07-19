@@ -14,7 +14,6 @@ const TOKEN_EURS = process.env.TOKENS_EURS_MAINNET_ADDR;
 const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
-
 async function main() {
   const [deployer, user1] = await ethers.getSigners();
 
