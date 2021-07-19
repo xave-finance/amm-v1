@@ -10,16 +10,15 @@ import { parseUnits } from "ethers/lib/utils";
 
 // Pool must respect a 10/90 ratio
 // i.e. value of one pair cannot exceed 90% of the pools value
-const ALPHA = parseUnits("0.8");
+const ALPHA = parseUnits(process.env.DIMENSION_ALPHA);
 
 // Slippage (fees) will that will be introduced when one of the tokens's ratio:
 // - exceeds 75% of the pool value
 // - goes under 25% of the pool value
-const BETA = parseUnits("0.5");
-
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0005"); // 5 basis point
-const LAMBDA = parseUnits("0.3");
+const BETA = parseUnits(process.env.DIMENSION_BETA);
+const MAX = parseUnits(process.env.DIMENSION_MAX);
+const EPSILON = parseUnits(process.env.DIMENSION_EPSILON); // 5 basis point
+const LAMBDA = parseUnits(process.env.DIMENSION_LAMBDA);
 
 const CONTRACT_CORE_CURVE_FACTORY_ADDR = process.env.CONTRACT_CORE_CURVE_FACTORY_ADDR;
 const CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR;
