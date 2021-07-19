@@ -71,6 +71,9 @@ web_modules/
 # dotenv environment variables file
 .env
 .env.test
+.env.localhost
+.env.kovan
+.env.mainnet
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -120,3 +123,5 @@ artifacts
 typechain
 
 .vscode/
+
+.DS_Store
