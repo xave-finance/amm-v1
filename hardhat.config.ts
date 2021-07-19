@@ -9,8 +9,11 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 
+const RPC_URL_MAINNET = process.env.RPC_URL_MAINNET;
 const RPC_URL_KOVAN = process.env.RPC_URL_KOVAN;
 const LOCAL_NODE = process.env.LOCAL_NODE;
+
+const MNEMONIC_SEED_MAINNET = process.env.MNEMONIC_SEED_MAINNET;
 const PRIVATE_KEY_MAINNET = process.env.PRIVATE_KEY_MAINNET;
 const PRIVATE_KEY2_MAINNET = process.env.PRIVATE_KEY2_MAINNET;
 const PRIVATE_KEY_KOVAN = process.env.PRIVATE_KEY_KOVAN;
@@ -30,6 +33,13 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
+    mainnet: {
+      url: RPC_URL_MAINNET,
+      chainId: 1,
+      accounts: {
+        mnemonic: MNEMONIC_SEED_MAINNET
+      }
+    },
     localhost: {
       url: LOCAL_NODE,
       timeout: 1200000,
@@ -51,7 +61,7 @@ const config: HardhatUserConfig = {
       },
       forking: {
         enabled: true,
-        url: process.env["RPC_URL_MAINNET"] ? process.env["RPC_URL_MAINNET"] : LOCAL_NODE,
+        url: RPC_URL_MAINNET ? RPC_URL_MAINNET : LOCAL_NODE,
         blockNumber: 12640151 // https://etherscan.io/block/12640151
       },
       blockGasLimit: 20000000,
