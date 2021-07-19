@@ -25,12 +25,6 @@ async function main() {
   const swapsLib = await SwapsLib.deploy();
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
 
-  const MainnetUsdcToUsdAssimilator = await ethers.getContractFactory("MainnetUsdcToUsdAssimilator");
-  const MainnetEursToUsdAssimilator = await ethers.getContractFactory("MainnetEursToUsdAssimilator");
-
-  const mainnetUsdcToUsdAssimilator = await MainnetUsdcToUsdAssimilator.deploy({ gasLimit: 12000000 });
-  const mainnetEursToUsdAssimilator = await MainnetEursToUsdAssimilator.deploy({ gasLimit: 12000000 });
-
   const CurveFactory = await ethers.getContractFactory("CurveFactory", {
     libraries: {
       Curves: curvesLib.address,
@@ -44,6 +38,12 @@ async function main() {
   const RouterFactory = await ethers.getContractFactory("Router");
   const curveFactory = (await CurveFactory.deploy({ gasLimit: 12000000 })) as CurveFactory;
   const router = (await RouterFactory.deploy(curveFactory.address, { gasLimit: 12000000 })) as Router;
+
+  const MainnetUsdcToUsdAssimilator = await ethers.getContractFactory("MainnetUsdcToUsdAssimilator");
+  const MainnetEursToUsdAssimilator = await ethers.getContractFactory("MainnetEursToUsdAssimilator");
+
+  const mainnetUsdcToUsdAssimilator = await MainnetUsdcToUsdAssimilator.deploy({ gasLimit: 12000000 });
+  const mainnetEursToUsdAssimilator = await MainnetEursToUsdAssimilator.deploy({ gasLimit: 12000000 });
 
   console.log(`CONTRACT_CORE_CURVES_ADDR=${curvesLib.address}`)
   console.log(`CONTRACT_CORE_ORCHESTRATOR_ADDR=${orchestratorLib.address}`)
