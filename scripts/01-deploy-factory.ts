@@ -114,9 +114,9 @@ async function main() {
     router: router.address,
   };
 
-  const timestamp = new Date().getTime().toString();
   // Deployed contracts log
-  const outputPath = path.join(__dirname, `./deployed_contracts/${timestamp}_factory_deployed.json`);
+  const timestamp = new Date().getTime().toString();
+  const outputPath = path.join(__dirname, `./deployed_contract_logs/${timestamp}_factory_deployed.json`);
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
 
   // Deployed contracts config

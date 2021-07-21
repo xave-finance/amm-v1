@@ -4,15 +4,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (args, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(await account.address);
-  }
-});
+const MNEMONIC = process.env.MNEMONIC;
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -31,7 +23,7 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545",
       timeout: 1200000,
       accounts: {
-        mnemonic: "myth like bonus scare over problem client lizard pioneer submit female collect",
+        mnemonic: MNEMONIC,
         accountsBalance: "100000000000000000000000",
       },
     },
@@ -46,7 +38,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 1,
       accounts: {
-        mnemonic: "myth like bonus scare over problem client lizard pioneer submit female collect",
+        mnemonic: MNEMONIC,
         accountsBalance: "100000000000000000000000",
       },
       forking: {
