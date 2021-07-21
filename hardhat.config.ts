@@ -1,7 +1,6 @@
 require("dotenv").config(); // eslint-disable-line
 import "hardhat-typechain";
 import { HardhatUserConfig } from "hardhat/config";
-import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 
 const MNEMONIC = process.env.MNEMONIC;

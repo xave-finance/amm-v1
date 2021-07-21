@@ -123,4 +123,6 @@ typechain
 
 .DS_Store
 
-scripts/factory_deployed.json
+# Contract config
+scripts/config/factory_deployed.json
+scripts/config/assimilators_deployed.json
