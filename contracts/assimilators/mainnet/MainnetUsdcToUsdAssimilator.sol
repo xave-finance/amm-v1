@@ -21,7 +21,7 @@ import "../lib/ABDKMath64x64.sol";
 import "../interfaces/IAssimilator.sol";
 import "../interfaces/IOracle.sol";
 
-contract UsdcToUsdAssimilator is IAssimilator {
+contract MainnetUsdcToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
