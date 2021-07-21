@@ -11,10 +11,10 @@ const { ethers } = hre;
 const GOVERNANCE = "0x27e843260c71443b4cc8cb6bf226c3f77b9695af";
 
 const ASSIMILATOR_ADDRESSES = {
-  cadcToUsdAssimilator: "0x12310b7726eaE2D2438361Fd126a25D8381Fe891",
-  usdcToUsdAssimilator: "0x3CB209Dc9dDC45ce4Fd9a2f5DD33a8C6A9b6ea52",
-  eursToUsdAssimilator: "0x39F45038D763dd88791cE9BdE8d6c18081c7d522",
-  xsgdToUsdAssimilator: "0xe36DeD0aF2929870977F05A1f017BAB6CF8190f8",
+  cadcToUsdAssimilator: "0x9fd244e5972F28e2F133bd3dAA5A6691C8E6d1c7",
+  usdcToUsdAssimilator: "0xA31Ea4553E82e08b3F411B29C009ECd45AE1738B",
+  eursToUsdAssimilator: "0x0534B3647623EB050541700810A070C2Df06F977",
+  xsgdToUsdAssimilator: "0x31799946e72a44273515556e366e059064Df8ca2",
 };
 
 const ALPHA = parseUnits("0.8");
@@ -31,7 +31,7 @@ async function main() {
 
   const curveFactory = (await ethers.getContractAt(
     "CurveFactory",
-    "0xd3C1bF5582b5f3029b15bE04a49C65d3226dFB0C",
+    "0x604d6376E7422C2cB1DC9B92534020e563044F15",
   )) as CurveFactory;
 
   const createAndSetParams = async (name, symbol, base, quote, baseAssim, quoteAssim) => {
