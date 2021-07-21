@@ -1,11 +1,7 @@
-const path = require('path');
-const netObj = JSON.parse(process.env.npm_config_argv).original;
-const NETWORK = netObj[0] === 'hh:node' || netObj[0] === 'test' ? 'localhost' : netObj[netObj.length - 1];
-
-require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${NETWORK}`) });
+require("dotenv").config();
 
 import "hardhat-typechain";
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 
@@ -16,7 +12,18 @@ const LOCAL_NODE = process.env.LOCAL_NODE;
 const MNEMONIC_SEED = process.env.MNEMONIC_SEED;
 const PRIVATE_KEY_MAINNET = process.env.PRIVATE_KEY_MAINNET;
 const PRIVATE_KEY2_MAINNET = process.env.PRIVATE_KEY2_MAINNET;
+
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task("accounts", "Prints the list of accounts", async (args, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -53,7 +60,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: RPC_URL_MAINNET ? RPC_URL_MAINNET : LOCAL_NODE,
-        blockNumber: 12640151 // https://etherscan.io/block/12640151
+        blockNumber: 12640151, // https://etherscan.io/block/12640151
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true,
@@ -62,19 +69,19 @@ const config: HardhatUserConfig = {
       url: RPC_URL_MAINNET,
       chainId: 1,
       accounts: {
-        mnemonic: MNEMONIC_SEED
-      }
+        mnemonic: MNEMONIC_SEED,
+      },
     },
     kovan: {
       url: RPC_URL_KOVAN,
       accounts: {
-        mnemonic: MNEMONIC_SEED
+        mnemonic: MNEMONIC_SEED,
       },
-      blockGasLimit: 20000000
-    }
+      blockGasLimit: 20000000,
+    },
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY
+    apiKey: ETHERSCAN_API_KEY,
   },
   mocha: {
     timeout: 1200000,

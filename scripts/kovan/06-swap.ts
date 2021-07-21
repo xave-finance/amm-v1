@@ -1,41 +1,58 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env.kovan') });
-
+require("dotenv").config();
 import { ethers } from "hardhat";
 import { Curve } from "../../typechain/Curve";
-import { getFutureTime } from "../../test/Utils";
 import { ERC20 } from "../../typechain/ERC20";
+import { formatCurrency, parseCurrency, TOKEN_DECIMAL, TOKEN_NAME, getFutureTime } from "../utils";
+import { createCurveAndSetParams } from "../curveFunctions";
 
-const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
-const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
-const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
-
+const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
 async function main() {
-  const [deployer] = await ethers.getSigners();
+  const [_deployer, _user1] = await ethers.getSigners();
+  const provider = _deployer.provider; // get provider instance from deployer or account[0]
 
-  console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  // replace env or address
+  const TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+  const TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR;
 
+  console.log(`Deployer account: ${await _deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+  console.log(`User1 account: ${await _user1.getAddress()}`);
+  console.log(`User1 balance: ${await _user1.getBalance()}`);
+
+  const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
   const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
-  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
 
-  const eurAmt = 30000000;
-  console.log(`Swapping ${eurAmt} EUR to USDC`);
+  const { curve: curveEURS } = await createCurveAndSetParams({
+    curveFactory: curveFactory,
+    base: eurs.address,
+    quote: usdc.address,
+  });
 
-  const eursBefore = await eurs.balanceOf(await deployer.getAddress());
-  console.log("Before EURS bal", eursBefore.toString());
+  const eurAmount = "10";
+  console.log(`Exchanging ${eurAmount} EURS to USDC.`);
+  const beforeBalance = await usdc.balanceOf(await _deployer.getAddress());
+  console.log("Before USDC bal", formatCurrency(TOKEN_NAME.USDC, TOKEN_DECIMAL.USDC, beforeBalance));
 
-  await curveEURS
-    .connect(deployer)
-    .originSwap(eurs.address, usdc.address, eurAmt, 0, await getFutureTime(), {
-      gasLimit: 3000000,
-    });
+  const swapTxn = await curveEURS
+    .connect(_deployer)
+    .originSwap(
+      eurs.address,
+      usdc.address,
+      parseCurrency(TOKEN_NAME.EURS, TOKEN_DECIMAL.EURS, "10"),
+      0,
+      await getFutureTime(provider),
+      {
+        gasLimit: 3000000,
+      },
+    );
 
-  const eursAfter = await eurs.balanceOf(await deployer.getAddress());
-  console.log("After EURS bal", eursAfter.toString());
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  console.log(await swapTxn.wait());
+  const afterBalance = await usdc.balanceOf(await _deployer.getAddress());
+  console.log(
+    "Difference after swap:",
+    formatCurrency(TOKEN_NAME.USDC, TOKEN_DECIMAL.USDC, afterBalance.sub(beforeBalance)),
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere

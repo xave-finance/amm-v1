@@ -1,60 +1,55 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env.kovan') });
-
+require("dotenv").config();
 import { ethers } from "hardhat";
-import { getFutureTime } from "../../test/Utils";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
-import { BigNumberish, Signer } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
+import { createCurveAndSetParams } from "../curveFunctions";
+import { formatCurrency, getFutureTime, TOKEN_DECIMAL, TOKEN_NAME } from "../utils";
 
-const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
-const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
-const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
-const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
-const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
+const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
+  const [_deployer, _user1] = await ethers.getSigners();
+  const provider = _deployer.provider; // get provider instance from deployer or account[0]
 
-  console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  // replace env or address
+  const TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+  const TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR;
 
+  console.log(`Deployer account: ${await _deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+  console.log(`User1 account: ${await _user1.getAddress()}`);
+  console.log(`User1 balance: ${await _user1.getBalance()}`);
+
+  const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
+  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
-  const mintAndApprove = async function (
-    tokenAddress: string,
-    minter: Signer,
-    amount: BigNumberish,
-    recipient: string,
-  ) {
-    await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
-  };
+  const { curve: curveEURS } = await createCurveAndSetParams({
+    curveFactory: curveFactory,
+    base: eurs.address,
+    quote: usdc.address,
+  });
 
-  const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
-    for (let i = 0; i < requests.length; i++) {
-      await mintAndApprove(...requests[i]);
-    }
-  };
+  const LP_TOKENS_AMOUNT = "500";
+  const LP_TOKENS_TO_MINT = parseEther(LP_TOKENS_AMOUNT); // 18 precision
+  console.log(`Checking how much liquidity to provide minting ${LP_TOKENS_AMOUNT}`);
+  const depositToCurveEURS = await curveEURS.connect(_deployer).viewDeposit(LP_TOKENS_TO_MINT);
+  console.log(
+    `You will provide ${formatCurrency(
+      TOKEN_NAME.EURS,
+      TOKEN_DECIMAL.EURS,
+      depositToCurveEURS[1][0],
+    )} in EURS and ${formatCurrency(
+      TOKEN_NAME.USDC,
+      TOKEN_DECIMAL.USDC,
+      depositToCurveEURS[1][1],
+    )} in USDC to receive ${LP_TOKENS_AMOUNT} LP Tokens. Depositing..`,
+  );
 
-  // Mint tokens and approve
-  await multiMintAndApprove([
-    [TOKEN_USDC, deployer, parseUnits("10000000", TOKENS_USDC_DECIMALS), CONTRACT_CURVE_EURS_ADDR],
-    [TOKEN_EURS, deployer, parseUnits("10000000", TOKENS_EURS_DECIMALS), CONTRACT_CURVE_EURS_ADDR]
-  ]);
-
-  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
-
-  // Supply liquidity to the pools
-  const depositCurveEURS = await curveEURS
-    .connect(deployer)
-    .deposit(parseUnits("5000000"), await getFutureTime())
-    .then(x => x.wait());
-
-  console.log('Deposit: ', depositCurveEURS)
-
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  const depositTxn = await curveEURS.connect(_deployer).deposit(LP_TOKENS_TO_MINT, await getFutureTime(provider));
+  console.log(await depositTxn.wait());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

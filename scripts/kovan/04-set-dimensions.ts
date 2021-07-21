@@ -1,80 +1,66 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env.kovan') });
-
+require("dotenv").config();
 import { ethers } from "hardhat";
 import { Curve } from "../../typechain/Curve";
-import { parseUnits } from "ethers/lib/utils";
+import { ERC20 } from "../../typechain/ERC20";
+import { BigNumberish } from "ethers";
+import { createCurve } from "../curveFunctions";
+import { ALPHA, BETA, MAX, EPSILON, LAMBDA } from "../constants";
 
-// Weights are always 50/50
-
-// Pool must respect a 10/90 ratio
-// i.e. value of one pair cannot exceed 90% of the pools value
-const ALPHA = parseUnits("0.8");
-
-// Slippage (fees) will that will be introduced when one of the tokens's ratio:
-// - exceeds 75% of the pool value
-// - goes under 25% of the pool value
-const BETA = parseUnits("0.5");
-
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0005"); // 5 basis point
-const LAMBDA = parseUnits("0.3");
-
-// Curve Contract Addresses
-const CONTRACT_CURVE_AUD_ADDR = process.env.CONTRACT_CURVE_AUD_ADDR;
-const CONTRACT_CURVE_CHF_ADDR = process.env.CONTRACT_CURVE_CHF_ADDR;
-const CONTRACT_CURVE_EURS_ADDR = process.env.CONTRACT_CURVE_EURS_ADDR;
-const CONTRACT_CURVE_GBP_ADDR = process.env.CONTRACT_CURVE_GBP_ADDR;
-const CONTRACT_CURVE_JPY_ADDR = process.env.CONTRACT_CURVE_JPY_ADDR;
-const CONTRACT_CURVE_KRW_ADDR = process.env.CONTRACT_CURVE_KRW_ADDR;
-const CONTRACT_CURVE_PKR_ADDR = process.env.CONTRACT_CURVE_PKR_ADDR;
+const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
 
 async function main() {
-  const [deployer, user1] = await ethers.getSigners();
+  const [_deployer, _user1] = await ethers.getSigners();
+  const provider = _deployer.provider; // get provider instance from deployer or account[0]
+
+  // replace env or address
+  const TOKEN_USDC = process.env.TOKENS_USDC_KOVAN_ADDR;
+  const TOKEN_EURS = process.env.TOKENS_EURS_KOVAN_ADDR;
 
   console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
-  console.log(`User1 account: ${await user1.getAddress()}`);
-  console.log(`User1 balance: ${await user1.getBalance()}`);
+  console.log(`Deployer account: ${await _deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+  console.log(`User1 account: ${await _user1.getAddress()}`);
+  console.log(`User1 balance: ${await _user1.getBalance()}`);
 
-  const curveAUD = (await ethers.getContractAt("Curve", CONTRACT_CURVE_AUD_ADDR)) as Curve;
-  const txAUD = await curveAUD.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txAUD.wait();
+  const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
+  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
 
-  const curveCHF = (await ethers.getContractAt("Curve", CONTRACT_CURVE_CHF_ADDR)) as Curve;
-  const txCHF = await curveCHF.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txCHF.wait();
+  const createCurveAndSetParams = async function ({
+    base,
+    quote,
+    params,
+  }: {
+    base: string;
+    quote: string;
 
-  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
-  const txEURS = await curveEURS.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txEURS.wait();
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  }) {
+    const { curve, curveLpToken } = await createCurve({
+      curveFactory,
+      base,
+      quote,
+    });
 
-  const curveGBP = (await ethers.getContractAt("Curve", CONTRACT_CURVE_GBP_ADDR)) as Curve;
-  const txGBP = await curveGBP.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txGBP.wait();
+    const tx = await curve.setParams(...params, { gasLimit: 12000000 });
+    console.log("Curve#setParams TX Hash: ", tx.hash);
+    await tx.wait();
 
-  const curveJPY = (await ethers.getContractAt("Curve", CONTRACT_CURVE_JPY_ADDR)) as Curve;
-  const txJPY = await curveJPY.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txJPY.wait();
+    return {
+      curve,
+      curveLpToken,
+    };
+  };
 
-  const curveKRW = (await ethers.getContractAt("Curve", CONTRACT_CURVE_KRW_ADDR)) as Curve;
-  const txKRW = await curveKRW.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txKRW.wait();
+  const { curve: curveEURS } = await createCurveAndSetParams({
+    base: eurs.address,
+    quote: usdc.address,
+    params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+  });
 
-  const curvePKR = (await ethers.getContractAt("Curve", CONTRACT_CURVE_PKR_ADDR)) as Curve;
-  const txPKR = await curvePKR.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, { gasLimit: 12000000 });
-  await txPKR.wait();
-
-  console.log('CurveAUD#setParams TX Hash: ', txAUD.hash);
-  console.log('CurveCHF#setParams TX Hash: ', txCHF.hash);
-  console.log('CurveEURS#setParams TX Hash: ', txEURS.hash);
-  console.log('CurveGBP#setParams TX Hash: ', txGBP.hash);
-  console.log('CurveJPY#setParams TX Hash: ', txJPY.hash);
-  console.log('CurveKRW#setParams TX Hash: ', txKRW.hash);
-  console.log('CurvePKR#setParams TX Hash: ', txPKR.hash);
-
-  console.log(`Deployer balance: ${await deployer.getBalance()}`)
+  console.log(curveEURS);
+  console.log("Dimensions set. Run add liquidity script next.");
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

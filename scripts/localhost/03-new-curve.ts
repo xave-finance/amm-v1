@@ -1,46 +1,33 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env.localhost') });
-
+require("dotenv").config();
 import { ethers } from "hardhat";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
+import { NAME, SYMBOL, ALPHA, BETA, MAX, EPSILON, LAMBDA } from "../constants";
+import { MockToken } from "../../typechain";
 
-const NAME = "STASIS EURS";
-const SYMBOL = "EURS";
-
-// Weights are always 50/50
-
-// Pool must respect a 10/90 ratio
-// i.e. value of one pair cannot exceed 90% of the pools value
-const ALPHA = parseUnits(process.env.DIMENSION_ALPHA);
-
-// Slippage (fees) will that will be introduced when one of the tokens's ratio:
-// - exceeds 75% of the pool value
-// - goes under 25% of the pool value
-const BETA = parseUnits(process.env.DIMENSION_BETA);
-const MAX = parseUnits(process.env.DIMENSION_MAX);
-const EPSILON = parseUnits(process.env.DIMENSION_EPSILON); // 5 basis point
-const LAMBDA = parseUnits(process.env.DIMENSION_LAMBDA);
-
-const CONTRACT_CORE_CURVE_FACTORY_ADDR = process.env.CONTRACT_CORE_CURVE_FACTORY_ADDR;
-const CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR;
-const CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR = process.env.CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR;
-
-const TOKEN_USDC = process.env.TOKENS_USDC_ADDR;
-const TOKEN_EURS = process.env.TOKENS_EURS_ADDR;
+const CONTRACT_CURVE_FACTORY_ADDR = process.env.CONTRACT_CURVE_FACTORY_ADDR;
+const CONTRACT_EURSTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_EURSTOUSDASSIMILATOR_ADDR;
+const CONTRACT_USDCTOUSDASSIMILATOR_ADDR = process.env.CONTRACT_USDCTOUSDASSIMILATOR_ADDR;
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
+  const [_deployer, _user1] = await ethers.getSigners();
 
-  console.log(`Setting up scaffolding at network ${ethers.provider.connection.url}`);
-  console.log(`Deployer account: ${await deployer.getAddress()}`);
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  // replace env or address
+  const TOKEN_USDC = process.env.TOKEN_USDC_ADDR;
+  const TOKEN_EURS = process.env.TOKEN_EURS_ADDR;
 
-  const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CORE_CURVE_FACTORY_ADDR)) as Curve;
-  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
+  console.log(`Deployer account: ${await _deployer.getAddress()}`);
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
+  console.log(`User1 account: ${await _user1.getAddress()}`);
+  console.log(`User1 balance: ${await _user1.getBalance()}`);
+  console.log(TOKEN_USDC);
+  console.log(TOKEN_EURS);
+  const curveFactory = (await ethers.getContractAt("CurveFactory", CONTRACT_CURVE_FACTORY_ADDR)) as Curve;
+  const usdc = (await ethers.getContractAt("MockToken", TOKEN_USDC)) as MockToken;
+  const eurs = (await ethers.getContractAt("MockToken", TOKEN_EURS)) as MockToken;
+  console.log("done");
 
   const createCurve = async function ({
     name,
@@ -76,18 +63,18 @@ async function main() {
     );
     await tx.wait();
 
-    console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+    console.log("CurveFactory#newCurve TX Hash: ", tx.hash);
 
     // Get curve address
     const curveAddress = await curveFactory.curves(
       ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
     );
-    console.log('Curve Address: ', curveAddress)
+    console.log("Curve Address: ", curveAddress);
     const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
     const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
     const turnOffWhitelisting = await curve.turnOffWhitelisting();
-    console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
+    console.log("Curve#turnOffWhitelisting TX Hash: ", turnOffWhitelisting.hash);
 
     return {
       curve,
@@ -104,8 +91,8 @@ async function main() {
     quoteWeight,
     baseAssimilator,
     quoteAssimilator,
-    params,
-  }: {
+  }: // params, -- we can actually set dimenstions here already or we can use script 3
+  {
     name: string;
     symbol: string;
     base: string;
@@ -126,7 +113,7 @@ async function main() {
       baseAssimilator,
       quoteAssimilator,
     });
-    // Set parameters/dimensions here
+    // Set parameters/dimensions here --
     // const tx = await curve.setParams(...params, { gasLimit: 12000000 });
     // console.log('Curve#setParams TX Hash: ', tx.hash)
     // await tx.wait();
@@ -143,12 +130,15 @@ async function main() {
     quote: usdc.address,
     baseWeight: parseUnits("0.5"),
     quoteWeight: parseUnits("0.5"),
-    baseAssimilator: CONTRACT_ASSIMILATOR_EURSTOUSD_ADDR,
-    quoteAssimilator: CONTRACT_ASSIMILATOR_USDCTOUSD_ADDR,
+    baseAssimilator: CONTRACT_EURSTOUSDASSIMILATOR_ADDR,
+    quoteAssimilator: CONTRACT_USDCTOUSDASSIMILATOR_ADDR,
     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
   });
 
-  console.log(`Deployer balance: ${await deployer.getBalance()}`);
+  console.log(curveEURS);
+  console.log("New curve created. Run next script to set dimension");
+
+  console.log(`Deployer balance: ${await _deployer.getBalance()}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
