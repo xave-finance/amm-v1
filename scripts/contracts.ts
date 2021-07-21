@@ -1,7 +1,5 @@
 import * as factory from "./factory_deployed.json";
 import * as assimilators from "./assimilators_deployed.json";
-// import * as fixes from "./fixes_deployed.json";
-// import * as zap from "./zap_deployed.json";
 
 export const CONTRACTS = {
   factory: factory.curveFactory,
