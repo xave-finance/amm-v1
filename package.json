@@ -14,7 +14,7 @@
     "deploy:local:2": "hardhat run scripts/02-deploy-assimilators.ts --network localhost",
     "deploy:local:3": "hardhat run scripts/03-new-curves.ts --network localhost",
     "deploy:local:4": "hardhat run scripts/04-deploy-zap.ts --network localhost",
-    "deploy:local:all": "yarn deploy:local:1 && yarn deploy:local:2 && deploy:local:3 && deploy:local:4",
+    "deploy:local:all": "yarn deploy:local:1 && yarn deploy:local:2 && yarn deploy:local:3 && yarn deploy:local:4",
     "lint": "yarn run lint:sol && yarn run lint:ts && yarn run prettier:list-different",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --ext .js,.ts .",
