@@ -22,20 +22,23 @@ const { parseUnits } = ethers.utils;
 
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
-const ALPHA = parseUnits("0.8");
-const BETA = parseUnits("0.5");
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0004");
-const LAMBDA = parseUnits("0.3");
+const ALPHA = parseUnits(process.env.DIMENSION_ALPHA);
+const BETA = parseUnits(process.env.DIMENSION_BETA);
+const MAX = parseUnits(process.env.DIMENSION_MAX);
+const EPSILON = parseUnits(process.env.DIMENSION_EPSILON); // 5 basis point
+const LAMBDA = parseUnits(process.env.DIMENSION_LAMBDA);
+
+const ORACLE_EURS = process.env.ORACLE_EURS;
+
+const TOKENS_EURS_DECIMALS: number = parseInt(process.env.TOKENS_EURS_DECIMALS);
+const TOKENS_USDC_DECIMALS: number = parseInt(process.env.TOKENS_USDC_DECIMALS);
 
 describe("Curve", function () {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];
 
-  let cadcToUsdAssimilator: Contract;
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
-  let xsgdToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
   let RouterFactory: ContractFactory;
@@ -44,9 +47,7 @@ describe("Curve", function () {
   let router: Router;
 
   let usdc: ERC20;
-  let cadc: ERC20;
   let eurs: ERC20;
-  let xsgd: ERC20;
   let erc20: ERC20;
 
   let createCurveAndSetParams: ({
@@ -194,6 +195,7 @@ describe("Curve", function () {
       };
 
       const eurAmt = "1";
+      console.log('eurAmt', eurAmt.toString());
       it(`EURS/USDC 50/50`, async function () {
         await viewLPDepositWithSanityChecks({
           amount: eurAmt.toString(),
@@ -203,12 +205,12 @@ describe("Curve", function () {
           quote: usdc.address,
           baseWeight: parseUnits("0.5"),
           quoteWeight: parseUnits("0.5"),
-          baseDecimals: 2,
-          quoteDecimals: TOKENS.USDC.decimals,
+          baseDecimals: TOKENS_EURS_DECIMALS,
+          quoteDecimals: TOKENS_USDC_DECIMALS,
           baseAssimilator: eursToUsdAssimilator.address,
           quoteAssimilator: usdcToUsdAssimilator.address,
           params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-          oracle: "0xb49f677943BC038e9857d61E7d053CaA2C1734C1",
+          oracle: ORACLE_EURS,
         });
       });
     });
