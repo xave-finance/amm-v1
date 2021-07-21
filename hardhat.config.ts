@@ -30,11 +30,15 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://127.0.0.1:8545",
       timeout: 1200000,
-      accounts: [
-        process.env["PRIVATE_KEY"]
-          ? process.env["PRIVATE_KEY"]
-          : "0000000000000000000000000000000000000000000000000000000000000001",
-      ],
+      // accounts: [
+      //   process.env["PRIVATE_KEY"]
+      //     ? process.env["PRIVATE_KEY"]
+      //     : "0000000000000000000000000000000000000000000000000000000000000001",
+      // ],
+      accounts: {
+        mnemonic: "myth like bonus scare over problem client lizard pioneer submit female collect",
+        accountsBalance: "100000000000000000000000",
+      },
     },
     remote: {
       url: process.env["REMOTE_URL"] ? process.env["REMOTE_URL"] : "http://127.0.0.1:8545",

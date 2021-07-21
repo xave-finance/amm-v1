@@ -37,6 +37,8 @@ async function main() {
   const createAndSetParams = async (name, symbol, base, quote, baseAssim, quoteAssim) => {
     console.log("creating ", name);
     let gasPrice = await getFastGasPrice();
+    console.log("gasPrice set to ", ethers.utils.formatEther(gasPrice));
+    console.log("curveFactory owner is ", await curveFactory.owner());
     const tx = await curveFactory.newCurve(
       name,
       symbol,
