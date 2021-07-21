@@ -22,6 +22,7 @@ import "./Curve.sol";
 import "./interfaces/IFreeFromUpTo.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract CurveFactory is Ownable {
     event NewCurve(address indexed caller, bytes32 indexed id, address indexed curve);
@@ -43,6 +44,7 @@ contract CurveFactory is Ownable {
         address _baseAssimilator,
         address _quoteAssimilator
     ) public onlyOwner returns (Curve) {
+        console.log("CONSOLE.LOG FROM CurveFactory CONTRACT");
         bytes32 curveId = keccak256(abi.encode(_baseCurrency, _quoteCurrency));
         if (curves[curveId] != address(0)) revert("CurveFactory/currency-pair-already-exists");
 

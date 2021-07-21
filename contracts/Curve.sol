@@ -31,6 +31,8 @@ import "./MerkleProver.sol";
 
 import "./interfaces/IFreeFromUpTo.sol";
 
+import "hardhat/console.sol";
+
 library Curves {
     using ABDKMath64x64 for int128;
 
@@ -323,6 +325,7 @@ contract Curve is Storage, MerkleProver {
         uint256 _epsilon,
         uint256 _lambda
     ) external onlyOwner {
+        console.log("CONSOLE.LOG FROM Curve CONTRACT");
         Orchestrator.setParams(curve, _alpha, _beta, _feeAtHalt, _epsilon, _lambda);
     }
 
@@ -468,8 +471,10 @@ contract Curve is Storage, MerkleProver {
         require(isWhitelisted(index, account, amount, merkleProof), "Curve/not-whitelisted");
         require(msg.sender == account, "Curve/not-approved-user");
 
-        (uint256 curvesMinted_, uint256[] memory deposits_) =
-            ProportionalLiquidity.proportionalDeposit(curve, _deposit);
+        (uint256 curvesMinted_, uint256[] memory deposits_) = ProportionalLiquidity.proportionalDeposit(
+            curve,
+            _deposit
+        );
 
         whitelistedDeposited[msg.sender] = whitelistedDeposited[msg.sender].add(curvesMinted_);
 
@@ -504,6 +509,7 @@ contract Curve is Storage, MerkleProver {
     /// @return (the amount of curves you receive in return for your deposit,
     ///          the amount deposited for each numeraire)
     function viewDeposit(uint256 _deposit) external view transactable returns (uint256, uint256[] memory) {
+        console.log("CONSOLE.LOG FROM Curve.viewDeposit");
         // curvesToMint_, depositsToMake_
         return ProportionalLiquidity.viewProportionalDeposit(curve, _deposit);
     }

@@ -31,21 +31,14 @@ export const scaffoldTest = async () => {
   const swapsLib = await SwapsLib.deploy();
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
 
-  const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
-  const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
+  const EursToUsdAssimilator = await ethers.getContractFactory("MainnetEursToUsdAssimilator");
+  const UsdcToUsdAssimilator = await ethers.getContractFactory("MainnetUsdcToUsdAssimilator"
+  );
 
-  const cadcToUsdAssimilator = await CadcToUsdAssimilator.deploy();
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy();
   const eursToUsdAssimilator = await EursToUsdAssimilator.deploy();
-  const xsgdToUsdAssimilator = await XsgdToUsdAssimilator.deploy();
-
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
   const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
-  const xsgd = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
-
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   const CurveFactory = await ethers.getContractFactory("CurveFactory", {
@@ -63,14 +56,10 @@ export const scaffoldTest = async () => {
   return {
     users,
     userAddresses,
-    cadcToUsdAssimilator,
     usdcToUsdAssimilator,
     eursToUsdAssimilator,
-    xsgdToUsdAssimilator,
     usdc,
-    cadc,
     eurs,
-    xsgd,
     erc20,
     CurveFactory,
     RouterFactory,
