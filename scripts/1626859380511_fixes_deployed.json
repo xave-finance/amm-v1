@@ -1,0 +1,12 @@
+{
+    "libraries": {
+        "Curves": "0x017DEAc7BcEEC08acA1E71ACB639065A3492E830",
+        "Orchestrator": "0xA0f599414C0F66e372200b16e9533c9c9E777fDD",
+        "Swaps": "0x2B2bFE80547F50e1a67Bbf0D52C24e0683f67B6D",
+        "ViewLiquidity": "0xe553C6c9E3C8bf66F396a3bfE88e4Ff4c8ef2FBb",
+        "ProportionalLiquidity": "0xa30e25274ca97b602C219f093Af2a798245d269A"
+    },
+    "curveFactory": "0x604d6376E7422C2cB1DC9B92534020e563044F15",
+    "router": "0x75f5a8fC5B222c1B64C3a03c39523c29a4383Cf2",
+    "usdcToUsdAssimilator": "0xdbf25ce2B5df10cc56789adc591795abdfe002B0"
+}

@@ -90,6 +90,7 @@ async function main() {
       gasLimit: 4000000,
     },
   });
+  console.log("curveFactory deployed by ", user.address, " and owner is ", await curveFactory.owner());
 
   const router = await deployContract({
     name: "Router",
