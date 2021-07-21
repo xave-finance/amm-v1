@@ -13,20 +13,8 @@ async function main() {
   console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
   console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
 
-  const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
   const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
-
-  const cadcToUsdAssimilator = await deployContract({
-    name: "CadcToUsdAssimilator",
-    deployer: user,
-    factory: CadcToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
 
   const usdcToUsdAssimilator = await deployContract({
     name: "UsdcToUsdAssimilator",
@@ -48,21 +36,9 @@ async function main() {
     },
   });
 
-  const xsgdToUsdAssimilator = await deployContract({
-    name: "XsgdToUsdAssimilator",
-    deployer: user,
-    factory: XsgdToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
   const output = {
-    cadcToUsdAssimilator: cadcToUsdAssimilator.address,
     usdcToUsdAssimilator: usdcToUsdAssimilator.address,
     eursToUsdAssimilator: eursToUsdAssimilator.address,
-    xsgdToUsdAssimilator: xsgdToUsdAssimilator.address,
   };
 
   const outputPath = path.join(__dirname, new Date().getTime().toString() + `_assimilators_deployed.json`);
