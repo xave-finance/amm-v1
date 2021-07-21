@@ -122,3 +122,5 @@ typechain
 .vscode/
 
 .DS_Store
+
+./scripts/factory_deployed.json

@@ -18,9 +18,9 @@ pragma solidity ^0.7.3;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "../lib/ABDKMath64x64.sol";
-import "../interfaces/IAssimilator.sol";
-import "../interfaces/IOracle.sol";
+import "../../lib/ABDKMath64x64.sol";
+import "../../interfaces/IAssimilator.sol";
+import "../../interfaces/IOracle.sol";
 
 contract MainnetEursToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
@@ -28,9 +28,9 @@ contract MainnetEursToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
+    IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
     IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     IERC20 private constant eurs = IERC20(0xdB25f211AB05b1c97D595516F45794528a807ad8);
-    IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
 
     // solhint-disable-next-line
     constructor() {}
