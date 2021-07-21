@@ -11,10 +11,8 @@ const { ethers } = hre;
 const GOVERNANCE = "0x27e843260c71443b4cc8cb6bf226c3f77b9695af";
 
 const ASSIMILATOR_ADDRESSES = {
-  cadcToUsdAssimilator: "0x9fd244e5972F28e2F133bd3dAA5A6691C8E6d1c7",
-  usdcToUsdAssimilator: "0xA31Ea4553E82e08b3F411B29C009ECd45AE1738B",
-  eursToUsdAssimilator: "0x0534B3647623EB050541700810A070C2Df06F977",
-  xsgdToUsdAssimilator: "0x31799946e72a44273515556e366e059064Df8ca2",
+  usdcToUsdAssimilator: "0x5eeF879FDBc9e8C053A74A11F8cb33aCf027d9C5",
+  eursToUsdAssimilator: "0x31926dFC35388c9aB5c1016B2F7E18516774Ba3e",
 };
 
 const ALPHA = parseUnits("0.8");
@@ -31,7 +29,7 @@ async function main() {
 
   const curveFactory = (await ethers.getContractAt(
     "CurveFactory",
-    "0x604d6376E7422C2cB1DC9B92534020e563044F15",
+    "0x7d1EA166A67922e1fd49cEA5cC647ee0f6f2F70f",
   )) as CurveFactory;
 
   const createAndSetParams = async (name, symbol, base, quote, baseAssim, quoteAssim) => {
@@ -81,29 +79,11 @@ async function main() {
   };
 
   await createAndSetParams(
-    "dfx-cadc-usdc-a",
-    "dfx-cadc-a",
-    TOKENS.CADC.address,
-    TOKENS.USDC.address,
-    ASSIMILATOR_ADDRESSES.cadcToUsdAssimilator,
-    ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
-  );
-
-  await createAndSetParams(
     "dfx-eurs-usdc-a",
     "dfx-eurs-a",
     TOKENS.EURS.address,
     TOKENS.USDC.address,
     ASSIMILATOR_ADDRESSES.eursToUsdAssimilator,
-    ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
-  );
-
-  await createAndSetParams(
-    "dfx-xsgd-usdc-a",
-    "dfx-xsgd-a",
-    TOKENS.XSGD.address,
-    TOKENS.USDC.address,
-    ASSIMILATOR_ADDRESSES.xsgdToUsdAssimilator,
     ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
   );
 }
