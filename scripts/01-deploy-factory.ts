@@ -116,12 +116,12 @@ async function main() {
 
   // Deployed contracts log
   const timestamp = new Date().getTime().toString();
-  const outputPath = path.join(__dirname, `./deployed_contract_logs/${timestamp}_factory_deployed.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+  const outputLogPath = path.join(__dirname, `./deployed_contract_logs/${timestamp}_factory_deployed.json`);
+  fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
 
   // Deployed contracts config
-  const factoryDeployedFile = './scripts/factory_deployed.json';
-  fs.writeFileSync(factoryDeployedFile, JSON.stringify(output, null, 4));
+  const outputConfigPath = './scripts/config/factory_deployed.json';
+  fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -29,7 +29,8 @@ async function main() {
     zap: zap.address,
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_zap_deployed.json`);
+  const timestamp = new Date().getTime().toString();
+  const outputPath = path.join(__dirname, `./deployed_contract_logs/${timestamp}_zap_deployed.json`);
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
 }
 
