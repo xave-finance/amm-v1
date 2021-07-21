@@ -29,8 +29,11 @@ async function main() {
     zap: zap.address,
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_zap_deployed.json`);
+  const outputPath = path.join(__dirname, "./deployLogs/" + new Date().getTime().toString() + `_zap_deployed.json`);
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+
+  const overwriteOutputPath = path.join(__dirname, `zap_deployed.json`);
+  fs.writeFileSync(overwriteOutputPath, JSON.stringify(output, null, 4));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

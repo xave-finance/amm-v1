@@ -2,6 +2,7 @@ import hre from "hardhat";
 import chalk from "chalk";
 import path from "path";
 import fs from "fs";
+import { CONTRACTS } from "./contracts";
 
 import { getAccounts, deployContract } from "./common";
 
@@ -9,12 +10,13 @@ const { ethers } = hre;
 
 const PREVIOUS_DEPLOYMENT = {
   libraries: {
-    Curves: "0x017DEAc7BcEEC08acA1E71ACB639065A3492E830",
-    Orchestrator: "0xA0f599414C0F66e372200b16e9533c9c9E777fDD",
-    Swaps: "0x2B2bFE80547F50e1a67Bbf0D52C24e0683f67B6D",
-    ViewLiquidity: "0xe553C6c9E3C8bf66F396a3bfE88e4Ff4c8ef2FBb",
+    Curves: CONTRACTS.curves,
+    Orchestrator: CONTRACTS.orchestrator,
+    Swaps: CONTRACTS.swaps,
+    ViewLiquidity: CONTRACTS.viewLiquidity,
   },
 };
+console.log("PREVIOUS_DEPLOYMENT ", PREVIOUS_DEPLOYMENT);
 
 async function main() {
   const { user } = await getAccounts();
@@ -87,8 +89,11 @@ async function main() {
     usdcToUsdAssimilator: usdcToUsdAssimilator.address,
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_fixes_deployed.json`);
+  const outputPath = path.join(__dirname, "./deployLogs/" + new Date().getTime().toString() + `_fixes_deployed.json`);
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+
+  const overwriteOutputPath = path.join(__dirname, `fixes_deployed.json`);
+  fs.writeFileSync(overwriteOutputPath, JSON.stringify(output, null, 4));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
