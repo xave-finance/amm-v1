@@ -8,6 +8,7 @@ import { getAccounts, deployContract } from "./common";
 
 const { ethers } = hre;
 
+
 async function main() {
   const { user } = await getAccounts();
 
@@ -116,7 +117,7 @@ async function main() {
   };
 
   // Deployed contracts log
-  const outputLogDir = path.join(__dirname, `./deployed_contract_logs`);
+  const outputLogDir = path.join(__dirname, `./deployed_contract_logs/${hre.network.name}`);
   // Just like mkdir -p, it will create directory if it doesn't exist
   // If it already exists, then it will not print an error and will move further to create sub-directories.
   mkdirp.sync(outputLogDir);

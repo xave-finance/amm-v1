@@ -47,6 +47,13 @@ const config: HardhatUserConfig = {
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true,
     },
+    kovan: {
+      url: process.env["RPC_URL"],
+      accounts: {
+        mnemonic: MNEMONIC
+      },
+      blockGasLimit: 20000000
+    }
   },
   mocha: {
     timeout: 1200000,
