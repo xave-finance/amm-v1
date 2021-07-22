@@ -1,5 +1,3 @@
-// import { CONTRACTS } from "./contracts";
-
 import * as factory from "./factory_deployed.json";
 import * as assimilators from "./assimilators_deployed.json";
 

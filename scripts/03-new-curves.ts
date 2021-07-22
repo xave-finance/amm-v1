@@ -64,9 +64,6 @@ async function main() {
     );
     console.log("tx hash", tx.hash);
     const txRecp = await tx.wait();
-
-    console.log(txRecp);
-
     const newCurveAddress = txRecp.events.filter(x => x.event === "NewCurve")[0].args.curve;
     console.log("new curve", newCurveAddress);
 

@@ -18,11 +18,11 @@ pragma solidity ^0.7.3;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "../../lib/ABDKMath64x64.sol";
-import "../../interfaces/IAssimilator.sol";
-import "../../interfaces/IOracle.sol";
+import "../lib/ABDKMath64x64.sol";
+import "../interfaces/IAssimilator.sol";
+import "../interfaces/IOracle.sol";
 
-contract MainnetCadcToUsdAssimilator is IAssimilator {
+contract CadcToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 

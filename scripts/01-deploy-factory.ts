@@ -4,10 +4,9 @@ import path from "path";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import { getAccounts, deployContract } from "./common";
-
 const { ethers } = hre;
 
+import { getAccounts, deployContract } from "./common";
 
 async function main() {
   const { user } = await getAccounts();
