@@ -39,6 +39,10 @@ async function main() {
   const timestamp = new Date().getTime().toString();
   const outputLogPath = path.join(`${outputLogDir}/${timestamp}_zap_deployed.json`);
   fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
+
+  // Deployed contracts config
+  const outputConfigPath = path.join(__dirname, '/config/zap_deployed.json');
+  fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
