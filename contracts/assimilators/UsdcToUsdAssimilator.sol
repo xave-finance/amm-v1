@@ -17,16 +17,16 @@ pragma solidity ^0.7.3;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../../lib/ABDKMath64x64.sol";
-import "../../interfaces/IAssimilator.sol";
-import "../../interfaces/IOracle.sol";
+import "../lib/ABDKMath64x64.sol";
+import "../interfaces/IAssimilator.sol";
+import "../interfaces/IOracle.sol";
 
-contract KovanUsdcToUsdAssimilator is IAssimilator {
+contract UsdcToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
-    IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
-    IERC20 private constant usdc = IERC20(0x72a97313cF25FDFdb1CeCD597CC12809c9851Ca0);
+    IOracle private constant oracle = IOracle(0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
     // solhint-disable-next-line
     constructor() {}
