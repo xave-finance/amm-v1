@@ -32,11 +32,9 @@ const config: HardhatUserConfig = {
     },
     remote: {
       url: RPC_URL ? RPC_URL : LOCALHOST,
-      accounts: [
-        process.env["PRIVATE_KEY"]
-          ? process.env["PRIVATE_KEY"]
-          : "0000000000000000000000000000000000000000000000000000000000000001",
-      ],
+      accounts: {
+        mnemonic: MNEMONIC
+      },
     },
     hardhat: {
       chainId: 1,
