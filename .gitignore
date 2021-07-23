@@ -127,6 +127,8 @@ typechain
 
 # Contract config
 scripts/deployed_contract_logs/localhost
+scripts/deployed_contract_logs/kovan
+
 scripts/config/factory_deployed.json
 scripts/config/assimilators_deployed.json
 scripts/config/zap_deployed.json
