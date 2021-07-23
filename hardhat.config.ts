@@ -4,8 +4,10 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 
+const RPC_URL = process.env.RPC_URL;
 const MNEMONIC = process.env.MNEMONIC;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const LOCALHOST = "http://127.0.0.1:8545";
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -21,7 +23,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: LOCALHOST,
       timeout: 1200000,
       accounts: {
         mnemonic: MNEMONIC,
@@ -29,7 +31,7 @@ const config: HardhatUserConfig = {
       },
     },
     remote: {
-      url: process.env["REMOTE_URL"] ? process.env["REMOTE_URL"] : "http://127.0.0.1:8545",
+      url: RPC_URL ? RPC_URL : LOCALHOST,
       accounts: [
         process.env["PRIVATE_KEY"]
           ? process.env["PRIVATE_KEY"]
@@ -44,13 +46,13 @@ const config: HardhatUserConfig = {
       },
       forking: {
         enabled: true,
-        url: process.env["RPC_URL"] ? process.env["RPC_URL"] : "http://127.0.0.1:8545",
+        url: RPC_URL ? RPC_URL : LOCALHOST,
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true,
     },
     kovan: {
-      url: process.env["RPC_URL"],
+      url: RPC_URL,
       accounts: {
         mnemonic: MNEMONIC
       },
