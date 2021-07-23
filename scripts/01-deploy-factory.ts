@@ -1,12 +1,10 @@
 import hre from "hardhat";
 import chalk from "chalk";
-import path from "path";
-import fs from "fs";
-import mkdirp from "mkdirp";
 
 const { ethers } = hre;
 
 import { getAccounts, deployContract } from "./common";
+import { deployedLogs } from "./Utils";
 
 async function main() {
   const { user } = await getAccounts();
@@ -116,18 +114,7 @@ async function main() {
   };
 
   // Deployed contracts log
-  const outputLogDir = path.join(__dirname, `./deployed_contract_logs/${hre.network.name}`);
-  // Just like mkdir -p, it will create directory if it doesn't exist
-  // If it already exists, then it will not print an error and will move further to create sub-directories.
-  mkdirp.sync(outputLogDir);
-
-  const timestamp = new Date().getTime().toString();
-  const outputLogPath = path.join(`${outputLogDir}/${timestamp}_factory_deployed.json`);
-  fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
-
-  // Deployed contracts config
-  const outputConfigPath = path.join(__dirname, '/config/factory_deployed.json');
-  fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
+  await deployedLogs(hre.network.name, 'factory_deployed', output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
