@@ -1,11 +1,10 @@
 import hre from "hardhat";
 import chalk from "chalk";
-import path from "path";
-import fs from "fs";
-
-import { getAccounts, deployContract } from "./common";
 
 const { ethers } = hre;
+
+import { getAccounts, deployContract } from "./common";
+import { deployedLogs } from "./Utils";
 
 async function main() {
   const { user } = await getAccounts();
@@ -29,8 +28,8 @@ async function main() {
     zap: zap.address,
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_zap_deployed.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+  // Deployed contracts log
+  await deployedLogs(hre.network.name, 'zap_deployed', output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

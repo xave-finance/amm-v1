@@ -1,11 +1,10 @@
 import hre from "hardhat";
 import chalk from "chalk";
-import path from "path";
-import fs from "fs";
-
-import { getAccounts, deployContract } from "./common";
 
 const { ethers } = hre;
+
+import { getAccounts, deployContract } from "./common";
+import { deployedLogs } from "./Utils";
 
 async function main() {
   const { user } = await getAccounts();
@@ -90,6 +89,7 @@ async function main() {
       gasLimit: 4000000,
     },
   });
+  console.log("curveFactory deployed by ", user.address, " and owner is ", await curveFactory.owner());
 
   const router = await deployContract({
     name: "Router",
@@ -113,8 +113,8 @@ async function main() {
     router: router.address,
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_factory_deployed.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+  // Deployed contracts log
+  await deployedLogs(hre.network.name, 'factory_deployed', output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

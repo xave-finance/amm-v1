@@ -9,6 +9,8 @@ import { Contract, ContractFactory, Wallet } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
+const CONFIRM_ALL = process.env.CONFIRM_ALL;
+
 export const getAccounts = async () => {
   const [user] = await ethers.getSigners();
 
@@ -154,10 +156,13 @@ export const deployContract = async ({
 
   console.log(chalk.keyword("orange")(`Deploy ${name} with the following args: `));
   console.log(chalk.keyword("orange")(JSON.stringify(displayArgs, null, 4)));
-  let confirmDeploy = await ask("Continue? (y/n): ");
+  let confirmDeploy = CONFIRM_ALL;
 
-  while (confirmDeploy === "" || (confirmDeploy !== "y" && confirmDeploy !== "n")) {
+  if (CONFIRM_ALL !== 'y') {
     confirmDeploy = await ask("Continue? (y/n): ");
+    while (confirmDeploy === "" || (confirmDeploy !== "y" && confirmDeploy !== "n")) {
+      confirmDeploy = await ask("Continue? (y/n): ");
+    }
   }
 
   if (confirmDeploy.toLowerCase() !== "y") {

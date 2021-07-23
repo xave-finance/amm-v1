@@ -1,27 +1,36 @@
 import hre from "hardhat";
 import chalk from "chalk";
-
-import { TOKENS } from "../test/Constants";
-import { CurveFactory, Curve } from "../typechain";
-import { getAccounts, getFastGasPrice } from "./common";
 import { parseUnits } from "@ethersproject/units";
 
 const { ethers } = hre;
 
-const GOVERNANCE = "0x27e843260c71443b4cc8cb6bf226c3f77b9695af";
+import { CurveFactory, Curve } from "../typechain";
+import { getAccounts, getFastGasPrice } from "./common";
+import { CONTRACTS } from "./config/contracts";
+
+const CORE_ADDRESSES = {
+  curveFactory: CONTRACTS.factory
+}
 
 const ASSIMILATOR_ADDRESSES = {
-  cadcToUsdAssimilator: "0x12310b7726eaE2D2438361Fd126a25D8381Fe891",
-  usdcToUsdAssimilator: "0x3CB209Dc9dDC45ce4Fd9a2f5DD33a8C6A9b6ea52",
-  eursToUsdAssimilator: "0x39F45038D763dd88791cE9BdE8d6c18081c7d522",
-  xsgdToUsdAssimilator: "0xe36DeD0aF2929870977F05A1f017BAB6CF8190f8",
+  usdcToUsdAssimilator: CONTRACTS.usdcToUsdAssimilator,
+  eursToUsdAssimilator: CONTRACTS.eursToUsdAssimilator,
 };
 
-const ALPHA = parseUnits("0.8");
-const BETA = parseUnits("0.5");
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0005");
-const LAMBDA = parseUnits("0.3");
+const GOVERNANCE_ADDRESS = process.env.GOVERNANCE_ADDRESS;
+
+const DIMENSION = {
+  alpha: parseUnits(process.env.DIMENSION_ALPHA),
+  beta: parseUnits(process.env.DIMENSION_BETA),
+  max: parseUnits(process.env.DIMENSION_MAX),
+  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
+  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+}
+
+const TOKEN = {
+  usdc: process.env.TOKEN_USDC,
+  eurs: process.env.TOKEN_EURS
+}
 
 async function main() {
   const { user } = await getAccounts();
@@ -31,12 +40,14 @@ async function main() {
 
   const curveFactory = (await ethers.getContractAt(
     "CurveFactory",
-    "0xd3C1bF5582b5f3029b15bE04a49C65d3226dFB0C",
+    CORE_ADDRESSES.curveFactory,
   )) as CurveFactory;
 
   const createAndSetParams = async (name, symbol, base, quote, baseAssim, quoteAssim) => {
     console.log("creating ", name);
     let gasPrice = await getFastGasPrice();
+    console.log("gasPrice set to ", ethers.utils.formatEther(gasPrice));
+    console.log("curveFactory owner is ", await curveFactory.owner());
     const tx = await curveFactory.newCurve(
       name,
       symbol,
@@ -59,15 +70,22 @@ async function main() {
     const curve = (await ethers.getContractAt("Curve", newCurveAddress)) as Curve;
     console.log("setting params");
     gasPrice = await getFastGasPrice();
-    const tx2 = await curve.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, {
+    const tx2 = await curve.setParams(
+      DIMENSION.alpha,
+      DIMENSION.beta,
+      DIMENSION.max,
+      DIMENSION.epsilon,
+      DIMENSION.lambda, {
       gasPrice,
       gasLimit: 300000,
-    });
+    }
+    );
     console.log("tx hash", tx2.hash);
     await tx2.wait();
     console.log("params setted, transferring ownership");
     gasPrice = await getFastGasPrice();
-    const tx3 = await curve.transferOwnership(GOVERNANCE, {
+
+    const tx3 = await curve.transferOwnership(GOVERNANCE_ADDRESS, {
       gasPrice,
       gasLimit: 300000,
     });
@@ -79,29 +97,11 @@ async function main() {
   };
 
   await createAndSetParams(
-    "dfx-cadc-usdc-a",
-    "dfx-cadc-a",
-    TOKENS.CADC.address,
-    TOKENS.USDC.address,
-    ASSIMILATOR_ADDRESSES.cadcToUsdAssimilator,
-    ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
-  );
-
-  await createAndSetParams(
     "dfx-eurs-usdc-a",
     "dfx-eurs-a",
-    TOKENS.EURS.address,
-    TOKENS.USDC.address,
+    TOKEN.eurs,
+    TOKEN.usdc,
     ASSIMILATOR_ADDRESSES.eursToUsdAssimilator,
-    ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
-  );
-
-  await createAndSetParams(
-    "dfx-xsgd-usdc-a",
-    "dfx-xsgd-a",
-    TOKENS.XSGD.address,
-    TOKENS.USDC.address,
-    ASSIMILATOR_ADDRESSES.xsgdToUsdAssimilator,
     ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
   );
 }
