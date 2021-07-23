@@ -7,17 +7,14 @@ const { ethers } = hre;
 
 import { getAccounts, deployContract } from "./common";
 
-const ASSIMILATOR_CONTRACT_NAME_USDC = process.env.ASSIMILATOR_CONTRACT_NAME_USDC;
-const ASSIMILATOR_CONTRACT_NAME_EURS = process.env.ASSIMILATOR_CONTRACT_NAME_EURS;
-
 async function main() {
   const { user } = await getAccounts();
 
   console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
   console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
 
-  const UsdcToUsdAssimilator = await ethers.getContractFactory(ASSIMILATOR_CONTRACT_NAME_USDC);
-  const EursToUsdAssimilator = await ethers.getContractFactory(ASSIMILATOR_CONTRACT_NAME_EURS);
+  const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
+  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
 
   const usdcToUsdAssimilator = await deployContract({
     name: "UsdcToUsdAssimilator",
