@@ -56,7 +56,14 @@ const config: HardhatUserConfig = {
         mnemonic: MNEMONIC
       },
       blockGasLimit: 20000000
-    }
+    },
+    mainnet: {
+      url: RPC_URL,
+      chainId: 1,
+      accounts: {
+        mnemonic: MNEMONIC
+      }
+    },
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY
