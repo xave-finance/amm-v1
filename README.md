@@ -145,38 +145,34 @@ Example.
 
 <img width="309" alt="Screen Shot 2021-07-23 at 10 52 11 AM" src="https://user-images.githubusercontent.com/81855319/126732382-7ad00c50-101c-488a-827f-5199b0a64002.png">
 
+## Quickstart
 
-
-## Testing
-
-We recommend that you run this against a local node. The difference in latency will make a huge difference.
-
+### Local deployment
+1. Deploy core contracts
 ```
-yarn
-RPC_URL=<MAINNET NODE> yarn test
+> yarn deploy:local:1
+```
+2. Deploy assimilator contracts
+```
+> yarn deploy:local:2
+```
+3. Create new curve and set dimensions
+```
+> yarn deploy:local:3
+```
+4. Deploy zap contracts
+```
+> yarn deploy:local:3
+```
+Deploy everything in one command
+```
+> yarn deploy:local:all
 ```
 
-## Deploy Locally
-
-1. Create a `.env` file at project root with the following contents:
-
-   ```
-   RPC_URL=<insert Alchemy API URL here>
-   ```
-
-2. Start the local testnet:
-
-   ```
-   yarn hh:node
-   ```
-
-3. In another terminal, run the scaffolding script:
-
-   ```
-   yarn hh:run scripts/testnet/scaffold.ts --network localhost
-   ```
-
-4. Observe console output and proceed to frontend testing setup (if required).
+Verify script for public networks (kovan for example)
+```
+> yarn deploy:kovan:verify
+```
 
 # Router API
 
