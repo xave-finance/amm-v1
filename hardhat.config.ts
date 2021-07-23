@@ -3,6 +3,7 @@ import "hardhat-typechain";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
+import 'hardhat-gas-reporter';
 
 const RPC_URL = process.env.RPC_URL;
 const MNEMONIC = process.env.MNEMONIC;
