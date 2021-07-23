@@ -45,6 +45,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: RPC_URL ? RPC_URL : LOCALHOST,
+        blockNumber: 12640151 // https://etherscan.io/block/12640151
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true,
