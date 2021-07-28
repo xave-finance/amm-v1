@@ -1,3 +1,4 @@
+import hre from "hardhat";
 import { ethers } from "hardhat";
 import { formatUnits } from "ethers/lib/utils";
 
@@ -12,10 +13,22 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 const CONFIRM_ALL = process.env.CONFIRM_ALL;
 
 export const getAccounts = async () => {
-  const [user] = await ethers.getSigners();
+  const accounts = await hre.ethers.getSigners();
+  const user1 = accounts[0];
+  const user2 = accounts[4];
+  const user1Bal = ethers.utils.formatEther(await user1.getBalance());
+  const user2Bal = ethers.utils.formatEther(await user2.getBalance());
+
+  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> User1: ${user1.address} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> User1 Balance: ${user1Bal} <<<<<<<<<<<<`));
+
+  console.log(chalk.blue(`>>>>>>>>>>>> User2: ${user2.address} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> User2 Balance: ${user2Bal} <<<<<<<<<<<<`));
 
   return {
-    user,
+    user1,
+    user2
   };
 };
 

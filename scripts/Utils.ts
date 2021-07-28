@@ -14,6 +14,8 @@ export const deployedLogs = async (network, filename, output) => {
   fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
 
   // Deployed contracts config
-  const outputConfigPath = path.join(__dirname, `/config/${filename}.json`);
+  const outputConfigDir = path.join(__dirname, `./config/${network}`);
+  mkdirp.sync(outputConfigDir);
+  const outputConfigPath = `/${outputConfigDir}/${filename}.json`;
   fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 };

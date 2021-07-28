@@ -7,10 +7,7 @@ import { getAccounts, deployContract } from "./common";
 import { deployedLogs } from "./Utils";
 
 async function main() {
-  const { user } = await getAccounts();
-
-  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
+  const { user1 } = await getAccounts();
 
   const CurvesLib = await ethers.getContractFactory("Curves");
   const OrchestratorLib = await ethers.getContractFactory("Orchestrator");
@@ -20,7 +17,7 @@ async function main() {
 
   const curvesLib = await deployContract({
     name: "CuvesLib",
-    deployer: user,
+    deployer: user1,
     factory: CurvesLib,
     args: [],
     opts: {
@@ -30,7 +27,7 @@ async function main() {
 
   const orchestratorLib = await deployContract({
     name: "OrchestratorLib",
-    deployer: user,
+    deployer: user1,
     factory: OrchestratorLib,
     args: [],
     opts: {
@@ -40,7 +37,7 @@ async function main() {
 
   const proportionalLiquidityLib = await deployContract({
     name: "ProportionalLiquidityLib",
-    deployer: user,
+    deployer: user1,
     factory: ProportionalLiquidityLib,
     args: [],
     opts: {
@@ -50,7 +47,7 @@ async function main() {
 
   const swapsLib = await deployContract({
     name: "SwapsLib",
-    deployer: user,
+    deployer: user1,
     factory: SwapsLib,
     args: [],
     opts: {
@@ -60,7 +57,7 @@ async function main() {
 
   const viewLiquidityLib = await deployContract({
     name: "ViewLiquidityLib",
-    deployer: user,
+    deployer: user1,
     factory: ViewLiquidityLib,
     args: [],
     opts: {
@@ -82,18 +79,18 @@ async function main() {
 
   const curveFactory = await deployContract({
     name: "CurveFactory",
-    deployer: user,
+    deployer: user1,
     factory: CurveFactory,
     args: [],
     opts: {
       gasLimit: 4000000,
     },
   });
-  console.log("curveFactory deployed by ", user.address, " and owner is ", await curveFactory.owner());
+  console.log("curveFactory deployed by ", user1.address, " and owner is ", await curveFactory.owner());
 
   const router = await deployContract({
     name: "Router",
-    deployer: user,
+    deployer: user1,
     factory: RouterFactory,
     args: [curveFactory.address],
     opts: {

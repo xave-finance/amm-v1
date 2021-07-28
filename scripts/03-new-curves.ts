@@ -1,11 +1,11 @@
 import hre from "hardhat";
-import chalk from "chalk";
 import { parseUnits } from "@ethersproject/units";
+import { BigNumberish } from "ethers";
+import { ERC20 } from "../typechain/ERC20";
 
 const { ethers } = hre;
 
 import { CurveFactory, Curve } from "../typechain";
-import { getAccounts, getFastGasPrice } from "./common";
 import { CONTRACTS } from "./config/contracts";
 
 const CORE_ADDRESSES = {
@@ -17,8 +17,6 @@ const ASSIMILATOR_ADDRESSES = {
   eursToUsdAssimilator: CONTRACTS.eursToUsdAssimilator,
 };
 
-const GOVERNANCE_ADDRESS = process.env.GOVERNANCE_ADDRESS;
-
 const DIMENSION = {
   alpha: parseUnits(process.env.DIMENSION_ALPHA),
   beta: parseUnits(process.env.DIMENSION_BETA),
@@ -29,81 +27,125 @@ const DIMENSION = {
 
 const TOKEN = {
   usdc: process.env.TOKEN_USDC,
-  eurs: process.env.TOKEN_EURS
+  eurs: process.env.TOKEN_EURS,
+  cadc: process.env.TOKEN_CADC,
+  xsgd: process.env.TOKEN_XSGD
 }
 
 async function main() {
-  const { user } = await getAccounts();
-
-  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
-
   const curveFactory = (await ethers.getContractAt(
     "CurveFactory",
     CORE_ADDRESSES.curveFactory,
   )) as CurveFactory;
 
-  const createAndSetParams = async (name, symbol, base, quote, baseAssim, quoteAssim) => {
-    console.log("creating ", name);
-    let gasPrice = await getFastGasPrice();
-    console.log("gasPrice set to ", ethers.utils.formatEther(gasPrice));
-    console.log("curveFactory owner is ", await curveFactory.owner());
+  const createCurve = async function ({
+    name,
+    symbol,
+    base,
+    quote,
+    baseWeight,
+    quoteWeight,
+    baseAssimilator,
+    quoteAssimilator,
+  }: {
+    name: string;
+    symbol: string;
+    base: string;
+    quote: string;
+    baseWeight: BigNumberish;
+    quoteWeight: BigNumberish;
+    baseAssimilator: string;
+    quoteAssimilator: string;
+  }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
     const tx = await curveFactory.newCurve(
       name,
       symbol,
       base,
       quote,
-      parseUnits("0.5"),
-      parseUnits("0.5"),
-      baseAssim,
-      quoteAssim,
+      baseWeight,
+      quoteWeight,
+      baseAssimilator,
+      quoteAssimilator,
       {
-        gasPrice,
-        gasLimit: 3300000,
+        gasLimit: 12000000,
       },
     );
-    console.log("tx hash", tx.hash);
-    const txRecp = await tx.wait();
-    const newCurveAddress = txRecp.events.filter(x => x.event === "NewCurve")[0].args.curve;
-    console.log("new curve", newCurveAddress);
+    await tx.wait();
 
-    const curve = (await ethers.getContractAt("Curve", newCurveAddress)) as Curve;
-    console.log("setting params");
-    gasPrice = await getFastGasPrice();
-    const tx2 = await curve.setParams(
-      DIMENSION.alpha,
-      DIMENSION.beta,
-      DIMENSION.max,
-      DIMENSION.epsilon,
-      DIMENSION.lambda, {
-      gasPrice,
-      gasLimit: 300000,
-    }
+    console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+
+    // Get curve address
+    const curveAddress = await curveFactory.curves(
+      ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
     );
-    console.log("tx hash", tx2.hash);
-    await tx2.wait();
-    console.log("params setted, transferring ownership");
-    gasPrice = await getFastGasPrice();
+    const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
+    const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
-    const tx3 = await curve.transferOwnership(GOVERNANCE_ADDRESS, {
-      gasPrice,
-      gasLimit: 300000,
-    });
-    console.log("tx hash", tx3.hash);
-    await tx3.wait();
-    console.log("ownership xferred");
+    console.log(`curveAddress ${symbol}: `, curveAddress)
+    console.log(`Curve ${symbol} Address: `, curve.address)
+    console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
-    console.log("==== done ====");
+    const turnOffWhitelisting = await curve.turnOffWhitelisting();
+    console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
+
+    return {
+      curve,
+      curveLpToken,
+    };
   };
 
-  await createAndSetParams(
-    "dfx-eurs-usdc-a",
-    "dfx-eurs-a",
-    TOKEN.eurs,
-    TOKEN.usdc,
-    ASSIMILATOR_ADDRESSES.eursToUsdAssimilator,
-    ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
-  );
+  const createCurveAndSetParams = async function ({
+    name,
+    symbol,
+    base,
+    quote,
+    baseWeight,
+    quoteWeight,
+    baseAssimilator,
+    quoteAssimilator,
+    params,
+  }: {
+    name: string;
+    symbol: string;
+    base: string;
+    quote: string;
+    baseWeight: BigNumberish;
+    quoteWeight: BigNumberish;
+    baseAssimilator: string;
+    quoteAssimilator: string;
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  }) {
+    const { curve, curveLpToken } = await createCurve({
+      name,
+      symbol,
+      base,
+      quote,
+      baseWeight,
+      quoteWeight,
+      baseAssimilator,
+      quoteAssimilator,
+    });
+    // Set parameters/dimensions here
+    const tx = await curve.setParams(...params, { gasLimit: 12000000 });
+    console.log('Curve#setParams TX Hash: ', tx.hash)
+    await tx.wait();
+    return {
+      curve,
+      curveLpToken,
+    };
+  };
+
+  const { curve: curveEURS } = await createCurveAndSetParams({
+    name: 'EURS Statis',
+    symbol: 'EURS',
+    base: TOKEN.eurs,
+    quote: TOKEN.usdc,
+    baseWeight: parseUnits("0.5"),
+    quoteWeight: parseUnits("0.5"),
+    baseAssimilator: ASSIMILATOR_ADDRESSES.eursToUsdAssimilator,
+    quoteAssimilator: ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
+    params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
