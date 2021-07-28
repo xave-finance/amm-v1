@@ -1,6 +1,10 @@
+import hre from "hardhat";
+const { ethers } = hre;
 import path from "path";
 import mkdirp from "mkdirp";
 import fs from "fs";
+
+import { deployContract } from "./common";
 
 export const deployedLogs = async (network, filename, output) => {
   // Deployed contracts log
@@ -19,3 +23,29 @@ export const deployedLogs = async (network, filename, output) => {
   const outputConfigPath = `/${outputConfigDir}/${filename}.json`;
   fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 };
+
+export const curveImporter = (filename) => {
+  return path.resolve(__dirname, `./config/${hre.network.name}/${filename}.json`);
+}
+
+export const assim = async (user, assim) => {
+  const toUsdAssimilator = await ethers.getContractFactory(assim);
+
+  const deployedAssimilator = await deployContract({
+    name: assim,
+    deployer: user,
+    factory: toUsdAssimilator,
+    args: [],
+    opts: {
+      gasLimit: 2000000,
+    },
+  });
+
+  // Lowercase the first letter of the key
+  const key = assim[0].toLocaleLowerCase() + assim.slice(1);
+
+  return {
+    key,
+    address: deployedAssimilator.address
+  }
+}

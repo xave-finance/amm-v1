@@ -3,38 +3,28 @@ import chalk from "chalk";
 const { ethers } = hre;
 
 import { getAccounts, deployContract } from "./common";
-import { deployedLogs } from "./Utils";
+import { deployedLogs, assim } from "./Utils";
+
+const ASSIMILATORS = process.env.ASSIMILATORS;
 
 async function main() {
   const { user1 } = await getAccounts();
+  let output = {};
 
-  const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
+  if (ASSIMILATORS.indexOf(',') > -1) {
+    let assimilatorsArr = ASSIMILATORS.split(',');
 
-  const usdcToUsdAssimilator = await deployContract({
-    name: "UsdcToUsdAssimilator",
-    deployer: user1,
-    factory: UsdcToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
+    for (let index = 0; index < assimilatorsArr.length; index++) {
+      const assimilator = assimilatorsArr[index];
+      const res = await assim(user1, assimilator);
 
-  const eursToUsdAssimilator = await deployContract({
-    name: "EursToUsdAssimilator",
-    deployer: user1,
-    factory: EursToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
+      output[res.key] = res.address;
+    }
+  } else {
+    const res = await assim(user1, ASSIMILATORS);
 
-  const output = {
-    usdcToUsdAssimilator: usdcToUsdAssimilator.address,
-    eursToUsdAssimilator: eursToUsdAssimilator.address,
-  };
+    output[res.key] = res.address;
+  }
 
   // Deployed contracts log
   await deployedLogs(hre.network.name, 'assimilators_deployed', output);
