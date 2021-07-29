@@ -607,27 +607,27 @@ describe("Curve", function () {
         expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true;
       };
 
-      for (let i = 1; i <= 10000; i *= 100) {
-        it(`EURS/USDC 50/50 - ${i}`, async function () {
-          console.log('Amount Input: ', i.toString());
+      // for (let i = 1; i <= 10000; i *= 100) {
+      //   it(`EURS/USDC 50/50 - ${i}`, async function () {
+      //     console.log('Amount Input: ', i.toString());
 
-          await viewLPDepositWithSanityChecks({
-            amount: i.toString(),
-            name: NAME,
-            symbol: SYMBOL,
-            base: eurs.address,
-            quote: usdc.address,
-            baseWeight: parseUnits("0.5"),
-            quoteWeight: parseUnits("0.5"),
-            baseDecimals: TOKENS.EURS.decimals,
-            quoteDecimals: TOKENS.USDC.decimals,
-            baseAssimilator: eursToUsdAssimilator.address,
-            quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-            oracle: ORACLES.EURS.address,
-          });
-        });
-      }
+      //     await viewLPDepositWithSanityChecks({
+      //       amount: i.toString(),
+      //       name: NAME,
+      //       symbol: SYMBOL,
+      //       base: eurs.address,
+      //       quote: usdc.address,
+      //       baseWeight: parseUnits("0.5"),
+      //       quoteWeight: parseUnits("0.5"),
+      //       baseDecimals: TOKENS.EURS.decimals,
+      //       quoteDecimals: TOKENS.USDC.decimals,
+      //       baseAssimilator: eursToUsdAssimilator.address,
+      //       quoteAssimilator: usdcToUsdAssimilator.address,
+      //       params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      //       oracle: ORACLES.EURS.address,
+      //     });
+      //   });
+      // }
 
       // for (let i = 1; i <= 10000; i *= 100) {
       //   it(`CADC/USDC 50/50 - ${i}`, async function () {

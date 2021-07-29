@@ -13,6 +13,7 @@ import { ORACLES, TOKENS } from "./Constants";
 import { getFutureTime, expectBNAproxEq, getOracleAnswer } from "./Utils";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
+import { formatUnits } from "ethers/lib/utils";
 
 chai.use(chaiBigNumber(BigNumber));
 
@@ -192,30 +193,22 @@ describe("Router", function () {
     const beforeAmntTo = await erc20.attach(toToken).balanceOf(userAddress);
     const beforeAmntFrom = await erc20.attach(fromToken).balanceOf(userAddress);
 
-    // const _amount = "1000";
     const _amount = amount;
 
-    // console.log('Actual Amount BigInt', ethers.utils.formatEther(amount));
-    // console.log('Actual Amount Str', ethers.utils.formatEther(_amount));
-    // console.log('================ USING PARSEUNIT');
-    // console.log('================ USING STR AMOUNT');
-    // console.log('Actual Amount BigInt', ethers.utils.formatEther(_amount));
-    // console.log('Actual Amount Str', ethers.utils.formatEther(_amount));
+    console.log('\r');
+    console.log('Amount From: ', formatUnits(_amount));
+    console.log('\r');
+
     const from = note.split('-')[0];
     const to = note.split('-')[1];
-    console.log(`Before ${from} Balance`, ethers.utils.formatEther(beforeAmntFrom));
-    console.log(`Before ${to} Balance`, ethers.utils.formatEther(beforeAmntTo));
+    console.log(`${from.trim()} Balance Before: `, ethers.utils.formatEther(beforeAmntFrom));
+    console.log(`${to.trim()} Balance Before: `, ethers.utils.formatEther(beforeAmntTo));
 
     const viewExpected = await router.connect(user).viewOriginSwap(TOKENS.USDC.address, fromToken, toToken, _amount);
 
     await router.connect(user).originSwap(TOKENS.USDC.address, fromToken, toToken, amount, 0, await getFutureTime());
     const afterAmntTo = await erc20.attach(toToken).balanceOf(userAddress);
     const afterAmntFrom = await erc20.attach(fromToken).balanceOf(userAddress);
-
-    console.log(`After ${from} Balance`, ethers.utils.formatEther(afterAmntFrom));
-    console.log(`After ${to} Balance`, ethers.utils.formatEther(afterAmntTo));
-    // console.log('\r\r\r\n\n\n');
-    console.log('--------------------------------------------------------------------------------')
 
     // Get oracle rates
     const FROM_RATE8 = await getOracleAnswer(fromOracle);
@@ -229,6 +222,19 @@ describe("Router", function () {
     } else {
       expected = expected.div(parseUnits("1", fromDecimals - toDecimals));
     }
+
+    console.log('\r');
+    console.log('Origin Swap Amount To (unit test): ', formatUnits(expected, toDecimals));
+    console.log('Origin Swap Amount To (contract):', formatUnits(viewExpected, toDecimals));
+    console.log('\r');
+
+    console.log(`${from.trim()} Balance After: `, formatUnits(afterAmntFrom, fromDecimals));
+    console.log(`${to.trim()} Balance After: `, formatUnits(afterAmntTo, toDecimals));
+
+    console.log('\r');
+    console.log('From Rate: ', formatUnits(FROM_RATE8, fromDecimals));
+    console.log('To Rate: ', formatUnits(TO_RATE8, toDecimals));
+    console.log('--------------------------------------------------------------------------------')
 
     expectBNAproxEq(obtained, expected, parseUnits("2", toDecimals));
     expectBNAproxEq(obtained, viewExpected, parseUnits("1", toDecimals));
@@ -374,19 +380,19 @@ describe("Router", function () {
   //   });
   // });
 
-  // it("CADC -> USDC originSwap", async function () {
-  //   await routerOriginSwapAndCheck({
-  //     note: 'CADC - USDC',
-  //     user: user2,
-  //     fromToken: TOKENS.CADC.address,
-  //     toToken: TOKENS.USDC.address,
-  //     amount: parseUnits("1000", TOKENS.CADC.decimals),
-  //     fromOracle: ORACLES.CADC.address,
-  //     toOracle: ORACLES.USDC.address,
-  //     fromDecimals: TOKENS.CADC.decimals,
-  //     toDecimals: TOKENS.USDC.decimals,
-  //   });
-  // });
+  it("CADC -> USDC originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      note: 'CADC - USDC',
+      user: user2,
+      fromToken: TOKENS.CADC.address,
+      toToken: TOKENS.USDC.address,
+      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      fromOracle: ORACLES.CADC.address,
+      toOracle: ORACLES.USDC.address,
+      fromDecimals: TOKENS.CADC.decimals,
+      toDecimals: TOKENS.USDC.decimals,
+    });
+  });
 
   // it("USDC -> XSGD originSwap", async function () {
   //   await routerOriginSwapAndCheck({

@@ -24,7 +24,7 @@ export const deployedLogs = async (network, filename, output) => {
   fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 };
 
-export const curveImporter = (filename) => {
+export const configImporter = (filename) => {
   return path.resolve(__dirname, `./config/${hre.network.name}/${filename}.json`);
 }
 

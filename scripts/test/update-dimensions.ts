@@ -4,6 +4,11 @@ const { ethers } = hre;
 
 import { Curve } from "../../typechain";
 
+import { curveImporter } from "../Utils";
+
+const eursCurveAddr = require(curveImporter('curve_EURS_deployed')).curveAddress
+const CONTRACT_CURVE_EURS_ADDR = eursCurveAddr;;
+
 const DIMENSION = {
   alpha: parseUnits(process.env.DIMENSION_ALPHA),
   beta: parseUnits(process.env.DIMENSION_BETA),
@@ -13,8 +18,15 @@ const DIMENSION = {
 }
 
 async function main() {
-  const curveAUD = (await ethers.getContractAt("Curve", "0x50d70784BBc9363408914Ab26d4897d469DD3DA1")) as Curve;
-  const txAUD = await curveAUD.setParams(DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, { gasLimit: 12000000 });
+  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
+  const txAUD = await curveEURS.setParams(
+    DIMENSION.alpha,
+    DIMENSION.beta,
+    DIMENSION.max,
+    DIMENSION.epsilon,
+    DIMENSION.lambda, {
+    gasLimit: 12000000
+  });
   await txAUD.wait();
 }
 

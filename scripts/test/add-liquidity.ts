@@ -1,13 +1,15 @@
 import { ethers } from "hardhat";
 import { parseUnits, formatUnits } from "ethers/lib/utils";
+import { BigNumberish, Signer } from "ethers";
+import hre from "hardhat";
 
-import { getFutureTime } from "../../test/Utils";
+import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { getAccounts } from "../common";
-import { curveImporter } from "../Utils";
+import { configImporter } from "../Utils";
 
-const eursCurveAddr = require(curveImporter('curve_EURS_deployed')).curveAddress;
+const eursCurveAddr = require(configImporter('curve_EURS_deployed')).curveAddress;
 
 const CONTRACT_CURVE_EURS_ADDR = eursCurveAddr;
 const TOKEN_USDC = process.env.TOKEN_USDC;
@@ -20,12 +22,39 @@ async function main() {
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   // Approve tokens
-  await erc20.attach(TOKEN_USDC).connect(user1)
-    .approve(CONTRACT_CURVE_EURS_ADDR, parseUnits("10000000", TOKENS_USDC_DECIMALS));
-  await erc20.attach(TOKEN_EURS).connect(user1)
-    .approve(CONTRACT_CURVE_EURS_ADDR, parseUnits("10000000", TOKENS_EURS_DECIMALS));
+  const mintAndApprove = async function (
+    tokenAddress: string,
+    minter: Signer,
+    amount: BigNumberish,
+    recipient: string,
+  ) {
+    const minterAddress = await minter.getAddress();
 
-  const amt = parseUnits("10000");
+    if (hre.network.name === 'localhost') {
+      if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
+        await mintUSDC(minterAddress, amount);
+      }
+
+      if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
+        await mintEURS(minterAddress, amount);
+      }
+    }
+
+    await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
+  };
+
+  const multiMintAndApprove = async function (requests: [string, Signer, BigNumberish, string][]) {
+    for (let i = 0; i < requests.length; i++) {
+      await mintAndApprove(...requests[i]);
+    }
+  };
+
+  await multiMintAndApprove([
+    [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), CONTRACT_CURVE_EURS_ADDR],
+    [TOKEN_EURS, user1, parseUnits("9000000", TOKENS_EURS_DECIMALS), CONTRACT_CURVE_EURS_ADDR]
+  ]);
+
+  const amt = parseUnits("900000");
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
   const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
@@ -64,8 +93,8 @@ async function main() {
   console.log('-----------------------------------------------------------------------');
 
   console.log('Total: ', formatUnits(lpAmount));
-  console.log('EURS: ', formatUnits(baseBal, TOKENS_EURS_DECIMALS));
-  console.log('USDC: ', formatUnits(quoteBal, TOKENS_USDC_DECIMALS));
+  console.log('EURS: ', formatUnits(baseBal));
+  console.log('USDC: ', formatUnits(quoteBal));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
