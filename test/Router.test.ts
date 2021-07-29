@@ -167,6 +167,7 @@ describe("Router", function () {
   });
 
   const routerOriginSwapAndCheck = async ({
+    note,
     user,
     fromToken,
     toToken,
@@ -176,6 +177,7 @@ describe("Router", function () {
     fromDecimals,
     toDecimals,
   }: {
+    note: any,
     user: Signer;
     fromToken: string;
     toToken: string;
@@ -187,18 +189,39 @@ describe("Router", function () {
   }) => {
     const userAddress = await user.getAddress();
     await mintAndApprove(fromToken, user, amount, router.address);
-    const beforeAmnt = await erc20.attach(toToken).balanceOf(userAddress);
+    const beforeAmntTo = await erc20.attach(toToken).balanceOf(userAddress);
+    const beforeAmntFrom = await erc20.attach(fromToken).balanceOf(userAddress);
 
-    const viewExpected = await router.connect(user).viewOriginSwap(TOKENS.USDC.address, fromToken, toToken, amount);
+    // const _amount = "1000";
+    const _amount = amount;
+
+    // console.log('Actual Amount BigInt', ethers.utils.formatEther(amount));
+    // console.log('Actual Amount Str', ethers.utils.formatEther(_amount));
+    // console.log('================ USING PARSEUNIT');
+    // console.log('================ USING STR AMOUNT');
+    // console.log('Actual Amount BigInt', ethers.utils.formatEther(_amount));
+    // console.log('Actual Amount Str', ethers.utils.formatEther(_amount));
+    const from = note.split('-')[0];
+    const to = note.split('-')[1];
+    console.log(`Before ${from} Balance`, ethers.utils.formatEther(beforeAmntFrom));
+    console.log(`Before ${to} Balance`, ethers.utils.formatEther(beforeAmntTo));
+
+    const viewExpected = await router.connect(user).viewOriginSwap(TOKENS.USDC.address, fromToken, toToken, _amount);
 
     await router.connect(user).originSwap(TOKENS.USDC.address, fromToken, toToken, amount, 0, await getFutureTime());
-    const afterAmnt = await erc20.attach(toToken).balanceOf(userAddress);
+    const afterAmntTo = await erc20.attach(toToken).balanceOf(userAddress);
+    const afterAmntFrom = await erc20.attach(fromToken).balanceOf(userAddress);
+
+    console.log(`After ${from} Balance`, ethers.utils.formatEther(afterAmntFrom));
+    console.log(`After ${to} Balance`, ethers.utils.formatEther(afterAmntTo));
+    // console.log('\r\r\r\n\n\n');
+    console.log('--------------------------------------------------------------------------------')
 
     // Get oracle rates
     const FROM_RATE8 = await getOracleAnswer(fromOracle);
     const TO_RATE8 = await getOracleAnswer(toOracle);
 
-    const obtained = afterAmnt.sub(beforeAmnt);
+    const obtained = afterAmntTo.sub(beforeAmntTo);
     let expected = amount.mul(FROM_RATE8).div(TO_RATE8);
 
     if (fromDecimals - toDecimals < 0) {
@@ -247,211 +270,219 @@ describe("Router", function () {
     expectBNAproxEq(sent, expected, parseUnits("2", fromDecimals));
   };
 
-  it("CADC -> USDC targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.USDC.address,
-      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.USDC.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.USDC.decimals,
-    });
-  });
+  // it("CADC -> USDC targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.USDC.address,
+  //     targetAmount: parseUnits("900", TOKENS.USDC.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.USDC.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.USDC.decimals,
+  //   });
+  // });
 
-  it("USDC -> CADC targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.USDC.address,
-      toToken: TOKENS.CADC.address,
-      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
-      fromOracle: ORACLES.USDC.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.USDC.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
+  // it("USDC -> CADC targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.USDC.address,
+  //     toToken: TOKENS.CADC.address,
+  //     targetAmount: parseUnits("900", TOKENS.USDC.decimals),
+  //     fromOracle: ORACLES.USDC.address,
+  //     toOracle: ORACLES.CADC.address,
+  //     fromDecimals: TOKENS.USDC.decimals,
+  //     toDecimals: TOKENS.CADC.decimals,
+  //   });
+  // });
 
-  it("CADC -> XSGD targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.XSGD.address,
-      targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
+  // it("CADC -> XSGD targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.XSGD.address,
+  //     targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.XSGD.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.XSGD.decimals,
+  //   });
+  // });
 
-  it("CADC -> EURS targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.EURS.address,
-      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.EURS.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.EURS.decimals,
-    });
-  });
+  // it("CADC -> EURS targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.EURS.address,
+  //     targetAmount: parseUnits("900", TOKENS.EURS.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.EURS.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.EURS.decimals,
+  //   });
+  // });
 
-  it("EURS -> XSGD targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.EURS.address,
-      toToken: TOKENS.XSGD.address,
-      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.EURS.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.EURS.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
+  // it("EURS -> XSGD targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.EURS.address,
+  //     toToken: TOKENS.XSGD.address,
+  //     targetAmount: parseUnits("900", TOKENS.EURS.decimals),
+  //     fromOracle: ORACLES.EURS.address,
+  //     toOracle: ORACLES.XSGD.address,
+  //     fromDecimals: TOKENS.EURS.decimals,
+  //     toDecimals: TOKENS.XSGD.decimals,
+  //   });
+  // });
 
-  it("XSGD -> EURS targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.XSGD.address,
-      toToken: TOKENS.EURS.address,
-      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.XSGD.address,
-      toOracle: ORACLES.EURS.address,
-      fromDecimals: TOKENS.XSGD.decimals,
-      toDecimals: TOKENS.EURS.decimals,
-    });
-  });
+  // it("XSGD -> EURS targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.XSGD.address,
+  //     toToken: TOKENS.EURS.address,
+  //     targetAmount: parseUnits("900", TOKENS.EURS.decimals),
+  //     fromOracle: ORACLES.XSGD.address,
+  //     toOracle: ORACLES.EURS.address,
+  //     fromDecimals: TOKENS.XSGD.decimals,
+  //     toDecimals: TOKENS.EURS.decimals,
+  //   });
+  // });
 
-  it("XSGD -> CADC targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.XSGD.address,
-      toToken: TOKENS.CADC.address,
-      targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
-      fromOracle: ORACLES.XSGD.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.XSGD.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
+  // it("XSGD -> CADC targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.XSGD.address,
+  //     toToken: TOKENS.CADC.address,
+  //     targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
+  //     fromOracle: ORACLES.XSGD.address,
+  //     toOracle: ORACLES.CADC.address,
+  //     fromDecimals: TOKENS.XSGD.decimals,
+  //     toDecimals: TOKENS.CADC.decimals,
+  //   });
+  // });
 
-  it("EURS -> CADC targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.EURS.address,
-      toToken: TOKENS.CADC.address,
-      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.EURS.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.EURS.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
+  // it("EURS -> CADC targetSwap", async function () {
+  //   await routerViewTargetSwapAndCheck({
+  //     user: user2,
+  //     fromToken: TOKENS.EURS.address,
+  //     toToken: TOKENS.CADC.address,
+  //     targetAmount: parseUnits("900", TOKENS.EURS.decimals),
+  //     fromOracle: ORACLES.EURS.address,
+  //     toOracle: ORACLES.CADC.address,
+  //     fromDecimals: TOKENS.EURS.decimals,
+  //     toDecimals: TOKENS.CADC.decimals,
+  //   });
+  // });
 
-  it("CADC -> USDC originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.USDC.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.USDC.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.USDC.decimals,
-    });
-  });
+  // it("CADC -> USDC originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'CADC - USDC',
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.USDC.address,
+  //     amount: parseUnits("1000", TOKENS.CADC.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.USDC.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.USDC.decimals,
+  //   });
+  // });
 
-  it("USDC -> XSGD originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.USDC.address,
-      toToken: TOKENS.XSGD.address,
-      amount: parseUnits("1000", TOKENS.USDC.decimals),
-      fromOracle: ORACLES.USDC.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.USDC.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
+  // it("USDC -> XSGD originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'USDC - XSGD',
+  //     user: user2,
+  //     fromToken: TOKENS.USDC.address,
+  //     toToken: TOKENS.XSGD.address,
+  //     amount: parseUnits("1000", TOKENS.USDC.decimals),
+  //     fromOracle: ORACLES.USDC.address,
+  //     toOracle: ORACLES.XSGD.address,
+  //     fromDecimals: TOKENS.USDC.decimals,
+  //     toDecimals: TOKENS.XSGD.decimals,
+  //   });
+  // });
 
-  it("CADC -> XSGD originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.XSGD.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
+  // it("CADC -> XSGD originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'CADC - XSGD',
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.XSGD.address,
+  //     amount: parseUnits("1000", TOKENS.CADC.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.XSGD.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.XSGD.decimals,
+  //   });
+  // });
 
-  it("CADC -> EURS originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.EURS.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.EURS.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.EURS.decimals,
-    });
-  });
+  // it("CADC -> EURS originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'CADC - EURS',
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.EURS.address,
+  //     amount: parseUnits("1000", TOKENS.CADC.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.EURS.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.EURS.decimals,
+  //   });
+  // });
 
-  it("EURS -> XSGD originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.EURS.address,
-      toToken: TOKENS.XSGD.address,
-      amount: parseUnits("1000", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.EURS.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.EURS.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
+  // it("EURS -> XSGD originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'EURS - XSGD',
+  //     user: user2,
+  //     fromToken: TOKENS.EURS.address,
+  //     toToken: TOKENS.XSGD.address,
+  //     amount: parseUnits("1000", TOKENS.EURS.decimals),
+  //     fromOracle: ORACLES.EURS.address,
+  //     toOracle: ORACLES.XSGD.address,
+  //     fromDecimals: TOKENS.EURS.decimals,
+  //     toDecimals: TOKENS.XSGD.decimals,
+  //   });
+  // });
 
-  it("EURS -> CADC originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.EURS.address,
-      toToken: TOKENS.CADC.address,
-      amount: parseUnits("1000", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.EURS.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.EURS.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
+  // it("EURS -> CADC originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'EURS - CADC',
+  //     user: user2,
+  //     fromToken: TOKENS.EURS.address,
+  //     toToken: TOKENS.CADC.address,
+  //     amount: parseUnits("1000", TOKENS.EURS.decimals),
+  //     fromOracle: ORACLES.EURS.address,
+  //     toOracle: ORACLES.CADC.address,
+  //     fromDecimals: TOKENS.EURS.decimals,
+  //     toDecimals: TOKENS.CADC.decimals,
+  //   });
+  // });
 
-  it("XSGD -> EURS originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.XSGD.address,
-      toToken: TOKENS.EURS.address,
-      amount: parseUnits("100", TOKENS.XSGD.decimals),
-      fromOracle: ORACLES.XSGD.address,
-      toOracle: ORACLES.EURS.address,
-      fromDecimals: TOKENS.XSGD.decimals,
-      toDecimals: TOKENS.EURS.decimals,
-    });
-  });
+  // it("XSGD -> EURS originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'XSGD - EURS',
+  //     user: user2,
+  //     fromToken: TOKENS.XSGD.address,
+  //     toToken: TOKENS.EURS.address,
+  //     amount: parseUnits("100", TOKENS.XSGD.decimals),
+  //     fromOracle: ORACLES.XSGD.address,
+  //     toOracle: ORACLES.EURS.address,
+  //     fromDecimals: TOKENS.XSGD.decimals,
+  //     toDecimals: TOKENS.EURS.decimals,
+  //   });
+  // });
 
-  it("XSGD -> CADC originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.XSGD.address,
-      toToken: TOKENS.CADC.address,
-      amount: parseUnits("1000", TOKENS.XSGD.decimals),
-      fromOracle: ORACLES.XSGD.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.XSGD.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
+  // it("XSGD -> CADC originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'XSGD - CADC',
+  //     user: user2,
+  //     fromToken: TOKENS.XSGD.address,
+  //     toToken: TOKENS.CADC.address,
+  //     amount: parseUnits("1000", TOKENS.XSGD.decimals),
+  //     fromOracle: ORACLES.XSGD.address,
+  //     toOracle: ORACLES.CADC.address,
+  //     fromDecimals: TOKENS.XSGD.decimals,
+  //     toDecimals: TOKENS.CADC.decimals,
+  //   });
+  // });
 });
