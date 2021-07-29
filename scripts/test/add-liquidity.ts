@@ -25,7 +25,7 @@ async function main() {
   await erc20.attach(TOKEN_EURS).connect(user1)
     .approve(CONTRACT_CURVE_EURS_ADDR, parseUnits("10000000", TOKENS_EURS_DECIMALS));
 
-  const amt = parseUnits("5");
+  const amt = parseUnits("10000");
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
   const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
