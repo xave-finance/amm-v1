@@ -7,6 +7,7 @@ const { ethers } = hre;
 
 import { CurveFactory, Curve } from "../typechain";
 import { CONTRACTS } from "./config/contracts";
+import { deployedLogs } from "./Utils";
 
 const CORE_ADDRESSES = {
   curveFactory: CONTRACTS.factory
@@ -80,6 +81,13 @@ async function main() {
     );
     const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
     const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
+
+    const output = {
+      curveAddress,
+    };
+
+    // Deployed contracts log
+    await deployedLogs(hre.network.name, `curve_${symbol}_deployed`, output);
 
     console.log(`curveAddress ${symbol}: `, curveAddress)
     console.log(`Curve ${symbol} Address: `, curve.address)
