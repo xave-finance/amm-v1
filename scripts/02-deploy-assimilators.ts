@@ -8,6 +8,7 @@ import { deployedLogs, assim } from "./Utils";
 const ASSIMILATORS = process.env.ASSIMILATORS;
 
 async function main() {
+  console.time('Deployment Time');
   const { user1 } = await getAccounts();
   let output = {};
 
@@ -28,6 +29,7 @@ async function main() {
 
   // Deployed contracts log
   await deployedLogs(hre.network.name, 'assimilators_deployed', output);
+  console.timeEnd('Deployment Time');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

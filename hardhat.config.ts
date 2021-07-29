@@ -69,8 +69,7 @@ const config: HardhatUserConfig = {
       }
     },
     matic: {
-      // url: `https://polygon-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
-      url: "https://matic-mainnet.chainstacklabs.com",
+      url: `https://polygon-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
       chainId: 137,
       accounts: {
         mnemonic: MNEMONIC

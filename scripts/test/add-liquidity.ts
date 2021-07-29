@@ -18,6 +18,7 @@ const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
 async function main() {
+  console.time('Deployment Time');
   const { user1 } = await getAccounts();
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
@@ -78,23 +79,29 @@ async function main() {
   console.log('EURS AMT: ', formatUnits(baseViewUser1, TOKENS_EURS_DECIMALS));
   console.log('USDC AMT: ', formatUnits(quoteViewUser1, TOKENS_USDC_DECIMALS));
 
-  // Supply liquidity to the pools
-  const depositCurveEURS = await curveEURS
-    .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
-    .then(x => x.wait());
+  try {
+    // Supply liquidity to the pools
+    const depositCurveEURS = await curveEURS
+      .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+      .then(x => x.wait());
 
-  console.log('depositCurveEURS', depositCurveEURS);
+    console.log('depositCurveEURS', depositCurveEURS);
 
-  // Check pool liquidity
-  const [lpAmount, [baseBal, quoteBal]] = await curveEURS
-    .liquidity();
-  console.log('-----------------------------------------------------------------------');
-  console.log('Liquidity Balance');
-  console.log('-----------------------------------------------------------------------');
+    // Check pool liquidity
+    const [lpAmount, [baseBal, quoteBal]] = await curveEURS
+      .liquidity();
+    console.log('-----------------------------------------------------------------------');
+    console.log('Liquidity Balance');
+    console.log('-----------------------------------------------------------------------');
 
-  console.log('Total: ', formatUnits(lpAmount));
-  console.log('EURS: ', formatUnits(baseBal));
-  console.log('USDC: ', formatUnits(quoteBal));
+    console.log('Total: ', formatUnits(lpAmount));
+    console.log('EURS: ', formatUnits(baseBal));
+    console.log('USDC: ', formatUnits(quoteBal));
+    console.timeEnd('Deployment Time');
+  } catch (error) {
+    console.log(error);
+    console.timeEnd('Deployment Time');
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -20,6 +20,7 @@ const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
 async function main() {
+  console.time('Deployment Time');
   const { user1 } = await getAccounts();
 
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
@@ -31,7 +32,7 @@ async function main() {
   await erc20.attach(TOKEN_EURS).connect(user1)
     .approve(CONTRACT_CURVE_EURS_ADDR, parseUnits("10000000", TOKENS_EURS_DECIMALS));
 
-  const amt = parseUnits("34", TOKENS_EURS_DECIMALS);
+  const amt = parseUnits("78", TOKENS_EURS_DECIMALS);
   const eursBalBefore = await erc20.attach(eurs.address).balanceOf(user1.address);
   const usdcBalBefore = await erc20.attach(usdc.address).balanceOf(user1.address);
   const eursAllowanceBefore = await eurs.allowance(user1.address, CONTRACT_CURVE_EURS_ADDR);
@@ -59,6 +60,7 @@ async function main() {
   console.log('\r');
   console.log(`EURS Balance After: `, formatUnits(eursBalAfter, TOKENS_EURS_DECIMALS));
   console.log(`USDC Balance After: `, formatUnits(usdcBalAfter, TOKENS_USDC_DECIMALS));
+  console.timeEnd('Deployment Time');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

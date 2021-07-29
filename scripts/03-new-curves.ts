@@ -34,6 +34,7 @@ const TOKEN = {
 }
 
 async function main() {
+  console.time('Deployment Time');
   const curveFactory = (await ethers.getContractAt(
     "CurveFactory",
     CORE_ADDRESSES.curveFactory,
@@ -154,6 +155,8 @@ async function main() {
     quoteAssimilator: ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
     params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
   });
+
+  console.timeEnd('Deployment Time');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

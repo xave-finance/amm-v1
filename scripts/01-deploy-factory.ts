@@ -7,6 +7,7 @@ import { getAccounts, deployContract } from "./common";
 import { deployedLogs } from "./Utils";
 
 async function main() {
+  console.time('Deployment Time');
   const { user1 } = await getAccounts();
 
   const CurvesLib = await ethers.getContractFactory("Curves");
@@ -112,6 +113,7 @@ async function main() {
 
   // Deployed contracts log
   await deployedLogs(hre.network.name, 'factory_deployed', output);
+  console.timeEnd('Deployment Time');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
