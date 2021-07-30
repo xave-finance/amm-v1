@@ -38,11 +38,6 @@ contract EursToUsdAssimilator is IAssimilator {
     IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
     IERC20 private constant eurs = IERC20(0x7bcFAF04C9BAD18e3A823740E0683A36426BB0Fe);
 
-    // // Kovan 18 decimals
-    // IOracle private constant oracle = IOracle(0x0c15Ab9A0DB086e062194c273CC79f41597Bbf13);
-    // IERC20 private constant usdc = IERC20(0x05911965c5b87307B8F1da65A1C1D81b0b095EF1);
-    // IERC20 private constant eurs = IERC20(0x9aEbd09207C78Dfc63425c70809bc92f0F42Ac80);
-
     // // Matic
     // IOracle private constant oracle = IOracle(0x73366Fe0AA0Ded304479862808e02506FE556a98);
     // IERC20 private constant usdc = IERC20(0x61410450256785735096baEB270407457dB91EC5);

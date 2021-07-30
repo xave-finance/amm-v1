@@ -33,10 +33,6 @@ contract UsdcToUsdAssimilator is IAssimilator {
     IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
     IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
 
-    // // Kovan 18 decimals
-    // IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
-    // IERC20 private constant usdc = IERC20(0x05911965c5b87307B8F1da65A1C1D81b0b095EF1);
-
     // // Matic
     // IOracle private constant oracle = IOracle(0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7);
     // IERC20 private constant usdc = IERC20(0x61410450256785735096baEB270407457dB91EC5);

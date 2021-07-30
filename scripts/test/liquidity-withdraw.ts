@@ -55,7 +55,7 @@ async function main() {
     [TOKEN_EURS, user1, parseUnits("9000000", TOKENS_EURS_DECIMALS), CONTRACT_CURVE_EURS_ADDR]
   ]);
 
-  const amt = parseUnits("900000");
+  const amt = parseUnits("10");
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
   const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
   const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
@@ -71,32 +71,51 @@ async function main() {
   console.log('EURS Allowance Before: ', eursAllowanceBefore);
   console.log('USDC Allowance Before: ', usdcAllowanceBefore);
 
-  const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await curveEURS.viewDeposit(amt);
+  // Check pool liquidity
+  const [lpAmount, [baseBal, quoteBal]] = await curveEURS
+    .liquidity();
+  console.log('-----------------------------------------------------------------------');
+  console.log('Liquidity Balance Before');
+  console.log('-----------------------------------------------------------------------');
+
+  console.log('Total: ', formatUnits(lpAmount));
+  console.log('EURS: ', formatUnits(baseBal));
+  console.log('USDC: ', formatUnits(quoteBal));
+
+  const [baseViewUser1, quoteViewUser1] = await curveEURS.connect(user1).viewWithdraw(amt);
 
   console.log('-----------------------------------------------------------------------');
-  console.log('Liquidity To Deposit');
+  console.log('Liquidity To Withdraw');
   console.log('-----------------------------------------------------------------------');
   console.log('EURS AMT: ', formatUnits(baseViewUser1, TOKENS_EURS_DECIMALS));
   console.log('USDC AMT: ', formatUnits(quoteViewUser1, TOKENS_USDC_DECIMALS));
 
   try {
     // Supply liquidity to the pools
-    const depositCurveEURS = await curveEURS
-      .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+    const withdrawCurveEURS = await curveEURS
+      .withdraw(amt, await getFutureTime(), { gasLimit: 12000000 })
       .then(x => x.wait());
 
-    console.log('depositCurveEURS', depositCurveEURS);
+    console.log('withdrawCurveEURS', withdrawCurveEURS);
 
     // Check pool liquidity
     const [lpAmount, [baseBal, quoteBal]] = await curveEURS
       .liquidity();
     console.log('-----------------------------------------------------------------------');
-    console.log('Liquidity Balance');
+    console.log('Liquidity Balance After');
     console.log('-----------------------------------------------------------------------');
 
     console.log('Total: ', formatUnits(lpAmount));
     console.log('EURS: ', formatUnits(baseBal));
     console.log('USDC: ', formatUnits(quoteBal));
+
+    const eursBalAfter = await erc20.attach(eurs.address).balanceOf(user1.address);
+    const usdcBalAfter = await erc20.attach(usdc.address).balanceOf(user1.address);
+
+    console.log('\r');
+    console.log(`EURS Balance After: `, formatUnits(eursBalAfter, TOKENS_EURS_DECIMALS));
+    console.log(`USDC Balance After: `, formatUnits(usdcBalAfter, TOKENS_USDC_DECIMALS));
+
     console.timeEnd('Deployment Time');
   } catch (error) {
     console.log(error);
