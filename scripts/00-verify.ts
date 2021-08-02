@@ -1,60 +1,52 @@
 const hre = require("hardhat");
-
+import { parseUnits } from "@ethersproject/units";
 import { CONTRACTS } from "./config/contracts";
-import * as zap from "./config/zap_deployed.json";
+// import * as zap from "./config/zap_deployed.json";
+import { configImporter } from "./Utils";
+
+
+const eursCurveAddr = require(configImporter('curve_EURS_deployed')).curveAddress;
+
+const ASSIMILATOR_ADDRESSES = {
+    usdcToUsdAssimilator: CONTRACTS.usdcToUsdAssimilator,
+    eursToUsdAssimilator: CONTRACTS.eursToUsdAssimilator,
+};
+
+const TOKEN = {
+    usdc: process.env.TOKEN_USDC,
+    eurs: process.env.TOKEN_EURS,
+    cadc: process.env.TOKEN_CADC,
+    xsgd: process.env.TOKEN_XSGD
+}
 
 async function main() {
-    console.log('-------------------- Verifying CORE_ADDRESSES.curves Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.curves
-    })
+    console.log('-------------------- Verifying eursCurveAddr Contract');
 
-    console.log('-------------------- Verifying CONTRACTS.orchestrator Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.orchestrator
-    })
+    const name = 'EURS Statis';
+    const symbol = 'EURS';
 
-    console.log('-------------------- Verifying CONTRACTS.proportionalLiquidity Contract');
     await hre.run('verify:verify', {
-        address: CONTRACTS.proportionalLiquidity
-    })
-
-    console.log('-------------------- Verifying CONTRACTS.swaps Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.swaps
-    })
-
-    console.log('-------------------- Verifying CONTRACTS.viewLiquidity Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.viewLiquidity
-    })
-
-    console.log('-------------------- Verifying CONTRACTS.factory Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.factory
-    })
-
-    console.log('-------------------- Verifying CONTRACTS.router Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.router,
+        address: eursCurveAddr,
         constructorArguments: [
-            CONTRACTS.factory
+            name,
+            symbol,
+            [
+                TOKEN.eurs,
+                ASSIMILATOR_ADDRESSES.eursToUsdAssimilator,
+                TOKEN.eurs,
+                ASSIMILATOR_ADDRESSES.eursToUsdAssimilator,
+                TOKEN.eurs,
+                TOKEN.usdc,
+                ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
+                TOKEN.usdc,
+                ASSIMILATOR_ADDRESSES.usdcToUsdAssimilator,
+                TOKEN.usdc,
+            ],
+            [
+                parseUnits("0.5"),
+                parseUnits("0.5"),
+            ]
         ]
-    })
-
-    console.log('-------------------- Verifying CONTRACTS.usdcToUsdAssimilator Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.usdcToUsdAssimilator
-    })
-
-    console.log('-------------------- Verifying CONTRACTS.eursToUsdAssimilator Contract');
-    await hre.run('verify:verify', {
-        address: CONTRACTS.eursToUsdAssimilator
-    })
-
-    console.log('-------------------- Verifying zap.zap Contract');
-    await hre.run('verify:verify', {
-        address: zap.zap
     })
 }
 
