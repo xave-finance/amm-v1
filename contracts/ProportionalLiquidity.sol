@@ -10,7 +10,6 @@ import "./lib/UnsafeMath64x64.sol";
 import "./lib/ABDKMath64x64.sol";
 
 import "./CurveMath.sol";
-import "hardhat/console.sol";
 
 library ProportionalLiquidity {
     using ABDKMath64x64 for uint256;
@@ -98,8 +97,6 @@ library ProportionalLiquidity {
                     curve.assets[i].addr,
                     __deposit.mul(curve.weights[i]).add(ONE_WEI)
                 );
-
-                console.log("View Deposit from contract ", i == 0 ? "Base: " : "Quote: ", deposits_[i]);
             }
         } else {
             // We already have an existing pool ratio
