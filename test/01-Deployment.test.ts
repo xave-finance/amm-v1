@@ -129,21 +129,8 @@ describe("Deployment", () => {
   })
 
   describe("Curve/Pair Contract", async () => {
-    // ({
-    //   cadcToUsdAssimilator,
-    //   usdcToUsdAssimilator
-    // } = await scaffoldTest());
-
     const NAME = "CAD Coin";
     const SYMBOL = "CADC";
-
-    // console.log(NAME);
-    // console.log(SYMBOL);
-    // console.log(TOKENS.CADC.address);
-    // console.log(TOKENS.USDC.address);
-    // console.log(cadcToUsdAssimilator.address);
-    // console.log(usdcToUsdAssimilator.address);
-    // console.log(DIMENSION.alpha);
 
     it("CADC:USDC", async () => {
       const { curve } = await createCurveAndSetParams({

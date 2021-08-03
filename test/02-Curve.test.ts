@@ -10,25 +10,30 @@ import { ERC20 } from "../typechain/ERC20";
 import { Router } from "../typechain/Router";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
+import { assert } from "console";
+
+import { TOKENS } from "./Constants";
 
 chai.use(chaiBigNumber(BigNumber));
 
 const { parseUnits } = ethers.utils;
 
-const NAME = "DFX V1";
-const SYMBOL = "DFX V1";
-const ALPHA = parseUnits("0.5");
-const BETA = parseUnits("0.35");
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0004");
-const LAMBDA = parseUnits("0.3");
+const DIMENSION = {
+  alpha: parseUnits(process.env.DIMENSION_ALPHA),
+  beta: parseUnits(process.env.DIMENSION_BETA),
+  max: parseUnits(process.env.DIMENSION_MAX),
+  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
+  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+}
 
-describe("Factory", function () {
+describe("Curve Contract", () => {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];
 
   let cadcToUsdAssimilator: Contract;
   let usdcToUsdAssimilator: Contract;
+  let eursToUsdAssimilator: Contract;
+  let xsgdToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
   let RouterFactory: ContractFactory;
@@ -38,6 +43,8 @@ describe("Factory", function () {
 
   let usdc: ERC20;
   let cadc: ERC20;
+  let eurs: ERC20;
+  let xsgd: ERC20;
   let erc20: ERC20;
 
   let createCurveAndSetParams: ({
@@ -65,21 +72,24 @@ describe("Factory", function () {
     curveLpToken: ERC20;
   }>;
 
-  before(async function () {
+  beforeEach(async function () {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
       cadcToUsdAssimilator,
       usdcToUsdAssimilator,
+      eursToUsdAssimilator,
+      xsgdToUsdAssimilator,
       CurveFactory,
       RouterFactory,
       usdc,
       cadc,
-      erc20,
+      eurs,
+      xsgd,
+      erc20
     } = await scaffoldTest());
-  });
 
-  beforeEach(async function () {
+
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
     router = (await RouterFactory.deploy(curveFactory.address)) as Router;
 
@@ -89,40 +99,179 @@ describe("Factory", function () {
     }));
   });
 
-  // it("No duplicate pairs", async function () {
-  //   const { curve } = await createCurveAndSetParams({
-  //     name: NAME,
-  //     symbol: SYMBOL,
-  //     base: cadc.address,
-  //     quote: usdc.address,
-  //     baseWeight: parseUnits("0.4"),
-  //     quoteWeight: parseUnits("0.6"),
-  //     baseAssimilator: cadcToUsdAssimilator.address,
-  //     quoteAssimilator: usdcToUsdAssimilator.address,
-  //     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  //   });
+  describe("Curve/Pair", async () => {
+    it("CADC:USDC", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
 
-  //   try {
-  //     await createCurveAndSetParams({
-  //       name: NAME,
-  //       symbol: SYMBOL,
-  //       base: cadc.address,
-  //       quote: usdc.address,
-  //       baseWeight: parseUnits("0.4"),
-  //       quoteWeight: parseUnits("0.6"),
-  //       baseAssimilator: cadcToUsdAssimilator.address,
-  //       quoteAssimilator: usdcToUsdAssimilator.address,
-  //       params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  //     });
-  //     throw new Error("newCurve should throw error");
-  //   } catch (e) {
-  //     expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
-  //   }
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
 
-  //   const curveCadcUsdcAddress = await curveFactory.curves(
-  //     ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [cadc.address, usdc.address])),
-  //   );
+      const curveAddress = await curveFactory.curves(
+        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [cadc.address, usdc.address])),
+      );
 
-  //   expect(curve.address.toLowerCase()).to.be.eq(curveCadcUsdcAddress.toLowerCase());
-  // });
+      assert(ethers.utils.isAddress(curve.address));
+      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
+    })
+
+    it("EURS:USDC", async () => {
+      const NAME = "EURS Statis";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: eursToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddress = await curveFactory.curves(
+        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [eurs.address, usdc.address])),
+      );
+
+      assert(ethers.utils.isAddress(curve.address));
+      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
+    })
+
+    it("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddress = await curveFactory.curves(
+        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [xsgd.address, usdc.address])),
+      );
+
+      assert(ethers.utils.isAddress(curve.address));
+      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
+    })
+
+    it("No duplicate pairs for CADC:USDC", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      try {
+        await createCurveAndSetParams({
+          name: NAME,
+          symbol: SYMBOL,
+          base: cadc.address,
+          quote: usdc.address,
+          baseWeight: parseUnits("0.4"),
+          quoteWeight: parseUnits("0.6"),
+          baseAssimilator: cadcToUsdAssimilator.address,
+          quoteAssimilator: usdcToUsdAssimilator.address,
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        });
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
+      }
+    })
+
+    it("No duplicate pairs for EURS:USDC", async () => {
+      const NAME = "EURS Statis";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: eursToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      try {
+        await createCurveAndSetParams({
+          name: NAME,
+          symbol: SYMBOL,
+          base: eurs.address,
+          quote: usdc.address,
+          baseWeight: parseUnits("0.4"),
+          quoteWeight: parseUnits("0.6"),
+          baseAssimilator: eursToUsdAssimilator.address,
+          quoteAssimilator: usdcToUsdAssimilator.address,
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        });
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
+      }
+    })
+
+    it("No duplicate pairs for XSGD:USDC", async () => {
+      const NAME = "XSGD Statis";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      try {
+        await createCurveAndSetParams({
+          name: NAME,
+          symbol: SYMBOL,
+          base: xsgd.address,
+          quote: usdc.address,
+          baseWeight: parseUnits("0.4"),
+          quoteWeight: parseUnits("0.6"),
+          baseAssimilator: xsgdToUsdAssimilator.address,
+          quoteAssimilator: usdcToUsdAssimilator.address,
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        });
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
+      }
+    })
+  })
 });
