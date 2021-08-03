@@ -99,7 +99,7 @@ describe("Curve Contract", () => {
     }));
   });
 
-  describe("Curve/Pair", async () => {
+  describe("Curve/Pair Creation", async () => {
     it("CADC:USDC", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
@@ -274,4 +274,173 @@ describe("Curve Contract", () => {
       }
     })
   })
+
+  describe("Set Dimensions", async () => {
+    it("CADC:USDC", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it("EURS:USDC", async () => {
+      const NAME = "EURS Statis";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: eursToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+  });
+
+  describe("Turn Off Whitelisting", async () => {
+    it("CADC:USDC", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it("EURS:USDC", async () => {
+      const NAME = "EURS Statis";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: eursToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+  });
 });
