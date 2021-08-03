@@ -380,19 +380,19 @@ describe("Router", function () {
   //   });
   // });
 
-  it("CADC -> USDC originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      note: 'CADC - USDC',
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.USDC.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.USDC.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.USDC.decimals,
-    });
-  });
+  // it("CADC -> USDC originSwap", async function () {
+  //   await routerOriginSwapAndCheck({
+  //     note: 'CADC - USDC',
+  //     user: user2,
+  //     fromToken: TOKENS.CADC.address,
+  //     toToken: TOKENS.USDC.address,
+  //     amount: parseUnits("1000", TOKENS.CADC.decimals),
+  //     fromOracle: ORACLES.CADC.address,
+  //     toOracle: ORACLES.USDC.address,
+  //     fromDecimals: TOKENS.CADC.decimals,
+  //     toDecimals: TOKENS.USDC.decimals,
+  //   });
+  // });
 
   // it("USDC -> XSGD originSwap", async function () {
   //   await routerOriginSwapAndCheck({
