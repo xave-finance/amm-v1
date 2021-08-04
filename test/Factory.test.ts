@@ -89,40 +89,40 @@ describe("Factory", function () {
     }));
   });
 
-  // it("No duplicate pairs", async function () {
-  //   const { curve } = await createCurveAndSetParams({
-  //     name: NAME,
-  //     symbol: SYMBOL,
-  //     base: cadc.address,
-  //     quote: usdc.address,
-  //     baseWeight: parseUnits("0.4"),
-  //     quoteWeight: parseUnits("0.6"),
-  //     baseAssimilator: cadcToUsdAssimilator.address,
-  //     quoteAssimilator: usdcToUsdAssimilator.address,
-  //     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  //   });
+  it("No duplicate pairs", async function () {
+    const { curve } = await createCurveAndSetParams({
+      name: NAME,
+      symbol: SYMBOL,
+      base: cadc.address,
+      quote: usdc.address,
+      baseWeight: parseUnits("0.4"),
+      quoteWeight: parseUnits("0.6"),
+      baseAssimilator: cadcToUsdAssimilator.address,
+      quoteAssimilator: usdcToUsdAssimilator.address,
+      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+    });
 
-  //   try {
-  //     await createCurveAndSetParams({
-  //       name: NAME,
-  //       symbol: SYMBOL,
-  //       base: cadc.address,
-  //       quote: usdc.address,
-  //       baseWeight: parseUnits("0.4"),
-  //       quoteWeight: parseUnits("0.6"),
-  //       baseAssimilator: cadcToUsdAssimilator.address,
-  //       quoteAssimilator: usdcToUsdAssimilator.address,
-  //       params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
-  //     });
-  //     throw new Error("newCurve should throw error");
-  //   } catch (e) {
-  //     expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
-  //   }
+    try {
+      await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: cadc.address,
+        quote: usdc.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      });
+      throw new Error("newCurve should throw error");
+    } catch (e) {
+      expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
+    }
 
-  //   const curveCadcUsdcAddress = await curveFactory.curves(
-  //     ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [cadc.address, usdc.address])),
-  //   );
+    const curveCadcUsdcAddress = await curveFactory.curves(
+      ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [cadc.address, usdc.address])),
+    );
 
-  //   expect(curve.address.toLowerCase()).to.be.eq(curveCadcUsdcAddress.toLowerCase());
-  // });
+    expect(curve.address.toLowerCase()).to.be.eq(curveCadcUsdcAddress.toLowerCase());
+  });
 });
