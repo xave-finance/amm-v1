@@ -28,15 +28,15 @@ contract EursToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    // // Mainnet
-    // IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
-    // IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    // IERC20 private constant eurs = IERC20(0xdB25f211AB05b1c97D595516F45794528a807ad8);
+    // Mainnet
+    IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IERC20 private constant eurs = IERC20(0xdB25f211AB05b1c97D595516F45794528a807ad8);
 
-    // Kovan 6 and 2 decimals
-    IOracle private constant oracle = IOracle(0x0c15Ab9A0DB086e062194c273CC79f41597Bbf13);
-    IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
-    IERC20 private constant eurs = IERC20(0x7bcFAF04C9BAD18e3A823740E0683A36426BB0Fe);
+    // // Kovan 6 and 2 decimals
+    // IOracle private constant oracle = IOracle(0x0c15Ab9A0DB086e062194c273CC79f41597Bbf13);
+    // IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
+    // IERC20 private constant eurs = IERC20(0x7bcFAF04C9BAD18e3A823740E0683A36426BB0Fe);
 
     // // Matic
     // IOracle private constant oracle = IOracle(0x73366Fe0AA0Ded304479862808e02506FE556a98);
