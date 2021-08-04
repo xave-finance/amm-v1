@@ -141,36 +141,36 @@ describe("Zap", function () {
     }
   };
 
-  // it("CADC", async function () {
-  //   const base = TOKENS.CADC.address;
-  //   const quote = TOKENS.USDC.address;
-  //   const baseDecimals = TOKENS.CADC.decimals;
-  //   const quoteDecimals = TOKENS.USDC.decimals;
-  //   const curve = curveCADC;
-  //   const oracle = ORACLES.EURS.address;
+  it("CADC", async function () {
+    const base = TOKENS.CADC.address;
+    const quote = TOKENS.USDC.address;
+    const baseDecimals = TOKENS.CADC.decimals;
+    const quoteDecimals = TOKENS.USDC.decimals;
+    const curve = curveCADC;
+    const oracle = ORACLES.EURS.address;
 
-  //   await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
-  // });
+    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
+  });
 
-  // it("XSGD", async function () {
-  //   const base = TOKENS.XSGD.address;
-  //   const quote = TOKENS.USDC.address;
-  //   const baseDecimals = TOKENS.XSGD.decimals;
-  //   const quoteDecimals = TOKENS.USDC.decimals;
-  //   const curve = curveXSGD;
-  //   const oracle = ORACLES.EURS.address;
+  it("XSGD", async function () {
+    const base = TOKENS.XSGD.address;
+    const quote = TOKENS.USDC.address;
+    const baseDecimals = TOKENS.XSGD.decimals;
+    const quoteDecimals = TOKENS.USDC.decimals;
+    const curve = curveXSGD;
+    const oracle = ORACLES.EURS.address;
 
-  //   await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
-  // });
+    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
+  });
 
-  // it("EURS", async function () {
-  //   const base = TOKENS.EURS.address;
-  //   const quote = TOKENS.USDC.address;
-  //   const baseDecimals = TOKENS.EURS.decimals;
-  //   const quoteDecimals = TOKENS.USDC.decimals;
-  //   const curve = curveEURS;
-  //   const oracle = ORACLES.EURS.address;
+  it("EURS", async function () {
+    const base = TOKENS.EURS.address;
+    const quote = TOKENS.USDC.address;
+    const baseDecimals = TOKENS.EURS.decimals;
+    const quoteDecimals = TOKENS.USDC.decimals;
+    const curve = curveEURS;
+    const oracle = ORACLES.EURS.address;
 
-  //   await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
-  // });
+    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
+  });
 });

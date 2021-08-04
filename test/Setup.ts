@@ -74,11 +74,6 @@ export const scaffoldTest = async () => {
     erc20,
     CurveFactory,
     RouterFactory,
-    curvesLib,
-    orchestratorLib,
-    proportionalLiquidityLib,
-    swapsLib,
-    viewLiquidityLib
   };
 };
 
