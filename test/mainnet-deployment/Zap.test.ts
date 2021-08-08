@@ -100,45 +100,81 @@ describe("Zap", function () {
 
     const zapAmount1 = "5000";
     const before1 = await curve.balanceOf(userAddress);
-    await zap.zapFromQuote(curve.address, parseUnits(zapAmount1, quoteDecimals), await getFutureTime(), 0);
+    console.log("before1: %s", before1);
+    
+    // lucas
+    console.log(curve.address);
+    console.log(Number(parseUnits(zapAmount1, quoteDecimals)));
+
+    // lucas 
+    const result = await zap.calcSwapAmountForZap(curve.address, Number(parseUnits(zapAmount1, quoteDecimals)), false);
+    
+    console.log("calcSwapAmountForZap");
+    console.log(result);
+
+    // lucas wrapper
+    console.log("zap.calc");
+    const result2 = await zap.calc(curve.address, "0xdB25f211AB05b1c97D595516F45794528a807ad8");
+    console.log(result2);
+
+    
+
+    // lucas test deposit2 wrapper
+    const deadline = await getFutureTime();
+    const result3 = await zap.deposit2(curve.address, deadline);
+    console.log("zap.deposit2");
+    console.log(result3);
+
+    let iface = new ethers.utils.Interface(["deposit2(address,uint256)"]);
+    const decoded = iface.decodeFunctionData("deposit2", result3.data);
+
+    await zap.zapFromQuote(curve.address, parseUnits(zapAmount1, quoteDecimals), deadline, 0);
     const after1 = await curve.balanceOf(userAddress);
+    console.log("after1: %s", after1);
+
+
+    // console.log(baseDecimals);
+
+    // lucas
+    const actual = after1.sub(before1);
+    console.log(actual);
 
     if (baseDecimals === 2) {
-      expectBNAproxEq(after1.sub(before1), parseUnits(zapAmount1), parseUnits(zapAmount1).div(40));
+      expectBNAproxEq(actual, parseUnits(zapAmount1), parseUnits(zapAmount1).div(40));
     } else {
       expectBNAproxEq(after1.sub(before1), parseUnits(zapAmount1), parseUnits(zapAmount1).div(50));
     }
 
-    const zapAmount2 = "5000";
-    const before2 = await curve.balanceOf(userAddress);
-    await zap.zapFromBase(curve.address, parseUnits(zapAmount2, baseDecimals), await getFutureTime(), 0);
-    const after2 = await curve.balanceOf(userAddress);
-    expect(after2.gt(before2)).to.be.true;
+    // const zapAmount2 = "5000";
+    // const before2 = await curve.balanceOf(userAddress);
+    // await zap.zapFromBase(curve.address, parseUnits(zapAmount2, baseDecimals), await getFutureTime(), 0);
+    // const after2 = await curve.balanceOf(userAddress);
+    // expect(after2.gt(before2)).to.be.true;
 
-    const maxDeposit1 = await zap.calcMaxDepositAmount(
-      curve.address,
-      parseUnits("100", baseDecimals),
-      parseUnits("10", quoteDecimals),
-    );
-    expect(maxDeposit1[2][0].lt(parseUnits("100", baseDecimals))).to.be.true;
-    expectBNAproxEq(maxDeposit1[2][1], parseUnits("10", quoteDecimals), parseUnits("1", quoteDecimals));
+    // const maxDeposit1 = await zap.calcMaxDepositAmount(
+    //   curve.address,
+    //   parseUnits("100", baseDecimals),
+    //   parseUnits("10", quoteDecimals),
+    // );
+    // expect(maxDeposit1[2][0].lt(parseUnits("100", baseDecimals))).to.be.true;
+    // expectBNAproxEq(maxDeposit1[2][1], parseUnits("10", quoteDecimals), parseUnits("1", quoteDecimals));
 
-    const maxDeposit2 = await zap.calcMaxDepositAmount(
-      curve.address,
-      parseUnits("100", baseDecimals),
-      parseUnits("1000", quoteDecimals),
-    );
+    // const maxDeposit2 = await zap.calcMaxDepositAmount(
+    //   curve.address,
+    //   parseUnits("100", baseDecimals),
+    //   parseUnits("1000", quoteDecimals),
+    // );
 
-    if (baseDecimals === 2) {
-      expect(maxDeposit2[2][1].lt(parseUnits("1000", quoteDecimals))).to.be.true;
+    // if (baseDecimals === 2) {
+    //   expect(maxDeposit2[2][1].lt(parseUnits("1000", quoteDecimals))).to.be.true;
 
-      // EURs approximation suxs
-      expect(maxDeposit2[2][0].lt(parseUnits("100", baseDecimals))).to.be.true;
-      expect(maxDeposit2[2][0].gt(parseUnits("50", baseDecimals))).to.be.true;
-    } else {
-      expect(maxDeposit2[2][1].lt(parseUnits("1000", quoteDecimals))).to.be.true;
-      expectBNAproxEq(maxDeposit2[2][0], parseUnits("100", baseDecimals), parseUnits("2", baseDecimals));
-    }
+    //   // EURs approximation suxs
+    //   expect(maxDeposit2[2][0].lt(parseUnits("100", baseDecimals))).to.be.true;
+    //   expect(maxDeposit2[2][0].gt(parseUnits("50", baseDecimals))).to.be.true;
+    // } else {
+    //   expect(maxDeposit2[2][1].lt(parseUnits("1000", quoteDecimals))).to.be.true;
+    //   expectBNAproxEq(maxDeposit2[2][0], parseUnits("100", baseDecimals), parseUnits("2", baseDecimals));
+    // }
   };
 
   it("CADC", async function () {
@@ -163,7 +199,7 @@ describe("Zap", function () {
     await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
   });
 
-  it("EURS", async function () {
+  it.only("EURS", async function () {
     const base = TOKENS.EURS.address;
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.EURS.decimals;

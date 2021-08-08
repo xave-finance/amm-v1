@@ -84,6 +84,11 @@ contract Zap {
         return zap(_curve, _zapAmount, _deadline, _minLPAmount, false);
     }
 
+    function deposit2(address _curve, uint256 _deadline) public returns (uint256) {
+        (uint256 lpAmount, ) = Curve(_curve).deposit(0, _deadline);
+        return lpAmount;
+    }
+
     /// @notice Zaps from a single token into the LP pool
     /// @param _curve The address of the curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
@@ -126,6 +131,7 @@ contract Zap {
         USDC.safeApprove(_curve, 0);
         USDC.safeApprove(_curve, quoteAmount);
 
+        // lpamount is zero here // lucas
         (uint256 lpAmount, ) = Curve(_curve).deposit(depositAmount, _deadline);
         require(lpAmount >= _minLPAmount, "!Zap/not-enough-lp-amount");
 
@@ -497,6 +503,11 @@ contract Zap {
         }
 
         return swapAmount;
+    }
+
+    // lucas wrapper
+    function calc(address _curve, address _base) public view returns (uint256, uint256, uint256) {
+        return _calcDepositAmount(_curve, _base);
     }
 
     function _calcDepositAmount(address _curve, address _base)

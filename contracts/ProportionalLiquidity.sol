@@ -25,6 +25,7 @@ library ProportionalLiquidity {
         external
         returns (uint256 curves_, uint256[] memory)
     {
+        // this will be 0 // lucas
         int128 __deposit = _deposit.divu(1e18);
 
         uint256 _length = curve.assets.length;
@@ -63,17 +64,26 @@ library ProportionalLiquidity {
 
         int128 _totalShells = curve.totalSupply.divu(1e18);
 
+        // this will be zero // lucas
         int128 _newShells = __deposit;
 
         if (_totalShells > 0) {
+            // this will be zero // lucas
             _newShells = __deposit.div(_oGLiq);
+
+            // these will be zero // lucas
             _newShells = _newShells.mul(_totalShells);
         }
 
+        // this will be zero // lucas
         requireLiquidityInvariant(curve, _totalShells, _newShells, _oGLiqProp, _oBalsProp);
 
-        mint(curve, msg.sender, curves_ = _newShells.mulu(1e18));
+        // lucas hack
+        curves_ = 0;
+        // mint(curve, msg.sender, curves_ = _newShells.mulu(1e18));
+        mint(curve, msg.sender, 0);
 
+        // returns zeroes // lucas
         return (curves_, deposits_);
     }
 
