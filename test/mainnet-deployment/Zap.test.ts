@@ -125,11 +125,13 @@ describe("Zap", function () {
     console.log("zap.deposit2");
     console.log(result3);
 
-    // // get return values instead
-    // let iface = new ethers.utils.Interface(["deposit2(address,uint256)"]);
-    // const decoded = iface.decodeFunctionData("deposit2", result3.data);
+    const result4 = await zap.deposit3(curve.address);
+    console.log("zap.deposit4");
+    console.log(result4);
 
+    // act
     await zap.zapFromQuote(curve.address, parseUnits(zapAmount1, quoteDecimals), deadline, 0);
+    
     const after1 = await curve.balanceOf(userAddress);
     console.log("after1: %s", after1);
 
