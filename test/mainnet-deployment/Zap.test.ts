@@ -117,7 +117,7 @@ describe("Zap", function () {
     const result2 = await zap.calc(curve.address, "0xdB25f211AB05b1c97D595516F45794528a807ad8");
     console.log(result2);
 
-    
+    viewDeposit
 
     // lucas test deposit2 wrapper
     const deadline = await getFutureTime();
@@ -125,8 +125,9 @@ describe("Zap", function () {
     console.log("zap.deposit2");
     console.log(result3);
 
-    let iface = new ethers.utils.Interface(["deposit2(address,uint256)"]);
-    const decoded = iface.decodeFunctionData("deposit2", result3.data);
+    // // get return values instead
+    // let iface = new ethers.utils.Interface(["deposit2(address,uint256)"]);
+    // const decoded = iface.decodeFunctionData("deposit2", result3.data);
 
     await zap.zapFromQuote(curve.address, parseUnits(zapAmount1, quoteDecimals), deadline, 0);
     const after1 = await curve.balanceOf(userAddress);

@@ -481,7 +481,22 @@ contract Curve is Storage, MerkleProver {
         return (curvesMinted_, deposits_);
     }
 
-    /// @notice deposit into the pool with no slippage from the numeraire assets the pool supports
+    // lucas helper
+    uint256 private __curves;
+
+    // lucas helper
+    function curvesMinted() external view returns (uint256) {
+        return __curves;
+    }
+
+    // lucas helper
+    uint256[] private __deposits;
+
+    // lucas helper
+    function deposits() external view returns (uint256[] memory) {
+        return __deposits;
+    }
+    
     /// @param  _deposit the full amount you want to deposit into the pool which will be divided up evenly amongst
     ///                  the numeraire assets of the pool
     /// @return (the amount of curves you receive in return for your deposit,
@@ -494,8 +509,12 @@ contract Curve is Storage, MerkleProver {
         notInWhitelistingStage
         returns (uint256, uint256[] memory)
     {
-        // (curvesMinted_,  deposits_)
-        return ProportionalLiquidity.proportionalDeposit(curve, _deposit);
+        // (curvesMinted_,  deposits_) // this was commented out LC
+        // return ProportionalLiquidity.proportionalDeposit(curve, _deposit); // commented out LC
+
+        // Set reutnr values
+        (__curves, __deposits) = ProportionalLiquidity.proportionalDeposit(curve, _deposit);
+        return (__curves, __deposits);
     }
 
     /// @notice view deposits and curves minted a given deposit would return

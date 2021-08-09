@@ -84,9 +84,17 @@ contract Zap {
         return zap(_curve, _zapAmount, _deadline, _minLPAmount, false);
     }
 
+    // helper LUCAS
     function deposit2(address _curve, uint256 _deadline) public returns (uint256) {
-        (uint256 lpAmount, ) = Curve(_curve).deposit(0, _deadline);
-        return lpAmount;
+        // curvesToMint_, depositsToMake_ 
+        // NB WAS lpamount
+        (uint256 curvesToMint_, ) = Curve(_curve).deposit(0, _deadline);
+        return curvesToMint_;
+    }
+
+    // helper LUCAS
+    function deposit3(address _curve) public returns (uint256, uint256[] memory) {
+        return Curve(_curve).viewDeposit(_deposit);
     }
 
     /// @notice Zaps from a single token into the LP pool
