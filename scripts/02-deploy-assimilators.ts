@@ -9,18 +9,10 @@ async function main() {
   console.time('Deployment Time');
   const { user1 } = await getAccounts();
   let output = {};
+  let assimilators = ASSIMILATORS.indexOf(',') > -1 ? ASSIMILATORS.split(',') : [ASSIMILATORS];
 
-  if (ASSIMILATORS.indexOf(',') > -1) {
-    let assimilatorsArr = ASSIMILATORS.split(',');
-
-    for (let index = 0; index < assimilatorsArr.length; index++) {
-      const assimilator = assimilatorsArr[index];
-      const res = await deployerHelper(user1, assimilator);
-
-      output[res.key] = res.address;
-    }
-  } else {
-    const res = await deployerHelper(user1, ASSIMILATORS);
+  for (let index = 0; index < assimilators.length; index++) {
+    const res = await deployerHelper(user1, assimilators[index]);
 
     output[res.key] = res.address;
   }

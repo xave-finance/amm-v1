@@ -39,7 +39,7 @@ export const configFileHelper = async (network, output, directory) => {
   for (var key in output) {
     let data = {};
     const token = key.split('ToUsdAssimilator')[0].toUpperCase();
-    const fileName = `${token}ToUsdAssimilator`;
+    const fileName = directory === 'assimilators' ? `${token}ToUsdAssimilator` : `${token}Curves`;
     data[fileName] = output[key];
 
     // Deployed contracts config
