@@ -1,9 +1,7 @@
 import hre from "hardhat";
-import chalk from "chalk";
-const { ethers } = hre;
 
 import { getAccounts } from "./common";
-import { deployerHelper, assimConfig } from "./Utils";
+import { deployerHelper, configFileHelper } from "./Utils";
 
 const ASSIMILATORS = process.env.ASSIMILATORS;
 
@@ -28,11 +26,7 @@ async function main() {
   }
 
   // Deployed contracts log
-  for (var key in output) {
-    let output = {};
-    output[key] = output[key]
-    await assimConfig(hre.network.name, key, output);
-  }
+  await configFileHelper(hre.network.name, output, 'assimilators');
   console.timeEnd('Deployment Time');
 }
 
