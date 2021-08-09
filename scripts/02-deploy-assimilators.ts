@@ -2,8 +2,8 @@ import hre from "hardhat";
 import chalk from "chalk";
 const { ethers } = hre;
 
-import { getAccounts, deployContract } from "./common";
-import { deployedLogs, assim } from "./Utils";
+import { getAccounts } from "./common";
+import { deployerHelper, assimConfig } from "./Utils";
 
 const ASSIMILATORS = process.env.ASSIMILATORS;
 
@@ -17,18 +17,22 @@ async function main() {
 
     for (let index = 0; index < assimilatorsArr.length; index++) {
       const assimilator = assimilatorsArr[index];
-      const res = await assim(user1, assimilator);
+      const res = await deployerHelper(user1, assimilator);
 
       output[res.key] = res.address;
     }
   } else {
-    const res = await assim(user1, ASSIMILATORS);
+    const res = await deployerHelper(user1, ASSIMILATORS);
 
     output[res.key] = res.address;
   }
 
   // Deployed contracts log
-  await deployedLogs(hre.network.name, 'assimilators_deployed', output);
+  for (var key in output) {
+    let output = {};
+    output[key] = output[key]
+    await assimConfig(hre.network.name, key, output);
+  }
   console.timeEnd('Deployment Time');
 }
 

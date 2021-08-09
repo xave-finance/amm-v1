@@ -6,6 +6,15 @@ import fs from "fs";
 
 import { deployContract } from "./common";
 
+export const assimConfig = async (network, filename, output) => {
+  // Deployed contracts config
+  const outputConfigDir = path.join(__dirname, `./config/${network}/assimilators`);
+  mkdirp.sync(outputConfigDir);
+
+  const outputConfigPath = `/${outputConfigDir}/${filename}.json`;
+  fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
+}
+
 export const deployedLogs = async (network, filename, output) => {
   // Deployed contracts log
   const outputLogDir = path.join(__dirname, `./deployed_contract_logs/${network}`);
@@ -28,13 +37,13 @@ export const configImporter = (filename) => {
   return path.resolve(__dirname, `./config/${hre.network.name}/${filename}.json`);
 }
 
-export const assim = async (user, assim) => {
-  const toUsdAssimilator = await ethers.getContractFactory(assim);
+export const deployerHelper = async (user, contractName) => {
+  const contractInstance = await ethers.getContractFactory(contractName);
 
-  const deployedAssimilator = await deployContract({
-    name: assim,
+  const deployed = await deployContract({
+    name: contractName,
     deployer: user,
-    factory: toUsdAssimilator,
+    factory: contractInstance,
     args: [],
     opts: {
       gasLimit: 2000000,
@@ -42,10 +51,10 @@ export const assim = async (user, assim) => {
   });
 
   // Lowercase the first letter of the key
-  const key = assim[0].toLocaleLowerCase() + assim.slice(1);
+  const key = contractName[0].toLocaleLowerCase() + contractName.slice(1);
 
   return {
     key,
-    address: deployedAssimilator.address
+    address: deployed.address
   }
 }
