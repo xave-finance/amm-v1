@@ -84,18 +84,32 @@ contract Zap {
         return zap(_curve, _zapAmount, _deadline, _minLPAmount, false);
     }
 
+    // lucas to debug
+    uint256 public curvesToMint;
+    uint256[] public depositsToMake;
+    uint256 public depositAmount;
+    uint256 public baseAmount;
+    uint256 public quoteAmount;
+    uint256 public lpAmount;
+
+    function usdcBalance() public view returns (uint256) {
+        return USDC.balanceOf(address(this));
+    }
+
     // lucas helper function
     function deposit2(address _curve, uint256 _deadline) public returns (uint256) {
         // curvesToMint_, depositsToMake_ 
         // NB WAS lpamount
-        (uint256 curvesToMint_, ) = Curve(_curve).deposit(0, _deadline);
+        (uint256 curvesToMint_, uint256[] memory depositsToMake_) = Curve(_curve).deposit(0, _deadline);
+        curvesToMint = curvesToMint_;
+        depositsToMake = depositsToMake_;
         return curvesToMint_;
     }
 
-    // lucas helper function
-    function deposit3(address _curve) public returns (uint256, uint256[] memory) {
-        return Curve(_curve).viewDeposit(0);
-    }
+    // // lucas helper function
+    // function viewDeposit(address _curve) public returns (uint256, uint256[] memory) {
+    //     return Curve(_curve).viewDeposit(0);
+    // }
 
     /// @notice Zaps from a single token into the LP pool
     /// @param _curve The address of the curve
@@ -113,23 +127,26 @@ contract Zap {
     ) public returns (uint256) {
         (address base, uint256 swapAmount) = calcSwapAmountForZap(_curve, _zapAmount, isFromBase);
 
-        // Swap on curve
-        if (isFromBase) {
-            IERC20(base).safeTransferFrom(msg.sender, address(this), _zapAmount);
-            IERC20(base).safeApprove(_curve, 0);
-            IERC20(base).safeApprove(_curve, swapAmount);
+        // // Swap on curve
+        // if (isFromBase) {
+        //     IERC20(base).safeTransferFrom(msg.sender, address(this), _zapAmount);
+        //     IERC20(base).safeApprove(_curve, 0);
+        //     IERC20(base).safeApprove(_curve, swapAmount);
 
-            Curve(_curve).originSwap(base, address(USDC), swapAmount, 0, _deadline);
-        } else {
+        //     Curve(_curve).originSwap(base, address(USDC), swapAmount, 0, _deadline);
+        // } else {
             USDC.safeTransferFrom(msg.sender, address(this), _zapAmount);
             USDC.safeApprove(_curve, 0);
             USDC.safeApprove(_curve, swapAmount);
 
             Curve(_curve).originSwap(address(USDC), base, swapAmount, 0, _deadline);
-        }
+        //}
 
         // Calculate deposit amount
-        (uint256 depositAmount, uint256 baseAmount, uint256 quoteAmount) = _calcDepositAmount(_curve, base);
+        (uint256 __depositAmount, uint256 __baseAmount, uint256 __quoteAmount) = _calcDepositAmount(_curve, base);
+        depositAmount = __depositAmount;
+        baseAmount = __baseAmount;
+        quoteAmount = __quoteAmount;
 
         // Can only deposit the smaller amount as we won't have enough of the
         // token to deposit
@@ -140,7 +157,8 @@ contract Zap {
         USDC.safeApprove(_curve, quoteAmount);
 
         // lpamount is zero here // lucas
-        (uint256 lpAmount, ) = Curve(_curve).deposit(depositAmount, _deadline);
+        (uint256 __lpAmount, ) = Curve(_curve).deposit(depositAmount, _deadline);
+        lpAmount = __lpAmount;
         require(lpAmount >= _minLPAmount, "!Zap/not-enough-lp-amount");
 
         // Transfer all remaining balances back to user

@@ -109,28 +109,47 @@ describe("Zap", function () {
     // lucas 
     const result = await zap.calcSwapAmountForZap(curve.address, Number(parseUnits(zapAmount1, quoteDecimals)), false);
     
-    console.log("calcSwapAmountForZap");
-    console.log(result);
+    console.log();
+    console.log("calcSwapAmountForZap " + result);
 
     // lucas wrapper
-    console.log("zap.calc");
-    const result2 = await zap.calc(curve.address, "0xdB25f211AB05b1c97D595516F45794528a807ad8");
-    console.log(result2);
-
-    viewDeposit
+    //https://etherscan.io/address/0xdB25f211AB05b1c97D595516F45794528a807ad8 EURSToken
+    const calc = await zap.calc(curve.address, "0xdB25f211AB05b1c97D595516F45794528a807ad8");
+    console.log("zap.calc repsonse " + calc);
 
     // lucas test deposit2 wrapper
     const deadline = await getFutureTime();
-    const result3 = await zap.deposit2(curve.address, deadline);
-    console.log("zap.deposit2");
-    console.log(result3);
+    await zap.deposit2(curve.address, deadline);
+ 
+    const curvesToMint = await zap.curvesToMint();
+    console.log("zap.curvesToMint " + curvesToMint);
 
-    const result4 = await zap.deposit3(curve.address);
-    console.log("zap.deposit4");
-    console.log(result4);
+    const depositsToMake = await zap.depositsToMake(0);
+    console.log("zap.depositsToMake " + depositsToMake);
+
+    // const viewDeposit = await zap.viewDeposit(curve.address);
+    // console.log("zap.viewDeposit " + viewDeposit);
+
+    // check balance of zap
+    const zap_curve_balance = await curve.balanceOf(zap.address);
+    console.log("zap_curve_balance " + zap_curve_balance);
+
+    const usdc_balance = await zap.usdcBalance();
+    console.log("usdc_balance " + usdc_balance);
 
     // act
     await zap.zapFromQuote(curve.address, parseUnits(zapAmount1, quoteDecimals), deadline, 0);
+    const depositAmount = await zap.depositAmount();
+    console.log("depositAmount " + depositAmount);
+
+    const baseAmount = await zap.baseAmount();
+    console.log("baseAmount    " + baseAmount);
+
+    const quoteAmount = await zap.quoteAmount();
+    console.log("quoteAmount " + quoteAmount);
+
+    const lpAmount = await zap.lpAmount();
+    console.log("lpAmount " + lpAmount);
     
     const after1 = await curve.balanceOf(userAddress);
     console.log("after1: %s", after1);
