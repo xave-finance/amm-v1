@@ -7,14 +7,8 @@ import fs from "fs";
 import { BigNumberish } from "ethers";
 import { ERC20 } from "../typechain/ERC20";
 import { CurveFactory, Curve } from "../typechain";
-
 import { deployContract } from "./common";
 
-import { CONTRACTS } from "./config/contracts";
-
-const CORE_ADDRESSES = {
-  curveFactory: CONTRACTS.factory
-}
 
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const TOKEN = {};
@@ -52,6 +46,11 @@ export const configFileHelper = async (network, output, directory) => {
 }
 
 export const curveConfig = async (network, tokenSymbol, tokenName) => {
+  const { CONTRACTS } = require(path.resolve(__dirname, `./config/contracts`));
+  const CORE_ADDRESSES = {
+    curveFactory: CONTRACTS.factory
+  }
+
   // List all json files under assimilators config
   const files = fs.readdirSync(path.join(__dirname, `./config/${network}/assimilators`));
   let fileObj = {};
@@ -138,7 +137,7 @@ export const deployerHelper = async (user, contractName) => {
     factory: contractInstance,
     args: [],
     opts: {
-      gasLimit: 2000000,
+      gasLimit: 3000000,
     },
   });
 

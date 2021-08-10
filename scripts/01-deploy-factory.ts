@@ -1,82 +1,32 @@
 import hre from "hardhat";
-import chalk from "chalk";
-
 const { ethers } = hre;
 
 import { getAccounts, deployContract } from "./common";
-import { deployedLogs } from "./Utils";
+import { deployedLogs, deployerHelper } from "./Utils";
 
 async function main() {
   console.time('Deployment Time');
   const { user1 } = await getAccounts();
+  let output = {};
+  let newOutput = {};
 
-  const CurvesLib = await ethers.getContractFactory("Curves");
-  const OrchestratorLib = await ethers.getContractFactory("Orchestrator");
-  const ProportionalLiquidityLib = await ethers.getContractFactory("ProportionalLiquidity");
-  const SwapsLib = await ethers.getContractFactory("Swaps");
-  const ViewLiquidityLib = await ethers.getContractFactory("ViewLiquidity");
+  const coreContracts = process.env.CORE_CONTRACTS.split(',');
+  for (let index = 0; index < coreContracts.length; index++) {
+    try {
+      const res = await deployerHelper(user1, coreContracts[index]);
 
-  const curvesLib = await deployContract({
-    name: "CuvesLib",
-    deployer: user1,
-    factory: CurvesLib,
-    args: [],
-    opts: {
-      gasLimit: 800000,
-    },
-  });
+      output[res.key] = res.address;
+    } catch (error) {
+      console.log(`Error: ${error}`);
+      continue;
+    }
+  }
 
-  const orchestratorLib = await deployContract({
-    name: "OrchestratorLib",
-    deployer: user1,
-    factory: OrchestratorLib,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const proportionalLiquidityLib = await deployContract({
-    name: "ProportionalLiquidityLib",
-    deployer: user1,
-    factory: ProportionalLiquidityLib,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const swapsLib = await deployContract({
-    name: "SwapsLib",
-    deployer: user1,
-    factory: SwapsLib,
-    args: [],
-    opts: {
-      gasLimit: 3000000,
-    },
-  });
-
-  const viewLiquidityLib = await deployContract({
-    name: "ViewLiquidityLib",
-    deployer: user1,
-    factory: ViewLiquidityLib,
-    args: [],
-    opts: {
-      gasLimit: 400000,
-    },
-  });
+  Object.keys(output).map(key => newOutput[key[0].toUpperCase() + key.slice(1)] = output[key]);
 
   const CurveFactory = await ethers.getContractFactory("CurveFactory", {
-    libraries: {
-      Curves: curvesLib.address,
-      Orchestrator: orchestratorLib.address,
-      ProportionalLiquidity: proportionalLiquidityLib.address,
-      Swaps: swapsLib.address,
-      ViewLiquidity: viewLiquidityLib.address,
-    },
+    libraries: newOutput,
   });
-
-  const RouterFactory = await ethers.getContractFactory("Router");
 
   const curveFactory = await deployContract({
     name: "CurveFactory",
@@ -87,8 +37,8 @@ async function main() {
       gasLimit: 4000000,
     },
   });
-  console.log("curveFactory deployed by ", user1.address, " and owner is ", await curveFactory.owner());
 
+  const RouterFactory = await ethers.getContractFactory("Router");
   const router = await deployContract({
     name: "Router",
     deployer: user1,
@@ -99,20 +49,12 @@ async function main() {
     },
   });
 
-  const output = {
-    libraries: {
-      Curves: curvesLib.address,
-      Orchestrator: orchestratorLib.address,
-      ProportionalLiquidity: proportionalLiquidityLib.address,
-      Swaps: swapsLib.address,
-      ViewLiquidity: viewLiquidityLib.address,
-    },
+  // Deployed contracts log
+  await deployedLogs(hre.network.name, 'factory_deployed', {
+    libraries: newOutput,
     curveFactory: curveFactory.address,
     router: router.address,
-  };
-
-  // Deployed contracts log
-  await deployedLogs(hre.network.name, 'factory_deployed', output);
+  });
   console.timeEnd('Deployment Time');
 }
 
