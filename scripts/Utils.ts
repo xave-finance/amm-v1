@@ -78,30 +78,33 @@ export const curveConfig = async (network, tokenSymbol, tokenName) => {
 
   for (let index = 0; index < tokenSymbolArr.length; index++) {
     const tokenSymbol = tokenSymbolArr[index];
-    const tokenName = tokenNameArr[index];
-    const fullFileName = fileObj[tokenSymbol];
-    const fileName = fileObj[tokenSymbol].split('.json')[0];
-    const quotedFilename = 'USDCToUsdAssimilator';
-    const baseCurveAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
-    const quotedCurveAddr = require(configImporterNew(`assimilators/${quotedFilename}.json`))[quotedFilename];
 
-    const curveFactory = (await ethers.getContractAt(
-      "CurveFactory",
-      CORE_ADDRESSES.curveFactory,
-    )) as CurveFactory;
+    if (tokenSymbol !== 'USDC') {
+      const tokenName = tokenNameArr[index];
+      const fullFileName = fileObj[tokenSymbol];
+      const fileName = fileObj[tokenSymbol].split('.json')[0];
+      const quotedFilename = 'USDCToUsdAssimilator';
+      const baseCurveAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
+      const quotedCurveAddr = require(configImporterNew(`assimilators/${quotedFilename}.json`))[quotedFilename];
 
-    const { curve } = await createCurveAndSetParams({
-      curveFactory,
-      name: tokenName,
-      symbol: tokenSymbol,
-      base: TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
-      quote: TOKEN[QUOTED_TOKEN],
-      baseWeight: parseUnits("0.5"),
-      quoteWeight: parseUnits("0.5"),
-      baseAssimilator: baseCurveAddr,
-      quoteAssimilator: quotedCurveAddr,
-      params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-    });
+      const curveFactory = (await ethers.getContractAt(
+        "CurveFactory",
+        CORE_ADDRESSES.curveFactory,
+      )) as CurveFactory;
+
+      const { curve } = await createCurveAndSetParams({
+        curveFactory,
+        name: tokenName,
+        symbol: tokenSymbol,
+        base: TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+        quote: TOKEN[QUOTED_TOKEN],
+        baseWeight: parseUnits("0.5"),
+        quoteWeight: parseUnits("0.5"),
+        baseAssimilator: baseCurveAddr,
+        quoteAssimilator: quotedCurveAddr,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+    }
   }
 }
 

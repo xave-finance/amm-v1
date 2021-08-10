@@ -86,42 +86,45 @@ const curvesVerify = async () => {
   for (let index = 0; index < tokenSymbolArr.length; index++) {
     try {
       const tokenSymbol = tokenSymbolArr[index];
-      console.log(`--------------------------------------------------------------------------------`);
-      console.log(`-------------------- Verifying ${tokenSymbol} Curve Contract`);
-      console.log(`--------------------------------------------------------------------------------`);
 
-      const fileName = `${tokenSymbol}Curves`;
-      const fullFileName = `${fileName}.json`;
-      const curveAddr = require(configImporterNew(`curves/${fullFileName}`))[fileName];
-      const token = assimilators[index].split('ToUsdAssimilator')[0].toUpperCase();
-      const assimfileName = `${token}ToUsdAssimilator`;
-      const assimAddr = require(configImporterNew(`assimilators/${assimfileName}.json`))[assimfileName];
-      const quotedAssimAddr = require(configImporterNew(`assimilators/USDCToUsdAssimilator.json`))['USDCToUsdAssimilator'];
+      if (tokenSymbol !== 'USDC') {
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`-------------------- Verifying ${tokenSymbol} Curve Contract`);
+        console.log(`--------------------------------------------------------------------------------`);
 
-      await hre.run('verify:verify', {
-        address: curveAddr,
-        constructorArguments: [
-          tokenNameArr[index],
-          tokenSymbol,
-          [
-            TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
-            assimAddr,
-            TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
-            assimAddr,
-            TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+        const fileName = `${tokenSymbol}Curves`;
+        const fullFileName = `${fileName}.json`;
+        const curveAddr = require(configImporterNew(`curves/${fullFileName}`))[fileName];
+        const token = assimilators[index].split('ToUsdAssimilator')[0].toUpperCase();
+        const assimfileName = `${token}ToUsdAssimilator`;
+        const assimAddr = require(configImporterNew(`assimilators/${assimfileName}.json`))[assimfileName];
+        const quotedAssimAddr = require(configImporterNew(`assimilators/USDCToUsdAssimilator.json`))['USDCToUsdAssimilator'];
 
-            TOKEN[QUOTED_TOKEN],
-            quotedAssimAddr,
-            TOKEN[QUOTED_TOKEN],
-            quotedAssimAddr,
-            TOKEN[QUOTED_TOKEN],
-          ],
-          [
-            parseUnits("0.5"),
-            parseUnits("0.5"),
+        await hre.run('verify:verify', {
+          address: curveAddr,
+          constructorArguments: [
+            tokenNameArr[index],
+            tokenSymbol,
+            [
+              TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+              assimAddr,
+              TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+              assimAddr,
+              TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+
+              TOKEN[QUOTED_TOKEN],
+              quotedAssimAddr,
+              TOKEN[QUOTED_TOKEN],
+              quotedAssimAddr,
+              TOKEN[QUOTED_TOKEN],
+            ],
+            [
+              parseUnits("0.5"),
+              parseUnits("0.5"),
+            ]
           ]
-        ]
-      });
+        });
+      }
     } catch (error) {
       console.log(`Error: ${error}`);
       continue;
