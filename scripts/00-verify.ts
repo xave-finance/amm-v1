@@ -11,8 +11,9 @@ async function main() {
     // ------------
     // Core Contracts
     for (const key in CONTRACTS) {
-        console.log(`-------------------- Verifying ${key} Contract`);
-        console.log(CONTRACTS[key]);
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`-------------------- Verifying ${key} Core Contract`);
+        console.log(`--------------------------------------------------------------------------------`);
 
         if (key === 'router') {
             await hre.run('verify:verify', {
@@ -31,7 +32,9 @@ async function main() {
     // ------------
     // Assimilators
     for (let index = 0; index < assimilators.length; index++) {
-        console.log(`-------------------- Verifying ${assimilators[index]} Contract`);
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`-------------------- Verifying ${assimilators[index]} Assimilator Contract`);
+        console.log(`--------------------------------------------------------------------------------`);
 
         const token = assimilators[index].split('ToUsdAssimilator')[0].toUpperCase();
         const fileName = `${token}ToUsdAssimilator`;
@@ -44,7 +47,6 @@ async function main() {
 
     // -------
     // Curves
-
     const TOKEN_SYMBOL = process.env.TOKEN_SYMBOL;
     const TOKEN_NAME = process.env.TOKEN_NAME;
 
@@ -71,7 +73,9 @@ async function main() {
 
     for (let index = 0; index < tokenSymbolArr.length; index++) {
         const tokenSymbol = tokenSymbolArr[index];
-        console.log(`-------------------- Verifying ${tokenSymbol} Contract`);
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`-------------------- Verifying ${tokenSymbol} Curve Contract`);
+        console.log(`--------------------------------------------------------------------------------`);
 
         const fileName = `${tokenSymbol}Curves`;
         const fullFileName = `${fileName}.json`;
