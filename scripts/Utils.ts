@@ -36,6 +36,9 @@ export const configFileHelper = async (network, output, directory) => {
     const fileName = directory === 'assimilators' ? `${token}ToUsdAssimilator` : `${token}Curves`;
     data[fileName] = output[key];
 
+    // Deployed contracts log
+    await logHelper(network, fileName, data);
+
     // Deployed contracts config
     const outputConfigDir = path.join(__dirname, `./config/${network}/${directory}`);
     mkdirp.sync(outputConfigDir);
@@ -104,6 +107,18 @@ export const curveConfig = async (network, tokenSymbol, tokenName) => {
 
 export const deployedLogs = async (network, filename, output) => {
   // Deployed contracts log
+  await logHelper(network, filename, output);
+
+  // Deployed contracts config
+  const outputConfigDir = path.join(__dirname, `./config/${network}`);
+  mkdirp.sync(outputConfigDir);
+  const outputConfigPath = `/${outputConfigDir}/${filename}.json`;
+  fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
+};
+
+
+const logHelper = async (network, filename, output) => {
+  // Deployed contracts log
   const outputLogDir = path.join(__dirname, `./deployed_contract_logs/${network}`);
   // Just like mkdir -p, it will create directory if it doesn't exist
   // If it already exists, then it will not print an error and will move further to create sub-directories.
@@ -112,13 +127,7 @@ export const deployedLogs = async (network, filename, output) => {
   const timestamp = new Date().getTime().toString();
   const outputLogPath = path.join(`${outputLogDir}/${timestamp}_${filename}.json`);
   fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
-
-  // Deployed contracts config
-  const outputConfigDir = path.join(__dirname, `./config/${network}`);
-  mkdirp.sync(outputConfigDir);
-  const outputConfigPath = `/${outputConfigDir}/${filename}.json`;
-  fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
-};
+}
 
 export const configImporter = (filename) => {
   return path.resolve(__dirname, `./config/${hre.network.name}/${filename}.json`);
@@ -171,6 +180,8 @@ const createCurve = async function ({
   baseAssimilator: string;
   quoteAssimilator: string;
 }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
+  let network = hre.network.name;
+
   const tx = await curveFactory.newCurve(
     name,
     symbol,
@@ -199,7 +210,7 @@ const createCurve = async function ({
   output[symbol.toUpperCase()] = curveAddress;
 
   // Deployed contracts log
-  await configFileHelper(hre.network.name, output, 'curves');
+  await configFileHelper(network, output, 'curves');
 
   console.log(`curveAddress ${symbol}: `, curveAddress)
   console.log(`Curve ${symbol} Address: `, curve.address)
