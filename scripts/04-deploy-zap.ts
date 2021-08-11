@@ -29,7 +29,7 @@ async function main() {
   };
 
   // Deployed contracts log
-  await deployedLogs(hre.network.name, 'zap_deployed', output);
+  await deployedLogs('zap_deployed', output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

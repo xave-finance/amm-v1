@@ -18,7 +18,7 @@ async function main() {
   }
 
   // Deployed contracts log
-  await configFileHelper(hre.network.name, output, 'assimilators');
+  await configFileHelper(output, 'assimilators');
   console.timeEnd('Deployment Time');
 }
 

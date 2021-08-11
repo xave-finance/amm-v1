@@ -1,4 +1,4 @@
-import hre from "hardhat";
+import hre, { network } from "hardhat";
 const { ethers } = hre;
 import { parseUnits } from "@ethersproject/units";
 import path from "path";
@@ -9,7 +9,7 @@ import { ERC20 } from "../typechain/ERC20";
 import { CurveFactory, Curve } from "../typechain";
 import { deployContract } from "./common";
 
-
+const NETWORK = hre.network.name;
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const TOKEN = {};
 const envList = process.env;
@@ -29,7 +29,7 @@ const DIMENSION = {
   lambda: parseUnits(process.env.DIMENSION_LAMBDA)
 }
 
-export const configFileHelper = async (network, output, directory) => {
+export const configFileHelper = async (output, directory) => {
   for (var key in output) {
     let data = {};
     const token = key.split('ToUsdAssimilator')[0].toUpperCase();
@@ -37,10 +37,10 @@ export const configFileHelper = async (network, output, directory) => {
     data[fileName] = output[key];
 
     // Deployed contracts log
-    await logHelper(network, fileName, data);
+    await logHelper(fileName, data);
 
     // Deployed contracts config
-    const outputConfigDir = path.join(__dirname, `./config/${network}/${directory}`);
+    const outputConfigDir = path.join(__dirname, `./config/${NETWORK}/${directory}`);
     mkdirp.sync(outputConfigDir);
 
     const outputConfigPath = `/${outputConfigDir}/${fileName}.json`;
@@ -48,22 +48,15 @@ export const configFileHelper = async (network, output, directory) => {
   }
 }
 
-export const curveConfig = async (network, tokenSymbol, tokenName) => {
+export const curveConfig = async (tokenSymbol, tokenName) => {
   const { CONTRACTS } = require(path.resolve(__dirname, `./config/contracts`));
   const CORE_ADDRESSES = {
     curveFactory: CONTRACTS.factory
   }
 
   // List all json files under assimilators config
-  const files = fs.readdirSync(path.join(__dirname, `./config/${network}/assimilators`));
-  let fileObj = {};
-
-  // Create key value pairs for the fileanems
-  for (let index = 0; index < files.length; index++) {
-    const fileName = files[index];
-    const token = fileName.split('ToUsdAssimilator.json')[0];
-    fileObj[token] = fileName;
-  }
+  const files = fs.readdirSync(path.join(__dirname, `./config/${NETWORK}/assimilators`));
+  let fileObj = await listFiles('assimilators', 'ToUsdAssimilator.json');
 
   let tokenSymbolArr;
   let tokenNameArr;
@@ -108,36 +101,23 @@ export const curveConfig = async (network, tokenSymbol, tokenName) => {
   }
 }
 
-export const deployedLogs = async (network, filename, output) => {
+export const deployedLogs = async (filename, output) => {
   // Deployed contracts log
-  await logHelper(network, filename, output);
+  await logHelper(filename, output);
 
   // Deployed contracts config
-  const outputConfigDir = path.join(__dirname, `./config/${network}`);
+  const outputConfigDir = path.join(__dirname, `./config/${NETWORK}`);
   mkdirp.sync(outputConfigDir);
   const outputConfigPath = `/${outputConfigDir}/${filename}.json`;
   fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 };
 
-
-const logHelper = async (network, filename, output) => {
-  // Deployed contracts log
-  const outputLogDir = path.join(__dirname, `./deployed_contract_logs/${network}`);
-  // Just like mkdir -p, it will create directory if it doesn't exist
-  // If it already exists, then it will not print an error and will move further to create sub-directories.
-  mkdirp.sync(outputLogDir);
-
-  const timestamp = new Date().getTime().toString();
-  const outputLogPath = path.join(`${outputLogDir}/${timestamp}_${filename}.json`);
-  fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
-}
-
 export const configImporter = (filename) => {
-  return path.resolve(__dirname, `./config/${hre.network.name}/${filename}.json`);
+  return path.resolve(__dirname, `./config/${NETWORK}/${filename}.json`);
 }
 
 export const configImporterNew = (route) => {
-  return path.resolve(__dirname, `./config/${hre.network.name}/${route}`);
+  return path.resolve(__dirname, `./config/${NETWORK}/${route}`);
 }
 
 export const deployerHelper = async (user, contractName) => {
@@ -162,6 +142,45 @@ export const deployerHelper = async (user, contractName) => {
   }
 }
 
+export const listFiles = async (directory, fileSuffix) => {
+  // List all json files under assimilators config
+  const files = fs.readdirSync(path.join(__dirname, `./config/${NETWORK}/${directory}`));
+  let fileObj = {};
+
+  // Create key value pairs for the fileanems
+  for (let index = 0; index < files.length; index++) {
+    const fileName = files[index];
+    const token = fileName.split(fileSuffix)[0];
+    fileObj[token] = fileName;
+  }
+
+  return fileObj;
+}
+
+export const curveAddresses = async () => {
+  let curves = {};
+  const fileObj = await listFiles('curves', 'Curves.json');
+
+  Object.keys(fileObj).map(key => {
+    let curveAddr = require(configImporterNew(`curves/${fileObj[key]}`))
+    curves[key] = curveAddr[Object.keys(curveAddr)[0]];
+  });
+
+  return curves;
+}
+
+const logHelper = async (filename, output) => {
+  // Deployed contracts log
+  const outputLogDir = path.join(__dirname, `./deployed_contract_logs/${NETWORK}`);
+  // Just like mkdir -p, it will create directory if it doesn't exist
+  // If it already exists, then it will not print an error and will move further to create sub-directories.
+  mkdirp.sync(outputLogDir);
+
+  const timestamp = new Date().getTime().toString();
+  const outputLogPath = path.join(`${outputLogDir}/${timestamp}_${filename}.json`);
+  fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
+}
+
 const createCurve = async function ({
   curveFactory,
   name,
@@ -183,8 +202,6 @@ const createCurve = async function ({
   baseAssimilator: string;
   quoteAssimilator: string;
 }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
-  let network = hre.network.name;
-
   const tx = await curveFactory.newCurve(
     name,
     symbol,
@@ -213,7 +230,7 @@ const createCurve = async function ({
   output[symbol.toUpperCase()] = curveAddress;
 
   // Deployed contracts log
-  await configFileHelper(network, output, 'curves');
+  await configFileHelper(output, 'curves');
 
   console.log(`curveAddress ${symbol}: `, curveAddress)
   console.log(`Curve ${symbol} Address: `, curve.address)

@@ -50,7 +50,7 @@ async function main() {
   });
 
   // Deployed contracts log
-  await deployedLogs(hre.network.name, 'factory_deployed', {
+  await deployedLogs('factory_deployed', {
     libraries: newOutput,
     curveFactory: curveFactory.address,
     router: router.address,

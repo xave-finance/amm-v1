@@ -6,7 +6,7 @@ const TOKEN_NAME = process.env.TOKEN_NAME;
 
 async function main() {
   console.time('Deployment Time');
-  await curveConfig(hre.network.name, TOKEN_SYMBOL, TOKEN_NAME);
+  await curveConfig(TOKEN_SYMBOL, TOKEN_NAME);
   console.timeEnd('Deployment Time');
 }
 
