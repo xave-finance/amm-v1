@@ -50,9 +50,9 @@ contract AudToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes raw aud amount, transfers it in, calculates corresponding numeraire amount and returns it
@@ -63,14 +63,14 @@ contract AudToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes a numeraire amount, calculates the raw amount of aud, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
 
         bool _transferSuccess = aud.transferFrom(msg.sender, address(this), amount_);
 
@@ -93,7 +93,7 @@ contract AudToUsdAssimilator is IAssimilator {
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(DECIMALS).div(_audBal.mul(DECIMALS).div(_baseWeight));
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e6).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e6)).div(_rate);
 
         bool _transferSuccess = aud.transferFrom(msg.sender, address(this), amount_);
 
@@ -108,7 +108,7 @@ contract AudToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _audAmount = ((_amount) * _rate).div(1e8);
+        uint256 _audAmount = ((_amount).mul(_rate)).div(1e8);
 
         bool _transferSuccess = aud.transfer(_dst, _audAmount);
 
@@ -118,14 +118,14 @@ contract AudToUsdAssimilator is IAssimilator {
 
         amount_ = _audAmount.divu(DECIMALS);
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes a raw amount of aud and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _audAmount = (_amount * _rate).div(1e8);
+        uint256 _audAmount = (_amount.mul(_rate)).div(1e8);
 
         bool _transferSuccess = aud.transfer(_dst, _audAmount);
 
@@ -138,7 +138,7 @@ contract AudToUsdAssimilator is IAssimilator {
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
 
         bool _transferSuccess = aud.transfer(_dst, amount_);
 
@@ -149,7 +149,7 @@ contract AudToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
     }
 
     // takes a numeraire amount and returns the raw amount without the rate
@@ -168,14 +168,14 @@ contract AudToUsdAssimilator is IAssimilator {
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(DECIMALS).div(_audBal.mul(DECIMALS).div(_baseWeight));
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e6).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e6)).div(_rate);
     }
 
     // takes a raw amount and returns the numeraire amount
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case aud
@@ -186,7 +186,7 @@ contract AudToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case aud
@@ -198,11 +198,11 @@ contract AudToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
 
         uint256 _balance = aud.balanceOf(_addr);
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case aud
@@ -222,6 +222,6 @@ contract AudToUsdAssimilator is IAssimilator {
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(DECIMALS).div(_audBal.mul(DECIMALS).div(_baseWeight));
 
-        balance_ = ((_audBal * _rate).div(1e6)).divu(DECIMALS);
+        balance_ = ((_audBal.mul(_rate)).div(1e6)).divu(DECIMALS);
     }
 }

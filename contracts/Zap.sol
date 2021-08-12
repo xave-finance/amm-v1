@@ -178,10 +178,9 @@ contract Zap {
         uint256 curveRatio = curveBaseBal.mul(10**(36 - uint256(curveBaseDecimals))).div(curveQuoteBal.mul(1e12));
 
         // How much user wants to swap
-        uint256 initialSwapAmount =
-            _zapAmount.sub(
-                curveRatio <= 1e18 ? _zapAmount.mul(curveRatio).div(1e18) : _zapAmount.mul(1e18).div(curveRatio)
-            );
+        uint256 initialSwapAmount = _zapAmount.sub(
+            curveRatio <= 1e18 ? _zapAmount.mul(curveRatio).div(1e18) : _zapAmount.mul(1e18).div(curveRatio)
+        );
 
         // Calc Base Swap Amount
         if (isFromBase) {
@@ -292,10 +291,9 @@ contract Zap {
     function _getCurveRatioAndBaseDecimals(address _curve) internal view returns (uint8, uint256) {
         address base = Curve(_curve).reserves(0);
         uint8 curveBaseDecimals = ERC20(base).decimals();
-        uint256 curveRatio =
-            IERC20(base).balanceOf(_curve).mul(10**(36 - uint256(curveBaseDecimals))).div(
-                USDC.balanceOf(_curve).mul(1e12)
-            );
+        uint256 curveRatio = IERC20(base).balanceOf(_curve).mul(10**(36 - uint256(curveBaseDecimals))).div(
+            USDC.balanceOf(_curve).mul(1e12)
+        );
 
         return (curveBaseDecimals, curveRatio);
     }
@@ -443,7 +441,7 @@ contract Zap {
 
             // Cannot swap more than zapAmount
             if (swapAmount > zapData.zapAmount) {
-                swapAmount = zapData.zapAmount - 1;
+                swapAmount = zapData.zapAmount.sub(1);
             }
 
             // Keep halving
@@ -489,7 +487,7 @@ contract Zap {
 
             // Cannot swap more than zap
             if (swapAmount > zapData.zapAmount) {
-                swapAmount = zapData.zapAmount - 1;
+                swapAmount = zapData.zapAmount.sub(1);
             }
 
             // Keep halving
@@ -510,10 +508,9 @@ contract Zap {
     {
         // Calculate _depositAmount
         uint8 curveBaseDecimals = ERC20(_base).decimals();
-        uint256 curveRatio =
-            IERC20(_base).balanceOf(_curve).mul(10**(36 - uint256(curveBaseDecimals))).div(
-                USDC.balanceOf(_curve).mul(1e12)
-            );
+        uint256 curveRatio = IERC20(_base).balanceOf(_curve).mul(10**(36 - uint256(curveBaseDecimals))).div(
+            USDC.balanceOf(_curve).mul(1e12)
+        );
 
         // Deposit amount is denomiated in USD value (based on pool LP ratio)
         // Things are 1:1 on USDC side on deposit

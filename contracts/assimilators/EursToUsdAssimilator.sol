@@ -60,9 +60,9 @@ contract EursToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes raw eurs amount, transfers it in, calculates corresponding numeraire amount and returns it
@@ -73,14 +73,14 @@ contract EursToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes a numeraire amount, calculates the raw amount of eurs, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
 
         bool _transferSuccess = eurs.transferFrom(msg.sender, address(this), amount_);
 
@@ -107,7 +107,7 @@ contract EursToUsdAssimilator is IAssimilator {
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(DECIMALS).div(_eursBal);
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e6).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e6)).div(_rate);
 
         bool _transferSuccess = eurs.transferFrom(msg.sender, address(this), amount_);
 
@@ -122,7 +122,7 @@ contract EursToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _eursAmount = ((_amount) * _rate).div(1e8);
+        uint256 _eursAmount = ((_amount).mul(_rate)).div(1e8);
 
         bool _transferSuccess = eurs.transfer(_dst, _eursAmount);
 
@@ -132,14 +132,14 @@ contract EursToUsdAssimilator is IAssimilator {
 
         amount_ = _eursAmount.divu(DECIMALS);
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes a raw amount of eurs and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _eursAmount = (_amount * _rate).div(1e8);
+        uint256 _eursAmount = (_amount.mul(_rate)).div(1e8);
 
         bool _transferSuccess = eurs.transfer(_dst, _eursAmount);
 
@@ -152,7 +152,7 @@ contract EursToUsdAssimilator is IAssimilator {
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
 
         bool _transferSuccess = eurs.transfer(_dst, amount_);
 
@@ -163,7 +163,7 @@ contract EursToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
     }
 
     function viewRawAmountLPRatio(
@@ -185,14 +185,14 @@ contract EursToUsdAssimilator is IAssimilator {
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(DECIMALS).div(_eursBal);
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e6).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS).mul(1e6)).div(_rate);
     }
 
     // takes a raw amount and returns the numeraire amount
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case eurs
@@ -203,7 +203,7 @@ contract EursToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case eurs
@@ -215,11 +215,11 @@ contract EursToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
 
         uint256 _balance = eurs.balanceOf(_addr);
 
-        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case eurs
@@ -239,6 +239,6 @@ contract EursToUsdAssimilator is IAssimilator {
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(1e18).div(_eursBal.mul(1e18).div(_baseWeight));
 
-        balance_ = ((_eursBal * _rate).div(1e6)).divu(1e18);
+        balance_ = ((_eursBal.mul(_rate)).div(1e6)).divu(1e18);
     }
 }

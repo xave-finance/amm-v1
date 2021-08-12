@@ -2,6 +2,8 @@
 
 pragma solidity ^0.7.3;
 
+import "@openzeppelin/contracts/math/SafeMath.sol";
+
 import "./Assimilators.sol";
 
 import "./Storage.sol";
@@ -15,6 +17,8 @@ library ProportionalLiquidity {
     using ABDKMath64x64 for uint256;
     using ABDKMath64x64 for int128;
     using UnsafeMath64x64 for int128;
+
+    using SafeMath for uint256;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
@@ -294,10 +298,10 @@ library ProportionalLiquidity {
     }
 
     function mintAdd(uint256 x, uint256 y) private pure returns (uint256 z) {
-        require((z = x + y) >= x, "Curve/mint-overflow");
+        require((z = x.add(y)) >= x, "Curve/mint-overflow");
     }
 
     function burnSub(uint256 x, uint256 y) private pure returns (uint256 z) {
-        require((z = x - y) <= x, "Curve/burn-underflow");
+        require((z = x.sub(y)) <= x, "Curve/burn-underflow");
     }
 }

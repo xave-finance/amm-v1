@@ -15,6 +15,8 @@
 
 pragma solidity ^0.7.3;
 
+import "@openzeppelin/contracts/math/SafeMath.sol";
+
 import "./Storage.sol";
 
 import "./lib/UnsafeMath64x64.sol";
@@ -29,6 +31,8 @@ library CurveMath {
     using ABDKMath64x64 for int128;
     using UnsafeMath64x64 for int128;
     using ABDKMath64x64 for uint256;
+
+    using SafeMath for uint256;
 
     // This is used to prevent stack too deep errors
     function calculateFee(
@@ -65,10 +69,10 @@ library CurveMath {
         int128 _delta
     ) private pure returns (int128 fee_) {
         if (_bal < _ideal) {
-            int128 _threshold = _ideal.mul(ONE - _beta);
+            int128 _threshold = _ideal.mul(ONE.sub(_beta));
 
             if (_bal < _threshold) {
-                int128 _feeMargin = _threshold - _bal;
+                int128 _feeMargin = _threshold.sub(_bal);
 
                 fee_ = _feeMargin.div(_ideal);
                 fee_ = fee_.mul(_delta);
@@ -78,10 +82,10 @@ library CurveMath {
                 fee_ = fee_.mul(_feeMargin);
             } else fee_ = 0;
         } else {
-            int128 _threshold = _ideal.mul(ONE + _beta);
+            int128 _threshold = _ideal.mul(ONE.add(_beta));
 
             if (_bal > _threshold) {
-                int128 _feeMargin = _bal - _threshold;
+                int128 _feeMargin = _bal.sub(_threshold);
 
                 fee_ = _feeMargin.div(_ideal);
                 fee_ = fee_.mul(_delta);
@@ -116,13 +120,15 @@ library CurveMath {
             int128 prevAmount;
             {
                 prevAmount = outputAmt_;
-                outputAmt_ = _omega < _psi ? -(_inputAmt + _omega - _psi) : -(_inputAmt + _lambda.mul(_omega - _psi));
+                outputAmt_ = _omega < _psi
+                    ? -(_inputAmt.add(_omega.sub(_psi)))
+                    : -(_inputAmt.add(_lambda.mul(_omega.sub(_psi))));
             }
 
-            if (outputAmt_ / 1e13 == prevAmount / 1e13) {
-                _nGLiq = _oGLiq + _inputAmt + outputAmt_;
+            if (outputAmt_.div(1e13) == prevAmount.div(1e13)) {
+                _nGLiq = _oGLiq.add(_inputAmt.add(outputAmt_));
 
-                _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
+                _nBals[_outputIndex] = _oBals[_outputIndex].add(outputAmt_);
 
                 enforceHalts(curve, _oGLiq, _nGLiq, _oBals, _nBals, _weights);
 
@@ -130,7 +136,7 @@ library CurveMath {
 
                 return outputAmt_;
             } else {
-                _nGLiq = _oGLiq + _inputAmt + outputAmt_;
+                _nGLiq = _oGLiq.add(_inputAmt.add(outputAmt_));
 
                 _nBals[_outputIndex] = _oBals[_outputIndex].add(outputAmt_);
             }
@@ -189,11 +195,11 @@ library CurveMath {
         int128 _nGLiq,
         int128 _psi
     ) private pure {
-        int128 _nextUtil = _nGLiq - _psi;
+        int128 _nextUtil = _nGLiq.sub(_psi);
 
-        int128 _prevUtil = _oGLiq - _omega;
+        int128 _prevUtil = _oGLiq.sub(_omega);
 
-        int128 _diff = _nextUtil - _prevUtil;
+        int128 _diff = _nextUtil.sub(_prevUtil);
 
         require(0 < _diff || _diff >= MAX_DIFF, "Curve/swap-invariant-violation");
     }
@@ -206,13 +212,13 @@ library CurveMath {
         int128 _omega,
         int128 _psi
     ) internal pure {
-        if (_totalShells == 0 || 0 == _totalShells + _newShells) return;
+        if (_totalShells == 0 || 0 == _totalShells.add(_newShells)) return;
 
         int128 _prevUtilPerShell = _oGLiq.sub(_omega).div(_totalShells);
 
         int128 _nextUtilPerShell = _nGLiq.sub(_psi).div(_totalShells.add(_newShells));
 
-        int128 _diff = _nextUtilPerShell - _prevUtilPerShell;
+        int128 _diff = _nextUtilPerShell.sub(_prevUtilPerShell);
 
         require(0 < _diff || _diff >= MAX_DIFF, "Curve/liquidity-invariant-violation");
     }
@@ -232,7 +238,7 @@ library CurveMath {
             int128 _nIdeal = _nGLiq.mul(_weights[i]);
 
             if (_nBals[i] > _nIdeal) {
-                int128 _upperAlpha = ONE + _alpha;
+                int128 _upperAlpha = ONE.add(_alpha);
 
                 int128 _nHalt = _nIdeal.mul(_upperAlpha);
 
@@ -240,10 +246,10 @@ library CurveMath {
                     int128 _oHalt = _oGLiq.mul(_weights[i]).mul(_upperAlpha);
 
                     if (_oBals[i] < _oHalt) revert("Curve/upper-halt");
-                    if (_nBals[i] - _nHalt > _oBals[i] - _oHalt) revert("Curve/upper-halt");
+                    if (_nBals[i].sub(_nHalt) > _oBals[i].sub(_oHalt)) revert("Curve/upper-halt");
                 }
             } else {
-                int128 _lowerAlpha = ONE - _alpha;
+                int128 _lowerAlpha = ONE.sub(_alpha);
 
                 int128 _nHalt = _nIdeal.mul(_lowerAlpha);
 
@@ -252,7 +258,7 @@ library CurveMath {
                     _oHalt = _oHalt.mul(_lowerAlpha);
 
                     if (_oBals[i] > _oHalt) revert("Curve/lower-halt");
-                    if (_nHalt - _nBals[i] > _oHalt - _oBals[i]) revert("Curve/lower-halt");
+                    if (_nHalt.sub(_nBals[i]) > _oHalt.sub(_oBals[i])) revert("Curve/lower-halt");
                 }
             }
         }
