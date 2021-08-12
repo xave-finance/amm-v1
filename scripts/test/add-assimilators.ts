@@ -28,7 +28,7 @@ async function main() {
   };
 
   // Deployed contracts log
-  await deployedLogs(hre.network.name, 'new_assimilators_deployed', output);
+  await deployedLogs('new_assimilators_deployed', output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

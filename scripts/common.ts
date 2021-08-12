@@ -18,8 +18,11 @@ export const getAccounts = async () => {
   const user2 = accounts[4];
   const user1Bal = ethers.utils.formatEther(await user1.getBalance());
   const user2Bal = ethers.utils.formatEther(await user2.getBalance());
+  const NETWORK = hre.network.name === 'hardhat' ? hre.network.name : (hre.network.config as any).url;
+  const BLOCK_NUM = await ethers.provider.getBlockNumber();
 
-  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${NETWORK} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> Block Number: ${BLOCK_NUM} <<<<<<<<<<<<`));
   console.log(chalk.blue(`>>>>>>>>>>>> User1: ${user1.address} <<<<<<<<<<<<`));
   console.log(chalk.blue(`>>>>>>>>>>>> User1 Balance: ${user1Bal} <<<<<<<<<<<<`));
 
