@@ -9,7 +9,7 @@ const ALCHEMY_PROJECT_ID = process.env.ALCHEMY_PROJECT_ID;
 const alchemyEndpoint = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
 const MNEMONIC = process.env.MNEMONIC;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-const BLOCK_NUM = parseInt(process.env.BLOCK_NUM);
+const BLOCK_NO = parseInt(process.env.BLOCK_NO);
 const LOCALHOST = "http://127.0.0.1:8545";
 
 // You need to export an object to set up your config
@@ -34,13 +34,20 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: alchemyEndpoint ? alchemyEndpoint : LOCALHOST,
-        blockNumber: BLOCK_NUM
+        blockNumber: BLOCK_NO
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: {
+        mnemonic: MNEMONIC
+      },
+      blockGasLimit: 20000000
+    },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: {
         mnemonic: MNEMONIC
       },

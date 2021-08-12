@@ -6,7 +6,8 @@ import { deployedLogs, deployerHelper } from "./Utils";
 
 async function main() {
   console.time('Deployment Time');
-  const { user1 } = await getAccounts();
+  const users = await getAccounts();
+  const user1 = users[0];
   let output = {};
   let newOutput = {};
 

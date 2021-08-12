@@ -48,7 +48,7 @@ export const configFileHelper = async (output, directory) => {
   }
 }
 
-export const curveConfig = async (tokenSymbol, tokenName) => {
+export const curveConfig = async (tokenSymbol, tokenName, curveWeights) => {
   const { CONTRACTS } = require(path.resolve(__dirname, `./config/contracts`));
   const CORE_ADDRESSES = {
     curveFactory: CONTRACTS.factory
@@ -60,19 +60,25 @@ export const curveConfig = async (tokenSymbol, tokenName) => {
 
   let tokenSymbolArr;
   let tokenNameArr;
+  let curveWeightsArr;
 
   if (tokenSymbol.indexOf(',') > -1) {
     tokenSymbolArr = tokenSymbol.split(',');
     tokenNameArr = tokenName.split(',');
+    curveWeightsArr = curveWeights.split(',');
   } else {
     tokenSymbolArr = [tokenSymbol];
     tokenNameArr = [tokenName];
+    curveWeightsArr = [curveWeights];
   }
 
   for (let index = 0; index < tokenSymbolArr.length; index++) {
     const tokenSymbol = tokenSymbolArr[index];
 
     if (tokenSymbol !== 'USDC') {
+      const weightArr = curveWeightsArr[index].split('/');
+      const baseWeight = toDecimal(weightArr[0]).toString();
+      const quoteWeight = toDecimal(weightArr[1]).toString();
       const tokenName = tokenNameArr[index];
       const fullFileName = fileObj[tokenSymbol];
       const fileName = fileObj[tokenSymbol].split('.json')[0];
@@ -91,8 +97,8 @@ export const curveConfig = async (tokenSymbol, tokenName) => {
         symbol: tokenSymbol,
         base: TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
         quote: TOKEN[QUOTED_TOKEN],
-        baseWeight: parseUnits("0.5"),
-        quoteWeight: parseUnits("0.5"),
+        baseWeight: parseUnits(baseWeight),
+        quoteWeight: parseUnits(quoteWeight),
         baseAssimilator: baseCurveAddr,
         quoteAssimilator: quotedCurveAddr,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
@@ -179,6 +185,12 @@ const logHelper = async (filename, output) => {
   const timestamp = new Date().getTime().toString();
   const outputLogPath = path.join(`${outputLogDir}/${timestamp}_${filename}.json`);
   fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
+}
+
+const toDecimal = (n) => {
+  var l = n.toString().length;
+  var v = n / Math.pow(10, l);
+  return v;
 }
 
 const createCurve = async function ({

@@ -9,30 +9,21 @@ import ora from "ora";
 import { Contract, ContractFactory, Wallet } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { use } from "chai";
 
 const CONFIRM_ALL = process.env.CONFIRM_ALL;
 
 export const getAccounts = async () => {
   const accounts = await hre.ethers.getSigners();
-  const user1 = accounts[0];
-  const user2 = accounts[4];
-  const user1Bal = ethers.utils.formatEther(await user1.getBalance());
-  const user2Bal = ethers.utils.formatEther(await user2.getBalance());
   const NETWORK = hre.network.name === 'hardhat' ? hre.network.name : (hre.network.config as any).url;
-  const BLOCK_NUM = await ethers.provider.getBlockNumber();
+  const BLOCK_NO = await ethers.provider.getBlockNumber();
 
   console.log(chalk.blue(`>>>>>>>>>>>> Network: ${NETWORK} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> Block Number: ${BLOCK_NUM} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> User1: ${user1.address} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> User1 Balance: ${user1Bal} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> Block Number: ${BLOCK_NO} <<<<<<<<<<<<`));
+  // console.log(accounts[0].address);
+  // console.log(ethers.utils.formatEther(await accounts[0].getBalance()));
 
-  console.log(chalk.blue(`>>>>>>>>>>>> User2: ${user2.address} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> User2 Balance: ${user2Bal} <<<<<<<<<<<<`));
-
-  return {
-    user1,
-    user2
-  };
+  return accounts;
 };
 
 export const ask = async (question: string, color: string = "orange"): Promise<string> => {

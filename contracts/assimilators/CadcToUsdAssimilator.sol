@@ -28,12 +28,12 @@ contract CadcToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
+    // Mainnet
     IOracle private constant oracle = IOracle(0xa34317DB73e77d453b1B8d04550c44D10e981C8e);
     IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     IERC20 private constant cadc = IERC20(0xcaDC0acd4B445166f12d2C07EAc6E2544FbE2Eef);
 
-    // solhint-disable-next-line
-    constructor() {}
+    uint256 private constant DECIMALS = 1e18;
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
@@ -50,9 +50,9 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
     }
 
     // takes raw cadc amount, transfers it in, calculates corresponding numeraire amount and returns it
@@ -63,14 +63,14 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
     }
 
     // takes a numeraire amount, calculates the raw amount of cadc, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e18) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
 
         bool _transferSuccess = cadc.transferFrom(msg.sender, address(this), amount_);
 
@@ -88,12 +88,12 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         if (_cadcBal <= 0) return 0;
 
-        uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        uint256 _usdcBal = usdc.balanceOf(_addr).mul(DECIMALS).div(_quoteWeight);
 
         // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_cadcBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_cadcBal.mul(DECIMALS).div(_baseWeight));
 
-        amount_ = (_amount.mulu(1e18) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e6).div(_rate);
 
         bool _transferSuccess = cadc.transferFrom(msg.sender, address(this), amount_);
 
@@ -108,7 +108,7 @@ contract CadcToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _cadcAmount = ((_amount) * _rate) / 1e8;
+        uint256 _cadcAmount = ((_amount) * _rate).div(1e8);
 
         bool _transferSuccess = cadc.transfer(_dst, _cadcAmount);
 
@@ -116,29 +116,29 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         uint256 _balance = cadc.balanceOf(address(this));
 
-        amount_ = _cadcAmount.divu(1e18);
+        amount_ = _cadcAmount.divu(DECIMALS);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
     }
 
     // takes a raw amount of cadc and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _cadcAmount = (_amount * _rate) / 1e8;
+        uint256 _cadcAmount = (_amount * _rate).div(1e8);
 
         bool _transferSuccess = cadc.transfer(_dst, _cadcAmount);
 
         require(_transferSuccess, "Curve/CADC-transfer-failed");
 
-        amount_ = _cadcAmount.divu(1e18);
+        amount_ = _cadcAmount.divu(DECIMALS);
     }
 
     // takes a numeraire value of cadc, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e18) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
 
         bool _transferSuccess = cadc.transfer(_dst, amount_);
 
@@ -149,7 +149,7 @@ contract CadcToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e18) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e8).div(_rate);
     }
 
     // takes a numeraire amount and returns the raw amount without the rate
@@ -163,19 +163,19 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         if (_cadcBal <= 0) return 0;
 
-        uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        uint256 _usdcBal = usdc.balanceOf(_addr).mul(DECIMALS).div(_quoteWeight);
 
         // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_cadcBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_cadcBal.mul(DECIMALS).div(_baseWeight));
 
-        amount_ = (_amount.mulu(1e18) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e6).div(_rate);
     }
 
     // takes a raw amount and returns the numeraire amount
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case cadc
@@ -186,7 +186,7 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case cadc
@@ -198,11 +198,11 @@ contract CadcToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount * _rate).div(1e8)).divu(DECIMALS);
 
         uint256 _balance = cadc.balanceOf(_addr);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance * _rate).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case cadc
@@ -217,11 +217,11 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         if (_cadcBal <= 0) return ABDKMath64x64.fromUInt(0);
 
-        uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        uint256 _usdcBal = usdc.balanceOf(_addr).mul(DECIMALS).div(_quoteWeight);
 
         // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_cadcBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_cadcBal.mul(DECIMALS).div(_baseWeight));
 
-        balance_ = ((_cadcBal * _rate) / 1e6).divu(1e18);
+        balance_ = ((_cadcBal * _rate).div(1e6)).divu(DECIMALS);
     }
 }
