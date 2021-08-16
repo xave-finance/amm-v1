@@ -7,16 +7,17 @@ import { getAccounts, deployContract } from "./common";
 import { deployedLogs } from "./Utils";
 
 async function main() {
-  const { user } = await getAccounts();
+  const users = await getAccounts();
+  const user1 = users[0];
 
   console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user1.address} <<<<<<<<<<<<`));
 
   const Factory = await ethers.getContractFactory("Zap");
 
   const zap = await deployContract({
     name: "zap",
-    deployer: user,
+    deployer: user1,
     factory: Factory,
     args: [],
     opts: {

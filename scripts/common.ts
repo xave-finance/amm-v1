@@ -20,8 +20,12 @@ export const getAccounts = async () => {
 
   console.log(chalk.blue(`>>>>>>>>>>>> Network: ${NETWORK} <<<<<<<<<<<<`));
   console.log(chalk.blue(`>>>>>>>>>>>> Block Number: ${BLOCK_NO} <<<<<<<<<<<<`));
-  // console.log(accounts[0].address);
-  // console.log(ethers.utils.formatEther(await accounts[0].getBalance()));
+
+  // for (let index = 0; index < accounts.length; index++) {
+  //   const account = accounts[index];
+  //   console.log(index, account.address);
+  //   console.log(ethers.utils.formatEther(await account.getBalance()));
+  // }
 
   return accounts;
 };

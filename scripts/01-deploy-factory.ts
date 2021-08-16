@@ -16,7 +16,9 @@ async function main() {
     try {
       const res = await deployerHelper(user1, coreContracts[index]);
 
-      output[res.key] = res.address;
+      if (res.key !== 'zap') {
+        output[res.key] = res.address;
+      }
     } catch (error) {
       console.log(`Error: ${error}`);
       continue;
