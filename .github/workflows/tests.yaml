@@ -33,10 +33,11 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - run: yarn install --frozen-lockfile
         env:
           INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
           ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
           MNEMONIC: ${{ secrets.MNEMONIC }}
+          BLOCK_NO: ${{ secrets.BLOCK_NO }}
+      - run: yarn install --frozen-lockfile
       - run: yarn compile
       - run: yarn test
