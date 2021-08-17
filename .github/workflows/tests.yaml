@@ -40,4 +40,9 @@ jobs:
           ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
           MNEMONIC: ${{ secrets.MNEMONIC }}
           BLOCK_NO: ${{ secrets.BLOCK_NO }}
+          DIMENSION_ALPHA: ${{ secrets.DIMENSION_ALPHA }}
+          DIMENSION_BETA: ${{ secrets.DIMENSION_BETA }}
+          DIMENSION_MAX: ${{ secrets.DIMENSION_MAX }}
+          DIMENSION_EPSILON: ${{ secrets.DIMENSION_EPSILON }}
+          DIMENSION_LAMBDA: ${{ secrets.DIMENSION_LAMBDA }}
       - run: yarn test
