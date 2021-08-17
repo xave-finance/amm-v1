@@ -6,16 +6,23 @@ import { deployedLogs, deployerHelper } from "./Utils";
 
 async function main() {
   console.time('Deployment Time');
-  const { user1 } = await getAccounts();
+  const users = await getAccounts();
+  const user1 = users[0];
   let output = {};
   let newOutput = {};
+  let excludedLib = ['zap'];
+  let excludedLibObj = {};
 
   const coreContracts = process.env.CORE_CONTRACTS.split(',');
   for (let index = 0; index < coreContracts.length; index++) {
     try {
       const res = await deployerHelper(user1, coreContracts[index]);
 
-      output[res.key] = res.address;
+      if (!excludedLib.includes(res.key)) {
+        output[res.key] = res.address;
+      } else {
+        excludedLibObj[res.key] = res.address;
+      }
     } catch (error) {
       console.log(`Error: ${error}`);
       continue;
@@ -49,12 +56,16 @@ async function main() {
     },
   });
 
-  // Deployed contracts log
-  await deployedLogs(hre.network.name, 'factory_deployed', {
+  let deployedContracts = {
     libraries: newOutput,
     curveFactory: curveFactory.address,
     router: router.address,
-  });
+  };
+
+  Object.keys(excludedLibObj).map((key) => deployedContracts[key] = excludedLibObj[key]);
+
+  // Deployed contracts log
+  await deployedLogs('factory_deployed', deployedContracts);
   console.timeEnd('Deployment Time');
 }
 

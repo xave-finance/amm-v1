@@ -3,13 +3,13 @@ import "hardhat-typechain";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
-// import 'hardhat-gas-reporter';
 
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const ALCHEMY_PROJECT_ID = process.env.ALCHEMY_PROJECT_ID;
 const alchemyEndpoint = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
 const MNEMONIC = process.env.MNEMONIC;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const BLOCK_NO = parseInt(process.env.BLOCK_NO);
 const LOCALHOST = "http://127.0.0.1:8545";
 
 // You need to export an object to set up your config
@@ -25,30 +25,29 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    localhost: {
-      url: LOCALHOST,
-      timeout: 1200000,
-      accounts: {
-        mnemonic: MNEMONIC,
-        accountsBalance: "100000000000000000000000",
-      },
-    },
     hardhat: {
       chainId: 1,
       accounts: {
         mnemonic: MNEMONIC,
-        accountsBalance: "100000000000000000000000",
+        accountsBalance: "300000000000000000000000",
       },
       forking: {
         enabled: true,
         url: alchemyEndpoint ? alchemyEndpoint : LOCALHOST,
-        blockNumber: 12640151 // https://etherscan.io/block/12640151
+        blockNumber: BLOCK_NO
       },
       blockGasLimit: 20000000,
-      allowUnlimitedContractSize: true,
+      allowUnlimitedContractSize: true
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: {
+        mnemonic: MNEMONIC
+      },
+      blockGasLimit: 20000000
+    },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: {
         mnemonic: MNEMONIC
       },

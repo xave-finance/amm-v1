@@ -7,7 +7,8 @@ const ASSIMILATORS = process.env.ASSIMILATORS;
 
 async function main() {
   console.time('Deployment Time');
-  const { user1 } = await getAccounts();
+  const users = await getAccounts();
+  const user1 = users[0];
   let output = {};
   let assimilators = ASSIMILATORS.indexOf(',') > -1 ? ASSIMILATORS.split(',') : [ASSIMILATORS];
 
@@ -18,7 +19,7 @@ async function main() {
   }
 
   // Deployed contracts log
-  await configFileHelper(hre.network.name, output, 'assimilators');
+  await configFileHelper(output, 'assimilators');
   console.timeEnd('Deployment Time');
 }
 

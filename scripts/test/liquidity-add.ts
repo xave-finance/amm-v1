@@ -2,24 +2,32 @@ import { ethers } from "hardhat";
 import { parseUnits, formatUnits } from "ethers/lib/utils";
 import { BigNumberish, Signer } from "ethers";
 import hre from "hardhat";
+import fs from "fs";
+import path from "path";
 
 import { mintEURS, mintUSDC, getFutureTime } from "../../test/Utils";
 import { Curve } from "../../typechain/Curve";
 import { ERC20 } from "../../typechain/ERC20";
 import { getAccounts } from "../common";
-import { configImporter } from "../Utils";
+import { curveAddresses } from "../Utils";
 
-const eursCurveAddr = require(configImporter('curve_EURS_deployed')).curveAddress;
+const TOKEN_USDC = process.env.TOKEN_ADDR_USDC;
+const TOKEN_EURS = process.env.TOKEN_ADDR_EURS;
+const TOKEN_AUD = process.env.TOKEN_ADDR_AUD
+const TOKEN_CHF = process.env.TOKEN_ADDR_CHF
+const TOKEN_GBP = process.env.TOKEN_ADDR_GBP
 
-const CONTRACT_CURVE_EURS_ADDR = eursCurveAddr;
-const TOKEN_USDC = process.env.TOKEN_USDC;
-const TOKEN_EURS = process.env.TOKEN_EURS;
 const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
+const TOKENS_AUD_DECIMALS = process.env.TOKENS_AUD_DECIMALS;
+const TOKENS_CHF_DECIMALS = process.env.TOKENS_CHF_DECIMALS;
+const TOKENS_GBP_DECIMALS = process.env.TOKENS_GBP_DECIMALS;
 
 async function main() {
   console.time('Deployment Time');
-  const { user1 } = await getAccounts();
+  const users = await getAccounts();
+  const user1 = users[0];
+  const curves = await curveAddresses();
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   // Approve tokens
@@ -51,52 +59,51 @@ async function main() {
   };
 
   await multiMintAndApprove([
-    [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), CONTRACT_CURVE_EURS_ADDR],
-    [TOKEN_EURS, user1, parseUnits("9000000", TOKENS_EURS_DECIMALS), CONTRACT_CURVE_EURS_ADDR]
+    [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['EURS']],
+    [TOKEN_EURS, user1, parseUnits("9000000", TOKENS_EURS_DECIMALS), curves['EURS']],
+
+    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['AUD']],
+    // [TOKEN_AUD, user1, parseUnits("9000000", TOKENS_AUD_DECIMALS), curves['AUD']],
+
+    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['CHF']],
+    // [TOKEN_CHF, user1, parseUnits("9000000", TOKENS_CHF_DECIMALS), curves['CHF']],
+
+    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['GBP']],
+    // [TOKEN_GBP, user1, parseUnits("9000000", TOKENS_GBP_DECIMALS), curves['GBP']]
   ]);
 
-  const amt = parseUnits("10");
-  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
-  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
-  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
+  const amt = parseUnits("700000"); // EURS
+  // const amt = parseUnits("700000"); // AUD
+  // const amt = parseUnits("70000"); // CHF
+  // const amt = parseUnits("700000"); // GBP
 
-  const eursBalBefore = formatUnits(await eurs.balanceOf(user1.address), TOKENS_EURS_DECIMALS);
-  const usdcBalBefore = formatUnits(await usdc.balanceOf(user1.address), TOKENS_USDC_DECIMALS);
-  const eursAllowanceBefore = formatUnits(await eurs.allowance(user1.address, CONTRACT_CURVE_EURS_ADDR), TOKENS_EURS_DECIMALS);
-  const usdcAllowanceBefore = formatUnits(await usdc.allowance(user1.address, CONTRACT_CURVE_EURS_ADDR), TOKENS_USDC_DECIMALS);
-
-  console.log('BASE Amout to Deposit: ', formatUnits(amt));
-  console.log('EURS Bal Before: ', eursBalBefore);
-  console.log('USDC Bal Before: ', usdcBalBefore);
-  console.log('EURS Allowance Before: ', eursAllowanceBefore);
-  console.log('USDC Allowance Before: ', usdcAllowanceBefore);
-
-  const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await curveEURS.viewDeposit(amt);
-
-  console.log('-----------------------------------------------------------------------');
-  console.log('Liquidity To Deposit');
-  console.log('-----------------------------------------------------------------------');
-  console.log('EURS AMT: ', formatUnits(baseViewUser1, TOKENS_EURS_DECIMALS));
-  console.log('USDC AMT: ', formatUnits(quoteViewUser1, TOKENS_USDC_DECIMALS));
+  const curveEURS = (await ethers.getContractAt("Curve", curves['EURS'])) as Curve;
+  // const curveAUD = (await ethers.getContractAt("Curve", curves['AUD'])) as Curve;
+  // const curveCHF = (await ethers.getContractAt("Curve", curves['CHF'])) as Curve;
+  // const curveGBP = (await ethers.getContractAt("Curve", curves['GBP'])) as Curve;
 
   try {
     // Supply liquidity to the pools
     const depositCurveEURS = await curveEURS
       .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
       .then(x => x.wait());
-
     console.log('depositCurveEURS', depositCurveEURS);
 
-    // Check pool liquidity
-    const [lpAmount, [baseBal, quoteBal]] = await curveEURS
-      .liquidity();
-    console.log('-----------------------------------------------------------------------');
-    console.log('Liquidity Balance');
-    console.log('-----------------------------------------------------------------------');
+    // const depositCurveAUD = await curveAUD
+    //   .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+    //   .then(x => x.wait());
+    // console.log('depositCurveAUD', depositCurveAUD);
 
-    console.log('Total: ', formatUnits(lpAmount));
-    console.log('EURS: ', formatUnits(baseBal));
-    console.log('USDC: ', formatUnits(quoteBal));
+    // const depositCurveCHF = await curveCHF
+    //   .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+    //   .then(x => x.wait());
+    // console.log('depositCurveAUD', depositCurveCHF);
+
+    // const depositCurveGBP = await curveGBP
+    //   .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+    //   .then(x => x.wait());
+    // console.log('depositCurveGBP', depositCurveGBP);
+
     console.timeEnd('Deployment Time');
   } catch (error) {
     console.log(error);

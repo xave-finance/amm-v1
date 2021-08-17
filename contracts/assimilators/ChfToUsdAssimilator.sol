@@ -33,8 +33,7 @@ contract ChfToUsdAssimilator is IAssimilator {
     IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
     IERC20 private constant chf = IERC20(0xE9958574866587c391735b7e7CE0D79432d3b9d0);
 
-    // solhint-disable-next-line
-    constructor() {}
+    uint256 private constant DECIMALS = 1e18;
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
@@ -51,9 +50,9 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes raw chf amount, transfers it in, calculates corresponding numeraire amount and returns it
@@ -64,14 +63,14 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes a numeraire amount, calculates the raw amount of chf, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e18) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
 
         bool _transferSuccess = chf.transferFrom(msg.sender, address(this), amount_);
 
@@ -89,12 +88,12 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         if (_chfBal <= 0) return 0;
 
-        uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        uint256 _usdcBal = usdc.balanceOf(_addr).mul(DECIMALS).div(_quoteWeight);
 
         // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_chfBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_chfBal.mul(DECIMALS).div(_baseWeight));
 
-        amount_ = (_amount.mulu(1e18) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS).mul(1e6)).div(_rate);
 
         bool _transferSuccess = chf.transferFrom(msg.sender, address(this), amount_);
 
@@ -109,7 +108,7 @@ contract ChfToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _chfAmount = ((_amount) * _rate) / 1e8;
+        uint256 _chfAmount = ((_amount).mul(_rate)).div(1e8);
 
         bool _transferSuccess = chf.transfer(_dst, _chfAmount);
 
@@ -117,29 +116,29 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         uint256 _balance = chf.balanceOf(address(this));
 
-        amount_ = _chfAmount.divu(1e18);
+        amount_ = _chfAmount.divu(DECIMALS);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // takes a raw amount of chf and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _chfAmount = (_amount * _rate) / 1e8;
+        uint256 _chfAmount = (_amount.mul(_rate)).div(1e8);
 
         bool _transferSuccess = chf.transfer(_dst, _chfAmount);
 
         require(_transferSuccess, "Curve/CHF-transfer-failed");
 
-        amount_ = _chfAmount.divu(1e18);
+        amount_ = _chfAmount.divu(DECIMALS);
     }
 
     // takes a numeraire value of chf, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e18) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
 
         bool _transferSuccess = chf.transfer(_dst, amount_);
 
@@ -150,7 +149,7 @@ contract ChfToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e18) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
     }
 
     // takes a numeraire amount and returns the raw amount without the rate
@@ -164,19 +163,19 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         if (_chfBal <= 0) return 0;
 
-        uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        uint256 _usdcBal = usdc.balanceOf(_addr).mul(DECIMALS).div(_quoteWeight);
 
         // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_chfBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_chfBal.mul(DECIMALS).div(_baseWeight));
 
-        amount_ = (_amount.mulu(1e18) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS).mul(1e6)).div(_rate);
     }
 
     // takes a raw amount and returns the numeraire amount
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case chf
@@ -187,7 +186,7 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case chf
@@ -199,11 +198,11 @@ contract ChfToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e18);
+        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
 
         uint256 _balance = chf.balanceOf(_addr);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e18);
+        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case chf
@@ -218,11 +217,11 @@ contract ChfToUsdAssimilator is IAssimilator {
 
         if (_chfBal <= 0) return ABDKMath64x64.fromUInt(0);
 
-        uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        uint256 _usdcBal = usdc.balanceOf(_addr).mul(DECIMALS).div(_quoteWeight);
 
         // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_chfBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_chfBal.mul(DECIMALS).div(_baseWeight));
 
-        balance_ = ((_chfBal * _rate) / 1e6).divu(1e18);
+        balance_ = ((_chfBal.mul(_rate)).div(1e6)).divu(DECIMALS);
     }
 }
