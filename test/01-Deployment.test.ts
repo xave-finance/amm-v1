@@ -146,6 +146,7 @@ describe("Deployment", () => {
       });
 
       assert(ethers.utils.isAddress(curve.address));
+      assert(ethers.utils.isAddress(await curveFactoryContract.getCurve(TOKENS.CADC.address, TOKENS.USDC.address)));
     })
   })
 });

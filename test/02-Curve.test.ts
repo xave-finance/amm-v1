@@ -303,6 +303,7 @@ describe("Curve Contract", () => {
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
 
+      assert(ethers.utils.isAddress(await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address)));
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -335,6 +336,7 @@ describe("Curve Contract", () => {
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
 
+      assert(ethers.utils.isAddress(await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address)));
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -367,6 +369,7 @@ describe("Curve Contract", () => {
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
 
+      assert(curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address));
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -392,6 +395,7 @@ describe("Curve Contract", () => {
 
       const txR = await curve.turnOffWhitelisting();
 
+      assert(curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address));
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -415,6 +419,7 @@ describe("Curve Contract", () => {
 
       const txR = await curve.turnOffWhitelisting();
 
+      assert(curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address));
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -438,6 +443,7 @@ describe("Curve Contract", () => {
 
       const txR = await curve.turnOffWhitelisting();
 
+      assert(curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address));
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
