@@ -302,8 +302,13 @@ describe("Curve Contract", () => {
 
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
-      assert(ethers.utils.isAddress(await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address)));
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -335,8 +340,13 @@ describe("Curve Contract", () => {
 
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
 
-      assert(ethers.utils.isAddress(await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address)));
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -368,8 +378,13 @@ describe("Curve Contract", () => {
 
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
-      assert(curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address));
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -394,8 +409,13 @@ describe("Curve Contract", () => {
       });
 
       const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
-      assert(curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address));
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -418,8 +438,13 @@ describe("Curve Contract", () => {
       });
 
       const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
 
-      assert(curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address));
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
@@ -442,8 +467,13 @@ describe("Curve Contract", () => {
       });
 
       const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
-      assert(curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address));
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;

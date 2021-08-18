@@ -145,8 +145,12 @@ describe("Deployment", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      assert(ethers.utils.isAddress(curve.address));
-      assert(ethers.utils.isAddress(await curveFactoryContract.getCurve(TOKENS.CADC.address, TOKENS.USDC.address)));
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
     })
   })
 });
