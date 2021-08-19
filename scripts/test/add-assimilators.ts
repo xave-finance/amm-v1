@@ -1,11 +1,9 @@
 import hre from "hardhat";
 import chalk from "chalk";
-import path from "path";
-import fs from "fs";
-
-import { getAccounts, deployContract } from "./common";
-
 const { ethers } = hre;
+
+import { getAccounts, deployContract } from "../common";
+import { deployedLogs } from "../Utils";
 
 async function main() {
   const { user } = await getAccounts();
@@ -13,24 +11,24 @@ async function main() {
   console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
   console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
 
-  const Factory = await ethers.getContractFactory("Zap");
+  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
 
-  const zap = await deployContract({
-    name: "zap",
+  const xsgdToUsdAssimilator = await deployContract({
+    name: "XsgdToUsdAssimilator",
     deployer: user,
-    factory: Factory,
+    factory: XsgdToUsdAssimilator,
     args: [],
     opts: {
-      gasLimit: 3000000,
+      gasLimit: 2000000,
     },
   });
 
   const output = {
-    zap: zap.address,
+    xsgdToUsdAssimilator: xsgdToUsdAssimilator.address
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_zap_deployed.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+  // Deployed contracts log
+  await deployedLogs('new_assimilators_deployed', output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -1,89 +1,43 @@
 import hre from "hardhat";
-import chalk from "chalk";
-import path from "path";
-import fs from "fs";
-
-import { getAccounts, deployContract } from "./common";
-
 const { ethers } = hre;
 
+import { getAccounts, deployContract } from "./common";
+import { deployedLogs, deployerHelper } from "./Utils";
+
 async function main() {
-  const { user } = await getAccounts();
+  console.time('Deployment Time');
+  const users = await getAccounts();
+  const user1 = users[0];
+  let output = {};
+  let newOutput = {};
+  let excludedLib = ['zap'];
+  let excludedLibObj = {};
 
-  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
+  const coreContracts = process.env.CORE_CONTRACTS.split(',');
+  for (let index = 0; index < coreContracts.length; index++) {
+    try {
+      const res = await deployerHelper(user1, coreContracts[index]);
 
-  const CurvesLib = await ethers.getContractFactory("Curves");
-  const OrchestratorLib = await ethers.getContractFactory("Orchestrator");
-  const ProportionalLiquidityLib = await ethers.getContractFactory("ProportionalLiquidity");
-  const SwapsLib = await ethers.getContractFactory("Swaps");
-  const ViewLiquidityLib = await ethers.getContractFactory("ViewLiquidity");
+      if (!excludedLib.includes(res.key)) {
+        output[res.key] = res.address;
+      } else {
+        excludedLibObj[res.key] = res.address;
+      }
+    } catch (error) {
+      console.log(`Error: ${error}`);
+      continue;
+    }
+  }
 
-  const curvesLib = await deployContract({
-    name: "CuvesLib",
-    deployer: user,
-    factory: CurvesLib,
-    args: [],
-    opts: {
-      gasLimit: 800000,
-    },
-  });
-
-  const orchestratorLib = await deployContract({
-    name: "OrchestratorLib",
-    deployer: user,
-    factory: OrchestratorLib,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const proportionalLiquidityLib = await deployContract({
-    name: "ProportionalLiquidityLib",
-    deployer: user,
-    factory: ProportionalLiquidityLib,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const swapsLib = await deployContract({
-    name: "SwapsLib",
-    deployer: user,
-    factory: SwapsLib,
-    args: [],
-    opts: {
-      gasLimit: 3000000,
-    },
-  });
-
-  const viewLiquidityLib = await deployContract({
-    name: "ViewLiquidityLib",
-    deployer: user,
-    factory: ViewLiquidityLib,
-    args: [],
-    opts: {
-      gasLimit: 400000,
-    },
-  });
+  Object.keys(output).map(key => newOutput[key[0].toUpperCase() + key.slice(1)] = output[key]);
 
   const CurveFactory = await ethers.getContractFactory("CurveFactory", {
-    libraries: {
-      Curves: curvesLib.address,
-      Orchestrator: orchestratorLib.address,
-      ProportionalLiquidity: proportionalLiquidityLib.address,
-      Swaps: swapsLib.address,
-      ViewLiquidity: viewLiquidityLib.address,
-    },
+    libraries: newOutput,
   });
-
-  const RouterFactory = await ethers.getContractFactory("Router");
 
   const curveFactory = await deployContract({
     name: "CurveFactory",
-    deployer: user,
+    deployer: user1,
     factory: CurveFactory,
     args: [],
     opts: {
@@ -91,9 +45,10 @@ async function main() {
     },
   });
 
+  const RouterFactory = await ethers.getContractFactory("Router");
   const router = await deployContract({
     name: "Router",
-    deployer: user,
+    deployer: user1,
     factory: RouterFactory,
     args: [curveFactory.address],
     opts: {
@@ -101,20 +56,17 @@ async function main() {
     },
   });
 
-  const output = {
-    libraries: {
-      Curves: curvesLib.address,
-      Orchestrator: orchestratorLib.address,
-      ProportionalLiquidity: proportionalLiquidityLib.address,
-      Swaps: swapsLib.address,
-      ViewLiquidity: viewLiquidityLib.address,
-    },
+  let deployedContracts = {
+    libraries: newOutput,
     curveFactory: curveFactory.address,
     router: router.address,
   };
 
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_factory_deployed.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+  Object.keys(excludedLibObj).map((key) => deployedContracts[key] = excludedLibObj[key]);
+
+  // Deployed contracts log
+  await deployedLogs('factory_deployed', deployedContracts);
+  console.timeEnd('Deployment Time');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
