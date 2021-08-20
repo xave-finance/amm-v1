@@ -543,7 +543,7 @@ contract Curve is Storage, MerkleProver {
     /// @notice  views the withdrawal information from the pool
     /// @param   _curvesToBurn the full amount you want to withdraw from the pool which will be withdrawn from evenly amongst the
     ///                        numeraire assets of the pool
-    /// @return the amonnts of numeraire assets withdrawn from the pool
+    /// @return the amounts of numeraire assets withdrawn from the pool
     function viewWithdraw(uint256 _curvesToBurn) external view transactable returns (uint256[] memory) {
         return ProportionalLiquidity.viewProportionalWithdraw(curve, _curvesToBurn);
     }
