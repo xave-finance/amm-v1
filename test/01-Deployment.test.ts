@@ -24,7 +24,7 @@ const DIMENSION = {
   max: parseUnits(process.env.DIMENSION_MAX),
   epsilon: parseUnits(process.env.DIMENSION_EPSILON),
   lambda: parseUnits(process.env.DIMENSION_LAMBDA),
-  gamma: parseUnits(process.env.DIMENSION_GAMMA)
+  gamma: 0 //process.env.DIMENSION_GAMMA)
 }
 
 describe("Deployment", () => {
