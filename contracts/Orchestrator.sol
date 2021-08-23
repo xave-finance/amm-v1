@@ -52,7 +52,8 @@ library Orchestrator {
         uint256 _beta,
         uint256 _feeAtHalt,
         uint256 _epsilon,
-        uint256 _lambda
+        uint256 _lambda,
+        uint256 _gamma
     ) external {
         require(0 < _alpha && _alpha < 1e18, "Curve/parameter-invalid-alpha");
 
@@ -75,6 +76,8 @@ library Orchestrator {
         curve.epsilon = (_epsilon.add(1)).divu(1e18);
 
         curve.lambda = (_lambda.add(1)).divu(1e18);
+
+        curve.gamma = (_gamma.add(1)).divu(1e18); // LUCAS WHY?
 
         int128 _psi = getFee(curve);
 

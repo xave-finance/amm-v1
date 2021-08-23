@@ -316,14 +316,16 @@ contract Curve is Storage, MerkleProver {
     /// @param _feeAtHalt the maximum value for the fee at the halt point
     /// @param _epsilon the base fee for the pool
     /// @param _lambda the value for lambda must be less than or equal to 1 and greater than zero
+    /// @param _gamma the protocol fee for the pool
     function setParams(
         uint256 _alpha,
         uint256 _beta,
         uint256 _feeAtHalt,
         uint256 _epsilon,
-        uint256 _lambda
+        uint256 _lambda,
+        uint256 _gamma
     ) external onlyOwner {
-        Orchestrator.setParams(curve, _alpha, _beta, _feeAtHalt, _epsilon, _lambda);
+        Orchestrator.setParams(curve, _alpha, _beta, _feeAtHalt, _epsilon, _lambda, _gamma);
     }
 
     /// @notice excludes an assimilator from the curve
