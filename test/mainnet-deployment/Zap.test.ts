@@ -23,7 +23,7 @@ import { scaffoldHelpers, scaffoldTest } from "../Setup";
 
 chai.use(chaiBigNumber(BigNumber));
 
-describe("Zap", function () {
+describe("Zap", () => {
   let [user, user2]: Signer[] = [];
   let [userAddress, user2Address]: string[] = [];
   let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
@@ -42,7 +42,7 @@ describe("Zap", function () {
 
   let zap: Zap;
 
-  before(async function () {
+  before(async () => {
     [user, user2] = await ethers.getSigners();
     [userAddress, user2Address] = await Promise.all([user, user2].map(x => x.getAddress()));
 
@@ -130,7 +130,7 @@ describe("Zap", function () {
     }
   };
 
-  it("CADC", async function () {
+  it("CADC", async () => {
     const base = TOKENS.CADC.address;
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.CADC.decimals;
@@ -142,7 +142,7 @@ describe("Zap", function () {
     await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
   });
 
-  it("XSGD", async function () {
+  it("XSGD", async () => {
     const base = TOKENS.XSGD.address;
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.XSGD.decimals;
@@ -154,7 +154,7 @@ describe("Zap", function () {
     await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
   });
 
-  it("EURS", async function () {
+  it("EURS", async () => {
     const base = TOKENS.EURS.address;
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.EURS.decimals;

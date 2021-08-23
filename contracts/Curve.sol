@@ -354,7 +354,8 @@ contract Curve is Storage, MerkleProver {
             uint256 beta_,
             uint256 delta_,
             uint256 epsilon_,
-            uint256 lambda_
+            uint256 lambda_,
+            uint256 gamma_
         )
     {
         return Orchestrator.viewCurve(curve);

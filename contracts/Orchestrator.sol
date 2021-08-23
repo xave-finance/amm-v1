@@ -216,7 +216,8 @@ library Orchestrator {
             uint256 beta_,
             uint256 delta_,
             uint256 epsilon_,
-            uint256 lambda_
+            uint256 lambda_,
+            uint256 gamma_
         )
     {
         alpha_ = curve.alpha.mulu(1e18);
@@ -228,5 +229,7 @@ library Orchestrator {
         epsilon_ = curve.epsilon.mulu(1e18);
 
         lambda_ = curve.lambda.mulu(1e18);
+
+        gamma_ = curve.gamma.mulu(1e18);
     }
 }

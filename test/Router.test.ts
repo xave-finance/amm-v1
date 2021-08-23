@@ -25,8 +25,9 @@ const BETA = parseUnits("0.35");
 const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0004");
 const LAMBDA = parseUnits("0.3");
+const GAMMA = parseUnits("0.1");
 
-describe("Router", function () {
+describe("Router", () => {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];
 
@@ -66,7 +67,7 @@ describe("Router", function () {
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
     curve: Curve;
     curveLpToken: ERC20;
@@ -112,7 +113,7 @@ describe("Router", function () {
       quoteWeight: parseUnits("0.6"),
       baseAssimilator: cadcToUsdAssimilator.address,
       quoteAssimilator: usdcToUsdAssimilator.address,
-      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
     });
 
     const { curve: curveXSGD } = await createCurveAndSetParams({
@@ -124,7 +125,7 @@ describe("Router", function () {
       quoteWeight: parseUnits("0.6"),
       baseAssimilator: xsgdToUsdAssimilator.address,
       quoteAssimilator: usdcToUsdAssimilator.address,
-      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
     });
 
     const { curve: curveEURS } = await createCurveAndSetParams({
@@ -136,7 +137,7 @@ describe("Router", function () {
       quoteWeight: parseUnits("0.6"),
       baseAssimilator: eursToUsdAssimilator.address,
       quoteAssimilator: usdcToUsdAssimilator.address,
-      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
     });
 
     // Supply liquidity to the pools

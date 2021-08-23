@@ -34,7 +34,7 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0004");
 const LAMBDA = parseUnits("0.3");
 
-describe("Whitelist", function () {
+describe("Whitelist", () => {
   let [owner, user1, user2]: Signer[] = [];
   let [ownerAddress, user1Address, user2Address]: string[] = [];
 
@@ -75,7 +75,7 @@ describe("Whitelist", function () {
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
     yesWhitelisting?: boolean;
   }) => Promise<{
     curve: Curve;
@@ -96,7 +96,7 @@ describe("Whitelist", function () {
     await Promise.all(rates.map((x, i) => updateOracleAnswer(oracles[i], x)));
   });
 
-  before(async function () {
+  before(async () => {
     ({
       users: [owner, user1, user2],
       userAddresses: [ownerAddress, user1Address, user2Address],
@@ -114,7 +114,7 @@ describe("Whitelist", function () {
     } = await scaffoldTest());
   });
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
     router = (await RouterFactory.deploy(curveFactory.address)) as Router;
 
@@ -124,7 +124,7 @@ describe("Whitelist", function () {
     }));
   });
 
-  // it("Only whitelisted users can deposit a max of $10_000 (USD) worth of tokens ", async function () {
+  // it("Only whitelisted users can deposit a max of $10_000 (USD) worth of tokens ", async () => {
   //   const base = TOKENS.CADC.address;
   //   const baseAssimilator = cadcToUsdAssimilator.address;
   //   const baseDecimals = 18;
@@ -142,7 +142,7 @@ describe("Whitelist", function () {
   //     quoteWeight: parseUnits("0.5"),
   //     baseAssimilator: baseAssimilator,
   //     quoteAssimilator: usdcToUsdAssimilator.address,
-  //     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+  //     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
   //     yesWhitelisting: true,
   //   });
 
@@ -185,7 +185,7 @@ describe("Whitelist", function () {
   //   }
   // });
 
-  // it("depositWithWhitelist disabled after whitelisting period ended ", async function () {
+  // it("depositWithWhitelist disabled after whitelisting period ended ", async () => {
   //   const base = TOKENS.CADC.address;
   //   const baseAssimilator = cadcToUsdAssimilator.address;
   //   const baseDecimals = 18;
@@ -203,7 +203,7 @@ describe("Whitelist", function () {
   //     quoteWeight: parseUnits("0.5"),
   //     baseAssimilator: baseAssimilator,
   //     quoteAssimilator: usdcToUsdAssimilator.address,
-  //     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+  //     params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
   //     yesWhitelisting: true,
   //   });
 

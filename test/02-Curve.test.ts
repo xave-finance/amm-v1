@@ -23,7 +23,8 @@ const DIMENSION = {
   beta: parseUnits(process.env.DIMENSION_BETA),
   max: parseUnits(process.env.DIMENSION_MAX),
   epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  lambda: parseUnits(process.env.DIMENSION_LAMBDA),
+  gamma: parseUnits(process.env.DIMENSION_GAMMA)
 }
 
 describe("Curve Contract", () => {
@@ -66,13 +67,13 @@ describe("Curve Contract", () => {
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
     curve: Curve;
     curveLpToken: ERC20;
   }>;
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
@@ -113,7 +114,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const curveAddress = await curveFactory.curves(
@@ -137,7 +138,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: eursToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const curveAddress = await curveFactory.curves(
@@ -161,7 +162,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: xsgdToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const curveAddress = await curveFactory.curves(
@@ -185,7 +186,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       try {
@@ -198,7 +199,7 @@ describe("Curve Contract", () => {
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: cadcToUsdAssimilator.address,
           quoteAssimilator: usdcToUsdAssimilator.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
         });
         throw new Error("newCurve should throw error");
       } catch (e) {
@@ -219,7 +220,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: eursToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       try {
@@ -232,7 +233,7 @@ describe("Curve Contract", () => {
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: eursToUsdAssimilator.address,
           quoteAssimilator: usdcToUsdAssimilator.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
         });
         throw new Error("newCurve should throw error");
       } catch (e) {
@@ -253,7 +254,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: xsgdToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       try {
@@ -266,7 +267,7 @@ describe("Curve Contract", () => {
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: xsgdToUsdAssimilator.address,
           quoteAssimilator: usdcToUsdAssimilator.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
         });
         throw new Error("newCurve should throw error");
       } catch (e) {
@@ -289,7 +290,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const tx = await curve.setParams(
@@ -297,7 +298,8 @@ describe("Curve Contract", () => {
         DIMENSION.beta,
         DIMENSION.max,
         DIMENSION.epsilon,
-        DIMENSION.lambda
+        DIMENSION.lambda,
+        DIMENSION.gamma
       );
 
       await tx.wait();
@@ -327,7 +329,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: eursToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const tx = await curve.setParams(
@@ -335,7 +337,8 @@ describe("Curve Contract", () => {
         DIMENSION.beta,
         DIMENSION.max,
         DIMENSION.epsilon,
-        DIMENSION.lambda
+        DIMENSION.lambda,
+        DIMENSION.gamma
       );
 
       await tx.wait();
@@ -365,7 +368,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: xsgdToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const tx = await curve.setParams(
@@ -373,7 +376,8 @@ describe("Curve Contract", () => {
         DIMENSION.beta,
         DIMENSION.max,
         DIMENSION.epsilon,
-        DIMENSION.lambda
+        DIMENSION.lambda,
+        DIMENSION.gamma
       );
 
       await tx.wait();
@@ -405,7 +409,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -434,7 +438,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: eursToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -463,7 +467,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: xsgdToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();

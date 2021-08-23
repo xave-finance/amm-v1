@@ -23,7 +23,7 @@ import { scaffoldHelpers, scaffoldTest } from "../Setup";
 
 chai.use(chaiBigNumber(BigNumber));
 
-describe("Curve Mainnet Sanity Checks", function () {
+describe("Curve Mainnet Sanity Checks", () => {
   let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
 
   let curveCADC: Curve;
@@ -38,7 +38,7 @@ describe("Curve Mainnet Sanity Checks", function () {
   let xsgd: ERC20;
   let erc20: ERC20;
 
-  before(async function () {
+  before(async () => {
     erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
     ({ multiMintAndApprove } = await scaffoldHelpers({
       curveFactory: null as CurveFactory,
@@ -141,7 +141,7 @@ describe("Curve Mainnet Sanity Checks", function () {
       .withdraw(await curve.connect(user).balanceOf(userAddress), await getFutureTime(), { gasPrice: 0 });
   };
 
-  // it("CADC", async function () {
+  // it("CADC", async () => {
   //   const base = TOKENS.CADC.address;
   //   const quote = TOKENS.USDC.address;
   //   const baseDecimals = TOKENS.CADC.decimals;
@@ -151,7 +151,7 @@ describe("Curve Mainnet Sanity Checks", function () {
   //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, curve);
   // });
 
-  // it("EURS", async function () {
+  // it("EURS", async () => {
   //   const base = TOKENS.EURS.address;
   //   const quote = TOKENS.USDC.address;
   //   const baseDecimals = TOKENS.EURS.decimals;
@@ -161,7 +161,7 @@ describe("Curve Mainnet Sanity Checks", function () {
   //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, curve);
   // });
 
-  // it("XSGD", async function () {
+  // it("XSGD", async () => {
   //   const base = TOKENS.XSGD.address;
   //   const quote = TOKENS.USDC.address;
   //   const baseDecimals = TOKENS.XSGD.decimals;
