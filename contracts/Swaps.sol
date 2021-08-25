@@ -63,8 +63,11 @@ library Swaps {
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _t.ix);
 
         _amt = _amt.us_mul(ONE.sub(curve.epsilon));
-
+        curve.totalFeeInNumeraire++;
         tAmt_ = Assimilators.outputNumeraire(_t.addr, _recipient, _amt);
+
+        // Curve.protocolFeeMapping += amt * epsilon * theta (epsilon deducted here)
+        // Curve.protocolFeeMapping += amt * lambda * theta (caveat - lambda calculation)
 
         emit Trade(msg.sender, _origin, _target, _originAmount, tAmt_);
     }
