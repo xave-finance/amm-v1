@@ -278,7 +278,7 @@ const createCurveAndSetParams = async function ({
   quoteWeight: BigNumberish;
   baseAssimilator: string;
   quoteAssimilator: string;
-  params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
 }) {
   const { curve, curveLpToken } = await createCurve({
     curveFactory,

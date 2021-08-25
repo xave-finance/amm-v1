@@ -23,7 +23,8 @@ const DIMENSION = {
   beta: parseUnits(process.env.DIMENSION_BETA),
   max: parseUnits(process.env.DIMENSION_MAX),
   epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  lambda: parseUnits(process.env.DIMENSION_LAMBDA),
+  gamma: 0 //process.env.DIMENSION_GAMMA)
 }
 
 describe("Deployment", () => {
@@ -73,13 +74,13 @@ describe("Deployment", () => {
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
     curve: Curve;
     curveLpToken: ERC20;
   }>;
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
@@ -142,10 +143,15 @@ describe("Deployment", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
-      assert(ethers.utils.isAddress(curve.address));
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
     })
   })
 });

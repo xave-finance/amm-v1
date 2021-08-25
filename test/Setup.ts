@@ -13,6 +13,7 @@ export const BETA = parseUnits("0.35");
 export const MAX = parseUnits("0.15");
 export const EPSILON = parseUnits("0.0004");
 export const LAMBDA = parseUnits("0.3");
+export const GAMMA = parseUnits("0.1");
 
 // eslint-disable-next-line
 export const scaffoldTest = async () => {
@@ -84,7 +85,7 @@ export const scaffoldTest = async () => {
 
 // eslint-disable-next-line
 export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: CurveFactory; erc20: ERC20 }) => {
-  const createCurve = async function ({
+  const createCurve = async ({
     name,
     symbol,
     base,
@@ -104,9 +105,9 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params?: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params?: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
     yesWhitelisting?: boolean;
-  }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
+  }): Promise<{ curve: Curve; curveLpToken: ERC20 }> => {
     await curveFactory.newCurve(name, symbol, base, quote, baseWeight, quoteWeight, baseAssimilator, quoteAssimilator);
 
     // Get curve address
@@ -124,7 +125,7 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     if (params) {
       await curve.setParams(...params);
     } else {
-      await curve.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA);
+      await curve.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA);
     }
 
     return {
@@ -133,7 +134,7 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     };
   };
 
-  const createCurveAndSetParams = async function ({
+  const createCurveAndSetParams = async ({
     name,
     symbol,
     base,
@@ -153,9 +154,9 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
     yesWhitelisting?: boolean;
-  }) {
+  }) => {
     const { curve, curveLpToken } = await createCurve({
       name,
       symbol,
@@ -177,12 +178,12 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     };
   };
 
-  const mintAndApprove = async function (
+  const mintAndApprove = async (
     tokenAddress: string,
     minter: Signer,
     amount: BigNumberish,
     recipient: string,
-  ) {
+  ) => {
     const minterAddress = await minter.getAddress();
 
     if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {

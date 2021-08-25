@@ -27,8 +27,9 @@ const BETA = parseUnits("0.5");
 const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0004");
 const LAMBDA = parseUnits("0.3");
+const GAMMA = parseUnits("0.1");
 
-describe("Curve", function () {
+describe("Curve", () => {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];
 
@@ -68,7 +69,7 @@ describe("Curve", function () {
     quoteWeight: BigNumberish;
     baseAssimilator: string;
     quoteAssimilator: string;
-    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
     curve: Curve;
     curveLpToken: ERC20;
@@ -88,7 +89,7 @@ describe("Curve", function () {
     await Promise.all(rates.map((x, i) => updateOracleAnswer(oracles[i], x)));
   });
 
-  before(async function () {
+  before(async () => {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
@@ -106,7 +107,7 @@ describe("Curve", function () {
     } = await scaffoldTest());
   });
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
     router = (await RouterFactory.deploy(curveFactory.address)) as Router;
 
@@ -116,8 +117,8 @@ describe("Curve", function () {
     }));
   });
 
-  describe("Invariant Checking", function () {
-    const checkInvariant = async function (base: string, baseAssimilator: string, baseDecimals: number) {
+  describe("Invariant Checking", () => {
+    const checkInvariant = async (base: string, baseAssimilator: string, baseDecimals: number) => {
       // We're just flipping them around...
       const { curve } = await createCurveAndSetParams({
         name: NAME,
@@ -128,7 +129,7 @@ describe("Curve", function () {
         quoteWeight: parseUnits("0.5"),
         baseAssimilator: baseAssimilator,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+        params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
       });
 
       const c: Curve = curve as Curve;
@@ -174,20 +175,20 @@ describe("Curve", function () {
       await c.connect(user2).withdraw(bal, await getFutureTime());
     };
 
-    it("CADC", async function () {
+    it("CADC", async () => {
       await checkInvariant(TOKENS.CADC.address, cadcToUsdAssimilator.address, TOKENS.CADC.decimals);
     });
 
-    it("XSGD", async function () {
+    it("XSGD", async () => {
       await checkInvariant(TOKENS.XSGD.address, xsgdToUsdAssimilator.address, TOKENS.XSGD.decimals);
     });
 
-    it("EURS", async function () {
+    it("EURS", async () => {
       await checkInvariant(TOKENS.EURS.address, eursToUsdAssimilator.address, TOKENS.EURS.decimals);
     });
   });
 
-  describe("Swaps", function () {
+  describe("Swaps", async () => {
     const originAndTargetSwapAndCheckSanity = async ({
       amount,
       name,
@@ -214,7 +215,7 @@ describe("Curve", function () {
       quoteWeight: BigNumberish;
       baseAssimilator: string;
       quoteAssimilator: string;
-      params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+      params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
       oracle: string;
     }) => {
       const { curve } = await createCurveAndSetParams({
@@ -324,7 +325,7 @@ describe("Curve", function () {
       quoteWeight: BigNumberish;
       baseAssimilator: string;
       quoteAssimilator: string;
-      params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+      params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
       oracle: string;
     }) => {
       // We're just flipping them around...
@@ -430,7 +431,7 @@ describe("Curve", function () {
           const oracle = oracles[i];
           const quoteWeight = weights[j][0];
 
-          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
+          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async ()  => {
             const assimilators = [cadcToUsdAssimilator, xsgdToUsdAssimilator, eursToUsdAssimilator];
             const baseAssimilator = assimilators[i].address;
 
@@ -446,12 +447,12 @@ describe("Curve", function () {
               quoteWeight: parseUnits(quoteWeight),
               baseAssimilator,
               quoteAssimilator: usdcToUsdAssimilator.address,
-              params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+              params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
               oracle,
             });
           });
 
-          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
+          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async ()  => {
             const assimilators = [cadcToUsdAssimilator, xsgdToUsdAssimilator, eursToUsdAssimilator];
             const baseAssimilator = assimilators[i].address;
 
@@ -467,7 +468,7 @@ describe("Curve", function () {
               quoteWeight: parseUnits(baseWeight),
               baseAssimilator: usdcToUsdAssimilator.address,
               quoteAssimilator: baseAssimilator,
-              params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+              params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
               oracle,
             });
           });
@@ -476,8 +477,8 @@ describe("Curve", function () {
     }
   });
 
-  describe("Pool Ratio changes between operations", function () {
-    describe("viewDeposit", function () {
+  describe("Pool Ratio changes between operations", () => {
+    describe("viewDeposit", () => {
       const viewLPDepositWithSanityChecks = async ({
         amount,
         name,
@@ -504,7 +505,7 @@ describe("Curve", function () {
         quoteDecimals: number;
         baseAssimilator: string;
         quoteAssimilator: string;
-        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
         const { curve } = await createCurveAndSetParams({
@@ -583,7 +584,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`CADC/USDC 50/50 - ${i}`, async function () {
+        it(`CADC/USDC 50/50 - ${i}`, async ()  => {
           await viewLPDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -596,14 +597,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: cadcToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.CADC.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`XSGD/USDC 50/50 - ${i}`, async function () {
+        it(`XSGD/USDC 50/50 - ${i}`, async () => {
           await viewLPDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -616,14 +617,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: xsgdToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.XSGD.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`EURS/USDC 50/50 - ${i}`, async function () {
+        it(`EURS/USDC 50/50 - ${i}`, async () => {
           await viewLPDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -636,14 +637,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: eursToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.EURS.address,
           });
         });
       }
     });
 
-    describe("viewWithdraw", function () {
+    describe("viewWithdraw", () => {
       const viewLPWithdrawWithSanityChecks = async ({
         amount,
         name,
@@ -669,7 +670,7 @@ describe("Curve", function () {
         quoteDecimals: number;
         baseAssimilator: string;
         quoteAssimilator: string;
-        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
       }) => {
         const { curve, curveLpToken } = await createCurveAndSetParams({
           name,
@@ -734,7 +735,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`CADC/USDC 50/50 - ${i}`, async function () {
+        it(`CADC/USDC 50/50 - ${i}`, async () => {
           await viewLPWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -747,13 +748,13 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: cadcToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`XSGD/USDC 50/50 - ${i}`, async function () {
+        it(`XSGD/USDC 50/50 - ${i}`, async () => {
           await viewLPWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -766,13 +767,13 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: xsgdToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`EURS/USDC 50/50 - ${i}`, async function () {
+        it(`EURS/USDC 50/50 - ${i}`, async ()  => {
           await viewLPWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -785,13 +786,13 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: eursToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
           });
         });
       }
     });
 
-    describe("Add and remove liquidity", function () {
+    describe("Add and remove liquidity", () => {
       const addAndRemoveLiquidityWithSanityChecks = async ({
         amount,
         name,
@@ -818,7 +819,7 @@ describe("Curve", function () {
         quoteDecimals: number;
         baseAssimilator: string;
         quoteAssimilator: string;
-        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
         const { curve, curveLpToken } = await createCurveAndSetParams({
@@ -950,7 +951,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("CADC/USDC 50/50 - " + i.toString(), async function () {
+        it("CADC/USDC 50/50 - " + i.toString(), async ()  => {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -963,14 +964,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: cadcToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.CADC.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("XSGD/USDC 50/50 - " + i.toString(), async function () {
+        it("XSGD/USDC 50/50 - " + i.toString(), async ()  => {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -983,14 +984,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: xsgdToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.XSGD.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("EURS/USDC 50/50 - " + i.toString(), async function () {
+        it("EURS/USDC 50/50 - " + i.toString(), async ()  => {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: "1",
             name: NAME,
@@ -1003,7 +1004,7 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: eursToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.EURS.address,
           });
         });
@@ -1011,8 +1012,8 @@ describe("Curve", function () {
     });
   });
 
-  describe("Oracle updates between operations", function () {
-    describe("viewDeposit", function () {
+  describe("Oracle updates between operations", () => {
+    describe("viewDeposit", () => {
       const viewDepositWithSanityChecks = async ({
         amount,
         name,
@@ -1039,7 +1040,7 @@ describe("Curve", function () {
         quoteDecimals: number;
         baseAssimilator: string;
         quoteAssimilator: string;
-        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
         const { curve } = await createCurveAndSetParams({
@@ -1101,7 +1102,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`CADC/USDC 50/50 - ${i}`, async function () {
+        it(`CADC/USDC 50/50 - ${i}`, async ()  => {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1114,14 +1115,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: cadcToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.CADC.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`XSGD/USDC 50/50 - ${i}`, async function () {
+        it(`XSGD/USDC 50/50 - ${i}`, async ()  => {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1134,14 +1135,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: xsgdToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.XSGD.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`EURS/USDC 50/50 - ${i}`, async function () {
+        it(`EURS/USDC 50/50 - ${i}`, async ()  => {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1154,14 +1155,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: eursToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.EURS.address,
           });
         });
       }
     });
 
-    describe("viewWithdraw", function () {
+    describe("viewWithdraw", () => {
       const viewWithdrawWithSanityChecks = async ({
         amount,
         name,
@@ -1188,7 +1189,7 @@ describe("Curve", function () {
         quoteDecimals: number;
         baseAssimilator: string;
         quoteAssimilator: string;
-        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
         const { curve, curveLpToken } = await createCurveAndSetParams({
@@ -1250,7 +1251,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`CADC/USDC 50/50 - ${i}`, async function () {
+        it(`CADC/USDC 50/50 - ${i}`, async ()  => {
           await viewWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1263,14 +1264,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: cadcToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.CADC.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("XSGD/USDC 50/50 - " + i.toString(), async function () {
+        it("XSGD/USDC 50/50 - " + i.toString(), async ()  => {
           await viewWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1283,14 +1284,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: xsgdToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.XSGD.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("EURS/USDC 50/50 - " + i.toString(), async function () {
+        it("EURS/USDC 50/50 - " + i.toString(), async ()  => {
           await viewWithdrawWithSanityChecks({
             amount: "10000",
             name: NAME,
@@ -1303,14 +1304,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: eursToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.EURS.address,
           });
         });
       }
     });
 
-    describe("Add and remove liquidity", function () {
+    describe("Add and remove liquidity", () => {
       const addAndRemoveLiquidityWithSanityChecks = async ({
         amount,
         name,
@@ -1337,7 +1338,7 @@ describe("Curve", function () {
         quoteDecimals: number;
         baseAssimilator: string;
         quoteAssimilator: string;
-        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
         const { curve, curveLpToken } = await createCurveAndSetParams({
@@ -1481,7 +1482,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("CADC/USDC 50/50 - " + i.toString(), async function () {
+        it("CADC/USDC 50/50 - " + i.toString(), async ()  => {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1494,14 +1495,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: cadcToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.CADC.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("XSGD/USDC 50/50 - " + i.toString(), async function () {
+        it("XSGD/USDC 50/50 - " + i.toString(), async ()  => {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1514,14 +1515,14 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: xsgdToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.XSGD.address,
           });
         });
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("EURS/USDC 50/50 - " + i.toString(), async function () {
+        it("EURS/USDC 50/50 - " + i.toString(), async ()  => {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: "1",
             name: NAME,
@@ -1534,7 +1535,7 @@ describe("Curve", function () {
             quoteDecimals: TOKENS.USDC.decimals,
             baseAssimilator: eursToUsdAssimilator.address,
             quoteAssimilator: usdcToUsdAssimilator.address,
-            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+            params: [ALPHA, BETA, MAX, EPSILON, LAMBDA, GAMMA],
             oracle: ORACLES.EURS.address,
           });
         });

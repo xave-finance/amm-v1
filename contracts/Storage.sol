@@ -26,6 +26,8 @@ contract Storage {
         int128 delta;
         int128 epsilon;
         int128 lambda;
+        int128 gamma; // protocol fee
+
         int128[] weights;
         // Assets and their assimilators
         Assimilator[] assets;

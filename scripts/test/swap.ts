@@ -39,8 +39,8 @@ async function main() {
 
   console.log('Amount From: ', formatUnits(amt, TOKENS_EURS_DECIMALS));
   console.log('\r');
-  console.log(`EURS Balance Before: `, formatUnits(eursBalBefore, TOKENS_EURS_DECIMALS));
-  console.log(`USDC Balance Before: `, formatUnits(usdcBalBefore, TOKENS_USDC_DECIMALS));
+  console.log('EURS Balance Before: ', formatUnits(eursBalBefore, TOKENS_EURS_DECIMALS));
+  console.log('USDC Balance Before: ', formatUnits(usdcBalBefore, TOKENS_USDC_DECIMALS));
   console.log('EURS Allowance Before: ', formatUnits(eursAllowanceBefore, TOKENS_EURS_DECIMALS));
 
   const viewRouterSwapEURS = await curveEURS
@@ -58,8 +58,8 @@ async function main() {
   console.log('\r');
   console.log('Origin Swap Amount To (contract): ', formatUnits(viewRouterSwapEURS, TOKENS_USDC_DECIMALS));
   console.log('\r');
-  console.log(`EURS Balance After: `, formatUnits(eursBalAfter, TOKENS_EURS_DECIMALS));
-  console.log(`USDC Balance After: `, formatUnits(usdcBalAfter, TOKENS_USDC_DECIMALS));
+  console.log('EURS Balance After: ', formatUnits(eursBalAfter, TOKENS_EURS_DECIMALS));
+  console.log('USDC Balance After: ', formatUnits(usdcBalAfter, TOKENS_USDC_DECIMALS));
   console.timeEnd('Deployment Time');
 }
 
