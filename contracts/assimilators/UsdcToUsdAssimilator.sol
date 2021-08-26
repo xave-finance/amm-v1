@@ -16,7 +16,6 @@
 pragma solidity ^0.7.3;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "../lib/ABDKMath64x64.sol";
 import "../interfaces/IAssimilator.sol";
@@ -26,19 +25,8 @@ contract UsdcToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
-    using SafeMath for uint256;
-
-    // Mainnet
     IOracle private constant oracle = IOracle(0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6);
     IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-
-    // // Kovan
-    // IOracle private constant oracle = IOracle(0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60);
-    // IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
-
-    // // Matic
-    // IOracle private constant oracle = IOracle(0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7);
-    // IERC20 private constant usdc = IERC20(0x61410450256785735096baEB270407457dB91EC5);
 
     uint256 private constant DECIMALS = 1e6;
 
@@ -56,9 +44,9 @@ contract UsdcToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
 
-        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
     function intakeRaw(uint256 _amount) external override returns (int128 amount_) {
@@ -68,13 +56,13 @@ contract UsdcToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
         bool _success = usdc.transferFrom(msg.sender, address(this), amount_);
 
@@ -101,7 +89,7 @@ contract UsdcToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _usdcAmount = ((_amount.mul(_rate)).div(1e8));
+        uint256 _usdcAmount = ((_amount * _rate) / 1e8);
 
         bool _success = usdc.transfer(_dst, _usdcAmount);
 
@@ -111,13 +99,13 @@ contract UsdcToUsdAssimilator is IAssimilator {
 
         amount_ = _usdcAmount.divu(DECIMALS);
 
-        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _usdcAmount = (_amount.mul(_rate)).div(1e8);
+        uint256 _usdcAmount = (_amount * _rate) / 1e8;
 
         bool _success = usdc.transfer(_dst, _usdcAmount);
 
@@ -129,7 +117,7 @@ contract UsdcToUsdAssimilator is IAssimilator {
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
         bool _success = usdc.transfer(_dst, amount_);
 
@@ -139,7 +127,7 @@ contract UsdcToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS).mul(1e8)).div(_rate);
+        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
     }
 
     function viewRawAmountLPRatio(
@@ -154,7 +142,7 @@ contract UsdcToUsdAssimilator is IAssimilator {
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
     function viewNumeraireBalance(address _addr) public view override returns (int128 balance_) {
@@ -164,7 +152,7 @@ contract UsdcToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve wrt to USD
@@ -187,10 +175,10 @@ contract UsdcToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount.mul(_rate)).div(1e8)).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
 
         uint256 _balance = usdc.balanceOf(_addr);
 
-        balance_ = ((_balance.mul(_rate)).div(1e8)).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 }
