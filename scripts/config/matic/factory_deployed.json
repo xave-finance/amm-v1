@@ -1,11 +1,12 @@
 {
     "libraries": {
-        "Curves": "0x84c061999c72acc5485beb1F602b59965e1Db50A",
-        "Orchestrator": "0x5E2F4205EeC6224012401BD3E5Ae9a7C1809b337",
-        "ProportionalLiquidity": "0x4cA29710f7bF693320b8E1981AB07E7c629A5e6C",
-        "Swaps": "0xe78e450C0fAF6419B31eC3F09A9CAcDCB752c5Cc",
-        "ViewLiquidity": "0xFbf87F3a92b1043975CE0539Ad607baCE649431b"
+        "Curves": "0x1aF00782F74DdC4c7fCEFe8752113084FEBCDA45",
+        "Orchestrator": "0x254e3D5F964E770F3a51a19d809bcE36308d797d",
+        "ProportionalLiquidity": "0x3251e99cEf4b9bA03a6434B767aa5Ad11ca6cc31",
+        "Swaps": "0x1eE3c77383aD0A0A9b8e68f7Bc6b5f5C38eCFe50",
+        "ViewLiquidity": "0x9187060B15ee8Ab193Fc090F78818Bce21223d25"
     },
-    "curveFactory": "0x0d283B07C20574D0D82491eB29f40DEA29CA3B57",
-    "router": "0xCeb68dA0913b47B7Ea5817e5c1299aE753CcD35f"
+    "curveFactory": "0x58A501c3Cc724aB1Ac9184452C16E158d5122d48",
+    "router": "0x0fDe373059B2445c41E7774C67f1441A536f1C8A",
+    "zap": "0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5"
 }

@@ -72,7 +72,10 @@ const config: HardhatUserConfig = {
       chainId: 137,
       accounts: {
         mnemonic: MNEMONIC
-      }
+      },
+      // Issue for polygon
+      // https://github.com/nomiclabs/hardhat/issues/1828
+      gasPrice: 8000000000
     },
   },
   etherscan: {
