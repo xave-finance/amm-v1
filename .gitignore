@@ -136,5 +136,5 @@ scripts/config/kovan
 scripts/config/localhost
 
 # Temporary, assimilator templates
-./contracts/assimilators/*Mainnet*
-./contracts/assimilators/*Polygon*
+*Mainnet*
+*Polygon*
