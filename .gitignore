@@ -134,3 +134,7 @@ scripts/deployed_contract_logs/kovan
 
 scripts/config/kovan
 scripts/config/localhost
+
+# Temporary, assimilator templates
+./contracts/assimilators/*Mainnet*
+./contracts/assimilators/*Polygon*
