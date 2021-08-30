@@ -587,6 +587,10 @@ contract Curve is Storage, MerkleProver {
         success_ = Curves.approve(curve, _spender, _amount);
     }
 
+    function mintProtocolFee() public returns (bool) {
+        return true;
+    }
+
     /// @notice view the curve token balance of a given account
     /// @param _account the account to view the balance of
     /// @return balance_ the curve token ballance of the given account
