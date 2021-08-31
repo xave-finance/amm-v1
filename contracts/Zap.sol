@@ -26,11 +26,7 @@ contract Zap {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    // Mainnet
     IERC20 private constant USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-
-    // // Kovan
-    // IERC20 private constant USDC = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
 
     struct ZapData {
         address curve;
