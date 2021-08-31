@@ -12,6 +12,7 @@ import { deployContract } from "./common";
 const NETWORK = hre.network.name;
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const TOKEN = {};
+const LPT_NAME = process.env.LPT_NAME;
 const envList = process.env;
 
 // Initialize token addresses from .env
@@ -216,7 +217,7 @@ const createCurve = async function ({
 }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
   const tx = await curveFactory.newCurve(
     name,
-    symbol,
+    LPT_NAME,
     base,
     quote,
     baseWeight,

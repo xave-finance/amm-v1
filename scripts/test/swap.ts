@@ -6,59 +6,54 @@ import { parseUnits, formatUnits, formatEther } from "ethers/lib/utils";
 import { getAccounts } from "../common";
 
 import { getFutureTime } from "../../test/Utils";
-import { configImporter } from "../Utils";
-import { use } from "chai";
+import { curveAddresses } from "../Utils";
 
-const eursCurveAddr = require(configImporter('curve_EURS_deployed')).curveAddress;
-const routerAddr = require(configImporter('factory_deployed')).router;
+const TOKEN_USDC = process.env.TOKEN_ADDR_USDC;
+const TOKEN_XSGD = process.env.TOKEN_ADDR_XSGD;
 
-const CONTRACT_CURVE_EURS_ADDR = eursCurveAddr;
-const ROUTER_ADDR = routerAddr;
-const TOKEN_USDC = process.env.TOKEN_USDC;
-const TOKEN_EURS = process.env.TOKEN_EURS;
 const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
-const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
+const TOKENS_XSGD_DECIMALS = process.env.TOKENS_XSGD_DECIMALS;
 
 async function main() {
   console.time('Deployment Time');
-  const { user1 } = await getAccounts();
-
-  const usdc = (await ethers.getContractAt("ERC20", TOKEN_USDC)) as ERC20;
-  const eurs = (await ethers.getContractAt("ERC20", TOKEN_EURS)) as ERC20;
+  const users = await getAccounts();
+  const user1 = users[0];
+  const curves = await curveAddresses();
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
-  const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
-  const router = (await ethers.getContractAt("Router", ROUTER_ADDR)) as Router;
+  const curveXSGD = (await ethers.getContractAt("Curve", curves['XSGD'])) as Curve;
 
-  await erc20.attach(TOKEN_EURS).connect(user1)
-    .approve(CONTRACT_CURVE_EURS_ADDR, parseUnits("10000000", TOKENS_EURS_DECIMALS));
+  await erc20.attach(TOKEN_XSGD).connect(user1)
+    .approve(curves['XSGD'], parseUnits("10000", TOKENS_XSGD_DECIMALS));
 
-  const amt = parseUnits("78", TOKENS_EURS_DECIMALS);
-  const eursBalBefore = await erc20.attach(eurs.address).balanceOf(user1.address);
-  const usdcBalBefore = await erc20.attach(usdc.address).balanceOf(user1.address);
-  const eursAllowanceBefore = await eurs.allowance(user1.address, CONTRACT_CURVE_EURS_ADDR);
+  const amt = parseUnits("78", TOKENS_XSGD_DECIMALS);
+  const xsgdBalBefore = await erc20.attach(TOKEN_XSGD).balanceOf(user1.address);
+  const usdcBalBefore = await erc20.attach(TOKEN_USDC).balanceOf(user1.address);
+  const xsgd = (await ethers.getContractAt("ERC20", TOKEN_XSGD)) as ERC20;
+  const xsgdAllowanceBefore = await xsgd.allowance(user1.address, curves['XSGD']);
 
-  console.log('Amount From: ', formatUnits(amt, TOKENS_EURS_DECIMALS));
   console.log('\r');
-  console.log('EURS Balance Before: ', formatUnits(eursBalBefore, TOKENS_EURS_DECIMALS));
+  console.log('XSGD Balance Before: ', formatUnits(xsgdBalBefore, TOKENS_XSGD_DECIMALS));
   console.log('USDC Balance Before: ', formatUnits(usdcBalBefore, TOKENS_USDC_DECIMALS));
-  console.log('EURS Allowance Before: ', formatUnits(eursAllowanceBefore, TOKENS_EURS_DECIMALS));
+  console.log('XSGD Allowance Before: ', formatUnits(xsgdAllowanceBefore, TOKENS_XSGD_DECIMALS));
 
-  const viewRouterSwapEURS = await curveEURS
+  const viewRouterSwapXSGD = await curveXSGD
     .connect(user1)
-    .viewOriginSwap(eurs.address, usdc.address, amt);
+    .viewOriginSwap(TOKEN_XSGD, TOKEN_USDC, amt);
 
-  await curveEURS
+  console.log('\r');
+  console.log('Origin Swap Amount To (contract): ', formatUnits(viewRouterSwapXSGD, TOKENS_USDC_DECIMALS));
+  console.log('\r');
+
+  await curveXSGD
     .connect(user1)
-    .originSwap(eurs.address, usdc.address, amt, 0, await getFutureTime(), {
+    .originSwap(TOKEN_XSGD, TOKEN_USDC, amt, 0, await getFutureTime(), {
       gasLimit: 3000000,
     });
-  const eursBalAfter = await erc20.attach(eurs.address).balanceOf(user1.address);
-  const usdcBalAfter = await erc20.attach(usdc.address).balanceOf(user1.address);
 
-  console.log('\r');
-  console.log('Origin Swap Amount To (contract): ', formatUnits(viewRouterSwapEURS, TOKENS_USDC_DECIMALS));
-  console.log('\r');
-  console.log('EURS Balance After: ', formatUnits(eursBalAfter, TOKENS_EURS_DECIMALS));
+  const xsgdBalAfter = await erc20.attach(TOKEN_XSGD).balanceOf(user1.address);
+  const usdcBalAfter = await erc20.attach(TOKEN_USDC).balanceOf(user1.address);
+
+  console.log('XSGD Balance After: ', formatUnits(xsgdBalAfter, TOKENS_XSGD_DECIMALS));
   console.log('USDC Balance After: ', formatUnits(usdcBalAfter, TOKENS_USDC_DECIMALS));
   console.timeEnd('Deployment Time');
 }
