@@ -35,7 +35,7 @@ library Orchestrator {
 
     int128 private constant ONE_WEI = 0x12;
 
-    event ParametersSet(uint256 alpha, uint256 beta, uint256 delta, uint256 epsilon, uint256 lambda);
+    event ParametersSet(uint256 alpha, uint256 beta, uint256 delta, uint256 epsilon, uint256 lambda, uint256 gamma);
 
     event AssetIncluded(address indexed numeraire, address indexed reserve, uint256 weight);
 
@@ -83,7 +83,7 @@ library Orchestrator {
 
         require(_omega >= _psi, "Curve/parameters-increase-fee");
 
-        emit ParametersSet(_alpha, _beta, curve.delta.mulu(1e18), _epsilon, _lambda);
+        emit ParametersSet(_alpha, _beta, curve.delta.mulu(1e18), _epsilon, _lambda, _gamma);
     }
 
     function getFee(Storage.Curve storage curve) private view returns (int128 fee_) {

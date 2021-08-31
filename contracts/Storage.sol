@@ -42,6 +42,7 @@ contract Storage {
         mapping(address => mapping(address => uint256)) allowances;
 
         uint256 totalFeeInNumeraire;
+        uint256 protocolFeeMapping;
     }
 
     struct Assimilator {
