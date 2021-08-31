@@ -61,6 +61,8 @@ library Orchestrator {
 
         require(_lambda <= 1e18, "Curve/parameter-invalid-lambda");
 
+        require(_gamma <= 1e18, "Curve/parameter-invalid-gamma");
+
         int128 _omega = getFee(curve);
 
         curve.alpha = (_alpha + 1).divu(1e18);
@@ -73,7 +75,7 @@ library Orchestrator {
 
         curve.lambda = (_lambda + 1).divu(1e18);
 
-        curve.gamma = _gamma;
+        curve.gamma = (_gamma + 1).divu(1e18);
 
         int128 _psi = getFee(curve);
 
