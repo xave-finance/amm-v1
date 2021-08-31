@@ -73,7 +73,7 @@ library Orchestrator {
 
         curve.lambda = (_lambda + 1).divu(1e18);
 
-        curve.gamma = (_gamma.add(1)).divu(1e18); // LUCAS WHY?
+        curve.gamma = _gamma;
 
         int128 _psi = getFee(curve);
 
