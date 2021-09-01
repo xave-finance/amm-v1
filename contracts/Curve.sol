@@ -590,7 +590,6 @@ contract Curve is Storage, MerkleProver {
     function mintProtocolFee(address _to) public returns (uint256) {
         require(_to != address(0), "Curve/mint-protocol-fee-to-zero");
 
-        // uint256 amount = curve.protocolFees[_to];
         uint256 amount = curve.protocolFee;
         require(amount > 0, "Curve/mint-protocol-fee-zero");
 
