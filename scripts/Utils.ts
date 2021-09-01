@@ -249,8 +249,8 @@ const createCurve = async function ({
   console.log(`Curve ${symbol} Address: `, curve.address)
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
-  const turnOffWhitelisting = await curve.turnOffWhitelisting();
-  console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
+  // const turnOffWhitelisting = await curve.turnOffWhitelisting();
+  // console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
 
   return {
     curve,
