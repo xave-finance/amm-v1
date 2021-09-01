@@ -174,7 +174,7 @@ describe("Curve", () => {
 
       const bal = await c.balanceOf(user2Address);
       await c.connect(user2).withdraw(bal, await getFutureTime());
-      expect(await (await c.curve()).protocolFeeMapping).to.be.eq(4);
+      expect(await (await c.curve()).protocolFee).to.be.eq(4);
     };
 
     it("CADC", async () => {
@@ -252,7 +252,7 @@ describe("Curve", () => {
       await curve.originSwap(base, quote, originSwapAmount, 0, await getFutureTime());
 
       expect(await (await curve.curve()).totalFeeInNumeraire).to.be.eq(1);
-      expect(await (await curve.curve()).protocolFeeMapping).to.be.eq(0);
+      expect(await (await curve.curve()).protocolFee).to.be.eq(0);
       
 
       let afterBase = await erc20.attach(base).balanceOf(user1Address);

@@ -587,8 +587,22 @@ contract Curve is Storage, MerkleProver {
         success_ = Curves.approve(curve, _spender, _amount);
     }
 
-    function mintProtocolFee() public returns (bool) {
-        return true;
+    function mintProtocolFee(address _to) public returns (uint256) {
+        require(_to != address(0), "Curve/mint-protocol-fee-to-zero");
+
+        // uint256 amount = curve.protocolFees[_to];
+        uint256 amount = curve.protocolFee;
+        require(amount > 0, "Curve/mint-protocol-fee-zero");
+
+        _totalSupply = _totalSupply.add(amount);
+
+        _balances[_to] = _balances[to].add(amount);
+        curve.protocolFees[_to] = 0;
+        curve.protocolFee = 0;
+        
+        emit Transfer(address(this), _to, amount);
+
+        return amount;
     }
 
     /// @notice view the curve token balance of a given account

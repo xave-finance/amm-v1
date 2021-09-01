@@ -61,7 +61,7 @@ library Swaps {
         curve.totalFeeInNumeraire++;
         tAmt_ = Assimilators.outputNumeraire(_t.addr, _recipient, _amt);
 
-        curve.protocolFeeMapping += uint256(_amt ** 2 * curve.epsilon * curve.gamma ** 2);
+        curve.protocolFee += uint256(_amt ** 2 * curve.epsilon * curve.gamma ** 2);
 
         emit Trade(msg.sender, _origin, _target, _originAmount, tAmt_);
     }
