@@ -52,19 +52,16 @@ library Swaps {
         if (_o.ix == _t.ix)
             return Assimilators.outputNumeraire(_t.addr, _recipient, Assimilators.intakeRaw(_o.addr, _originAmount));
 
-        (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _oBals, int128[] memory _nBals) = getOriginSwapData(
-            curve,
-            _o.ix,
-            _t.ix,
-            _o.addr,
-            _originAmount
-        );
+        (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _oBals, int128[] memory _nBals) =
+            getOriginSwapData(curve, _o.ix, _t.ix, _o.addr, _originAmount);
 
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _t.ix);
 
-        _amt = _amt.us_mul(ONE.sub(curve.epsilon));
-
+        _amt = _amt.us_mul(ONE - curve.epsilon);
+        curve.totalFeeInNumeraire++;
         tAmt_ = Assimilators.outputNumeraire(_t.addr, _recipient, _amt);
+
+        curve.protocolFeeMapping += uint256(_amt ** 2 * curve.epsilon * curve.gamma ** 2);
 
         emit Trade(msg.sender, _origin, _target, _originAmount, tAmt_);
     }
@@ -80,17 +77,12 @@ library Swaps {
         if (_o.ix == _t.ix)
             return Assimilators.viewRawAmount(_t.addr, Assimilators.viewNumeraireAmount(_o.addr, _originAmount));
 
-        (
-            int128 _amt,
-            int128 _oGLiq,
-            int128 _nGLiq,
-            int128[] memory _nBals,
-            int128[] memory _oBals
-        ) = viewOriginSwapData(curve, _o.ix, _t.ix, _originAmount, _o.addr);
+        (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _nBals, int128[] memory _oBals) =
+            viewOriginSwapData(curve, _o.ix, _t.ix, _originAmount, _o.addr);
 
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _t.ix);
 
-        _amt = _amt.us_mul(ONE.sub(curve.epsilon));
+        _amt = _amt.us_mul(ONE - curve.epsilon);
 
         tAmt_ = Assimilators.viewRawAmount(_t.addr, _amt.abs());
     }
@@ -120,14 +112,8 @@ library Swaps {
             _targetAmount = _targetAmount.mul(1e8).div(Assimilators.getRate(_t.addr));
         }
 
-        (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _oBals, int128[] memory _nBals) = getTargetSwapData(
-            curve,
-            _t.ix,
-            _o.ix,
-            _t.addr,
-            _recipient,
-            _targetAmount
-        );
+        (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _oBals, int128[] memory _nBals) =
+            getTargetSwapData(curve, _t.ix, _o.ix, _t.addr, _recipient, _targetAmount);
 
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _o.ix);
 
@@ -139,7 +125,7 @@ library Swaps {
             _amt = _amt.mul(Assimilators.getRate(_t.addr).divu(1e8));
         }
 
-        _amt = _amt.us_mul(ONE.add(curve.epsilon));
+        _amt = _amt.us_mul(ONE + curve.epsilon);
 
         oAmt_ = Assimilators.intakeNumeraire(_o.addr, _amt);
 
@@ -170,13 +156,8 @@ library Swaps {
             _targetAmount = _targetAmount.mul(1e8).div(Assimilators.getRate(_t.addr));
         }
 
-        (
-            int128 _amt,
-            int128 _oGLiq,
-            int128 _nGLiq,
-            int128[] memory _nBals,
-            int128[] memory _oBals
-        ) = viewTargetSwapData(curve, _t.ix, _o.ix, _targetAmount, _t.addr);
+        (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _nBals, int128[] memory _oBals) =
+            viewTargetSwapData(curve, _t.ix, _o.ix, _targetAmount, _t.addr);
 
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _o.ix);
 
@@ -188,7 +169,7 @@ library Swaps {
             _amt = _amt.mul(Assimilators.getRate(_t.addr).divu(1e8));
         }
 
-        _amt = _amt.us_mul(ONE.add(curve.epsilon));
+        _amt = _amt.us_mul(ONE + curve.epsilon);
 
         oAmt_ = Assimilators.viewRawAmount(_o.addr, _amt);
     }

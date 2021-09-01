@@ -18,8 +18,6 @@ pragma solidity ^0.7.3;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-
 import "./lib/ABDKMath64x64.sol";
 
 import "./Storage.sol";
@@ -31,11 +29,9 @@ library Orchestrator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
-    using SafeMath for uint256;
-
     int128 private constant ONE_WEI = 0x12;
 
-    event ParametersSet(uint256 alpha, uint256 beta, uint256 delta, uint256 epsilon, uint256 lambda);
+    event ParametersSet(uint256 alpha, uint256 beta, uint256 delta, uint256 epsilon, uint256 lambda, uint256 gamma);
 
     event AssetIncluded(address indexed numeraire, address indexed reserve, uint256 weight);
 
@@ -65,25 +61,27 @@ library Orchestrator {
 
         require(_lambda <= 1e18, "Curve/parameter-invalid-lambda");
 
+        require(_gamma <= 1e18, "Curve/parameter-invalid-gamma");
+
         int128 _omega = getFee(curve);
 
-        curve.alpha = (_alpha.add(1)).divu(1e18);
+        curve.alpha = (_alpha + 1).divu(1e18);
 
-        curve.beta = (_beta.add(1)).divu(1e18);
+        curve.beta = (_beta + 1).divu(1e18);
 
-        curve.delta = (_feeAtHalt).divu(1e18).div(uint256(2).fromUInt().mul(curve.alpha.sub(curve.beta))).add(ONE_WEI);
+        curve.delta = (_feeAtHalt).divu(1e18).div(uint256(2).fromUInt().mul(curve.alpha.sub(curve.beta))) + ONE_WEI;
 
-        curve.epsilon = (_epsilon.add(1)).divu(1e18);
+        curve.epsilon = (_epsilon + 1).divu(1e18);
 
-        curve.lambda = (_lambda.add(1)).divu(1e18);
+        curve.lambda = (_lambda + 1).divu(1e18);
 
-        curve.gamma = (_gamma.add(1)).divu(1e18); // LUCAS WHY?
+        curve.gamma = (_gamma + 1).divu(1e18);
 
         int128 _psi = getFee(curve);
 
         require(_omega >= _psi, "Curve/parameters-increase-fee");
 
-        emit ParametersSet(_alpha, _beta, curve.delta.mulu(1e18), _epsilon, _lambda);
+        emit ParametersSet(_alpha, _beta, curve.delta.mulu(1e18), _epsilon, _lambda, _gamma);
     }
 
     function getFee(Storage.Curve storage curve) private view returns (int128 fee_) {
@@ -115,7 +113,7 @@ library Orchestrator {
         require(_assets.length % 5 == 0, "Curve/assets-must-be-divisible-by-five");
 
         for (uint256 i = 0; i < _assetWeights.length; i++) {
-            uint256 ix = i.mul(5);
+            uint256 ix = i * 5;
 
             numeraires.push(_assets[ix]);
             derivatives.push(_assets[ix]);
