@@ -154,6 +154,7 @@ describe("Curve", () => {
       await c
         .connect(user2)
         .originSwap(base, TOKENS.USDC.address, parseUnits("1000", baseDecimals), 0, await getFutureTime());
+
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
       await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", 6), 0, await getFutureTime());
@@ -173,6 +174,7 @@ describe("Curve", () => {
 
       const bal = await c.balanceOf(user2Address);
       await c.connect(user2).withdraw(bal, await getFutureTime());
+      expect(await (await c.curve()).protocolFeeMapping).to.be.eq(4);
     };
 
     it("CADC", async () => {
@@ -188,7 +190,7 @@ describe("Curve", () => {
     });
   });
 
-  describe("Swaps", async () => {
+  describe.only("Swaps", async () => {
     const originAndTargetSwapAndCheckSanity = async ({
       amount,
       name,
@@ -248,6 +250,10 @@ describe("Curve", () => {
 
       const originSwapAmount = parseUnits(amount, baseDecimals);
       await curve.originSwap(base, quote, originSwapAmount, 0, await getFutureTime());
+
+      expect(await (await curve.curve()).totalFeeInNumeraire).to.be.eq(1);
+      expect(await (await curve.curve()).protocolFeeMapping).to.be.eq(0);
+      
 
       let afterBase = await erc20.attach(base).balanceOf(user1Address);
       let afterQuote = await erc20.attach(quote).balanceOf(user1Address);
