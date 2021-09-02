@@ -14,9 +14,17 @@ import { assert } from "console";
 
 import { TOKENS } from "./Constants";
 
+import { getFutureTime } from "./Utils";
+import { formatUnits } from "ethers/lib/utils";
+
 chai.use(chaiBigNumber(BigNumber));
 
 const { parseUnits } = ethers.utils;
+
+const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
+const TOKENS_CADC_DECIMALS = process.env.TOKENS_CADC_DECIMALS;
+const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
+const TOKENS_XSGD_DECIMALS = process.env.TOKENS_XSGD_DECIMALS;
 
 const DIMENSION = {
   alpha: parseUnits(process.env.DIMENSION_ALPHA),
@@ -46,6 +54,9 @@ describe("Curve Contract", () => {
   let eurs: ERC20;
   let xsgd: ERC20;
   let erc20: ERC20;
+
+  let mintAndApprove: (tokenAddress: string, minter: Signer, amount: BigNumberish, recipient: string) => Promise<void>;
+  let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
 
   let createCurveAndSetParams: ({
     name,
@@ -93,7 +104,7 @@ describe("Curve Contract", () => {
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
     router = (await RouterFactory.deploy(curveFactory.address)) as Router;
 
-    ({ createCurveAndSetParams } = await scaffoldHelpers({
+    ({ createCurveAndSetParams, mintAndApprove, multiMintAndApprove } = await scaffoldHelpers({
       curveFactory,
       erc20,
     }));
@@ -477,6 +488,182 @@ describe("Curve Contract", () => {
       expect(txR.blockNumber).to.not.equal("");
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
+    })
+  });
+
+  describe("Emergency Withdraw", async () => {
+    it("CADC:USDC", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+        .then(x => x.wait());
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+
+      expect(formatUnits(lpAmountBefore)).to.be.equal(formatUnits(amt));
+
+      // Enable emergency withdraw
+      expect(await curve.emergency()).to.be.equal(false);
+      await curve.setEmergency(true);
+      expect(await curve.emergency()).to.be.equal(true);
+
+      // Withdraw everything
+      await curve
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasLimit: 12000000 })
+        .then(x => x.wait());
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountAfter)).to.be.equal(formatUnits(parseUnits("0")));
+    })
+
+    it("EURS:USDC", async () => {
+      const NAME = "EURS Statis";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: eursToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.EURS.address, user1, parseUnits("10000000", TOKENS_EURS_DECIMALS), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+        .then(x => x.wait());
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+
+      expect(formatUnits(lpAmountBefore)).to.be.equal(formatUnits(amt));
+
+      // Enable emergency withdraw
+      expect(await curve.emergency()).to.be.equal(false);
+      await curve.setEmergency(true);
+      expect(await curve.emergency()).to.be.equal(true);
+
+      // Withdraw everything
+      await curve
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasLimit: 12000000 })
+        .then(x => x.wait());
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountAfter)).to.be.equal(formatUnits(parseUnits("0")));
+    })
+
+    it("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS_XSGD_DECIMALS), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+        .then(x => x.wait());
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+
+      expect(formatUnits(lpAmountBefore)).to.be.equal(formatUnits(amt));
+
+      // Enable emergency withdraw
+      expect(await curve.emergency()).to.be.equal(false);
+      await curve.setEmergency(true);
+      expect(await curve.emergency()).to.be.equal(true);
+
+      // Withdraw everything
+      await curve
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasLimit: 12000000 })
+        .then(x => x.wait());
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountAfter)).to.be.equal(formatUnits(parseUnits("0")));
     })
   });
 });
