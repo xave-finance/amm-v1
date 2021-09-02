@@ -529,7 +529,7 @@ describe("Curve Contract", () => {
       // Deposit
       const amt = parseUnits("1000000");
       await curve
-        .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
         .then(x => x.wait());
 
       const lpAmountBefore = await curve.balanceOf(user1Address);
@@ -543,7 +543,7 @@ describe("Curve Contract", () => {
 
       // Withdraw everything
       await curve
-        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasLimit: 12000000 })
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasPrice: 0 })
         .then(x => x.wait());
 
       const lpAmountAfter = await curve.balanceOf(user1Address);
@@ -587,7 +587,7 @@ describe("Curve Contract", () => {
       // Deposit
       const amt = parseUnits("1000000");
       await curve
-        .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
         .then(x => x.wait());
 
       const lpAmountBefore = await curve.balanceOf(user1Address);
@@ -601,7 +601,7 @@ describe("Curve Contract", () => {
 
       // Withdraw everything
       await curve
-        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasLimit: 12000000 })
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasPrice: 0 })
         .then(x => x.wait());
 
       const lpAmountAfter = await curve.balanceOf(user1Address);
@@ -645,7 +645,7 @@ describe("Curve Contract", () => {
       // Deposit
       const amt = parseUnits("1000000");
       await curve
-        .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
         .then(x => x.wait());
 
       const lpAmountBefore = await curve.balanceOf(user1Address);
@@ -659,11 +659,259 @@ describe("Curve Contract", () => {
 
       // Withdraw everything
       await curve
-        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasLimit: 12000000 })
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasPrice: 0 })
         .then(x => x.wait());
 
       const lpAmountAfter = await curve.balanceOf(user1Address);
       expect(formatUnits(lpAmountAfter)).to.be.equal(formatUnits(parseUnits("0")));
+    })
+  });
+
+  describe("Freeze and Unfreeze Curve", async () => {
+    it("CADC:USDC", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+
+      // Curve is not frozen by default
+      expect(await curve.frozen()).to.be.false;
+      // Freeze Curve
+      await curve
+        .setFrozen(true)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.true;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
+
+      try {
+        // Deposit
+        const amt = parseUnits("1000000");
+
+        // Deposit should not go through
+        await curve
+          .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+          .then(x => x.wait());
+        throw new Error("Curve is frozen");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/frozen-only-allowing-proportional-withdraw");
+      }
+
+      const lpAmountA = await curve.balanceOf(user1Address);
+      // Balance is still zero
+      expect(formatUnits(lpAmountA)).to.be.equal(formatUnits(parseUnits("0")));
+
+      // Unfreeze Curve
+      await curve
+        .setFrozen(false)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.false;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+        .then(x => x.wait());
+
+      // Balance is now equal to amt
+      const lpAmountB = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountB)).to.be.equal(formatUnits(amt));
+    })
+
+    it("EURS:USDC", async () => {
+      const NAME = "EURS Statis";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: eursToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+
+      // Curve is not frozen by default
+      expect(await curve.frozen()).to.be.false;
+      // Freeze Curve
+      await curve
+        .setFrozen(true)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.true;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.EURS.address, user1, parseUnits("10000000", TOKENS_EURS_DECIMALS), curve.address],
+      ]);
+
+      try {
+        // Deposit
+        const amt = parseUnits("1000000");
+
+        // Deposit should not go through
+        await curve
+          .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+          .then(x => x.wait());
+        throw new Error("Curve is frozen");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/frozen-only-allowing-proportional-withdraw");
+      }
+
+      const lpAmountA = await curve.balanceOf(user1Address);
+      // Balance is still zero
+      expect(formatUnits(lpAmountA)).to.be.equal(formatUnits(parseUnits("0")));
+
+      // Unfreeze Curve
+      await curve
+        .setFrozen(false)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.false;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.EURS.address, user1, parseUnits("10000000", TOKENS_EURS_DECIMALS), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+        .then(x => x.wait());
+
+      // Balance is now equal to amt
+      const lpAmountB = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountB)).to.be.equal(formatUnits(amt));
+    })
+
+    it("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const txR = await curve.turnOffWhitelisting();
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+
+      // Curve is not frozen by default
+      expect(await curve.frozen()).to.be.false;
+      // Freeze Curve
+      await curve
+        .setFrozen(true)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.true;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS_XSGD_DECIMALS), curve.address],
+      ]);
+
+      try {
+        // Deposit
+        const amt = parseUnits("1000000");
+
+        // Deposit should not go through
+        await curve
+          .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+          .then(x => x.wait());
+        throw new Error("Curve is frozen");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/frozen-only-allowing-proportional-withdraw");
+      }
+
+      const lpAmountA = await curve.balanceOf(user1Address);
+      // Balance is still zero
+      expect(formatUnits(lpAmountA)).to.be.equal(formatUnits(parseUnits("0")));
+
+      // Unfreeze Curve
+      await curve
+        .setFrozen(false)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.false;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS_XSGD_DECIMALS), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+        .then(x => x.wait());
+
+      // Balance is now equal to amt
+      const lpAmountB = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountB)).to.be.equal(formatUnits(amt));
     })
   });
 });
