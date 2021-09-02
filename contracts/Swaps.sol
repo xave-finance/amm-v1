@@ -55,13 +55,14 @@ library Swaps {
         (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _oBals, int128[] memory _nBals) =
             getOriginSwapData(curve, _o.ix, _t.ix, _o.addr, _originAmount);
 
+        // Note: lucas gamma
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _t.ix);
 
         _amt = _amt.us_mul(ONE - curve.epsilon);
         tAmt_ = Assimilators.outputNumeraire(_t.addr, _recipient, _amt);
 
-        curve.protocolFee += uint256(_amt ** 2 * curve.epsilon * curve.gamma ** 2);
-
+        curve.protocolFee += _amt.us_mul(curve.epsilon.mulu(curve.gamma));
+    
         emit Trade(msg.sender, _origin, _target, _originAmount, tAmt_);
     }
 
