@@ -36,6 +36,7 @@ jobs:
           DIMENSION_MAX: ${{ secrets.DIMENSION_MAX }}
           DIMENSION_EPSILON: ${{ secrets.DIMENSION_EPSILON }}
           DIMENSION_LAMBDA: ${{ secrets.DIMENSION_LAMBDA }}
+          
           TOKENS_USDC_DECIMALS: ${{ secrets.TOKENS_USDC_DECIMALS }}
           TOKENS_CADC_DECIMALS: ${{ secrets.TOKENS_CADC_DECIMALS }}
           TOKENS_EURS_DECIMALS: ${{ secrets.TOKENS_EURS_DECIMALS }}
