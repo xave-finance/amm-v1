@@ -68,7 +68,7 @@ describe("Curve Contract", () => {
     quoteAssimilator: string;
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
-    curve: Curve;
+    oq_curve: Curve;
     curveLpToken: ERC20;
   }>;
 
@@ -104,7 +104,7 @@ describe("Curve Contract", () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.CADC.address,
@@ -116,19 +116,19 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const curveAddress = await curveFactory.curves(
+      const curveAddress = await curveFactory.oq_curves(
         ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [cadc.address, usdc.address])),
       );
 
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
+      assert(ethers.utils.isAddress(oq_curve.address));
+      expect(oq_curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
     })
 
     it("EURS:USDC", async () => {
       const NAME = "EURS Statis";
       const SYMBOL = "EURS";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.EURS.address,
@@ -140,19 +140,19 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const curveAddress = await curveFactory.curves(
+      const curveAddress = await curveFactory.oq_curves(
         ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [eurs.address, usdc.address])),
       );
 
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
+      assert(ethers.utils.isAddress(oq_curve.address));
+      expect(oq_curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
     })
 
     it("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.XSGD.address,
@@ -164,19 +164,19 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const curveAddress = await curveFactory.curves(
+      const curveAddress = await curveFactory.oq_curves(
         ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [xsgd.address, usdc.address])),
       );
 
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
+      assert(ethers.utils.isAddress(oq_curve.address));
+      expect(oq_curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
     })
 
     it("No duplicate pairs for CADC:USDC", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.CADC.address,
@@ -200,7 +200,7 @@ describe("Curve Contract", () => {
           quoteAssimilator: usdcToUsdAssimilator.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
-        throw new Error("newCurve should throw error");
+        throw new Error("oq_newCurve should throw error");
       } catch (e) {
         expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
       }
@@ -210,7 +210,7 @@ describe("Curve Contract", () => {
       const NAME = "EURS Statis";
       const SYMBOL = "EURS";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.EURS.address,
@@ -234,7 +234,7 @@ describe("Curve Contract", () => {
           quoteAssimilator: usdcToUsdAssimilator.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
-        throw new Error("newCurve should throw error");
+        throw new Error("oq_newCurve should throw error");
       } catch (e) {
         expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
       }
@@ -244,7 +244,7 @@ describe("Curve Contract", () => {
       const NAME = "XSGD Statis";
       const SYMBOL = "XSGD";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.XSGD.address,
@@ -268,7 +268,7 @@ describe("Curve Contract", () => {
           quoteAssimilator: usdcToUsdAssimilator.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
-        throw new Error("newCurve should throw error");
+        throw new Error("oq_newCurve should throw error");
       } catch (e) {
         expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
       }
@@ -280,7 +280,7 @@ describe("Curve Contract", () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.CADC.address,
@@ -292,7 +292,7 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const tx = await curve.setParams(
+      const tx = await oq_curve.oq_setParams(
         DIMENSION.alpha,
         DIMENSION.beta,
         DIMENSION.max,
@@ -302,7 +302,7 @@ describe("Curve Contract", () => {
 
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
@@ -318,7 +318,7 @@ describe("Curve Contract", () => {
       const NAME = "EURS Statis";
       const SYMBOL = "EURS";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.EURS.address,
@@ -330,7 +330,7 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const tx = await curve.setParams(
+      const tx = await oq_curve.oq_setParams(
         DIMENSION.alpha,
         DIMENSION.beta,
         DIMENSION.max,
@@ -340,7 +340,7 @@ describe("Curve Contract", () => {
 
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
@@ -356,7 +356,7 @@ describe("Curve Contract", () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.XSGD.address,
@@ -368,7 +368,7 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const tx = await curve.setParams(
+      const tx = await oq_curve.oq_setParams(
         DIMENSION.alpha,
         DIMENSION.beta,
         DIMENSION.max,
@@ -378,7 +378,7 @@ describe("Curve Contract", () => {
 
       await tx.wait();
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
@@ -396,7 +396,7 @@ describe("Curve Contract", () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.CADC.address,
@@ -408,8 +408,8 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
-      const curveAddrA = curve.address;
+      const txR = await oq_curve.turnOffWhitelisting();
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
@@ -425,7 +425,7 @@ describe("Curve Contract", () => {
       const NAME = "EURS Statis";
       const SYMBOL = "EURS";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.EURS.address,
@@ -437,8 +437,8 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
-      const curveAddrA = curve.address;
+      const txR = await oq_curve.turnOffWhitelisting();
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
@@ -454,7 +454,7 @@ describe("Curve Contract", () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.XSGD.address,
@@ -466,8 +466,8 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
-      const curveAddrA = curve.address;
+      const txR = await oq_curve.turnOffWhitelisting();
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));

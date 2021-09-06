@@ -4,7 +4,7 @@ const factoryUrl = path.resolve(__dirname, `./${hre.network.name}/factory_deploy
 const factory = require(factoryUrl);
 
 export const CONTRACTS = {
-  curves: factory.libraries.Curves,
+  oq_curves: factory.libraries.Curves,
   orchestrator: factory.libraries.Orchestrator,
   proportionalLiquidity: factory.libraries.ProportionalLiquidity,
   swaps: factory.libraries.Swaps,

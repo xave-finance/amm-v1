@@ -27,7 +27,7 @@ async function main() {
   console.time('Deployment Time');
   const users = await getAccounts();
   const user1 = users[0];
-  const curves = await curveAddresses();
+  const oq_curves = await curveAddresses();
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   // Approve tokens
@@ -59,17 +59,17 @@ async function main() {
   };
 
   await multiMintAndApprove([
-    [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['EURS']],
-    [TOKEN_EURS, user1, parseUnits("9000000", TOKENS_EURS_DECIMALS), curves['EURS']],
+    [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), oq_curves['EURS']],
+    [TOKEN_EURS, user1, parseUnits("9000000", TOKENS_EURS_DECIMALS), oq_curves['EURS']],
 
-    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['AUD']],
-    // [TOKEN_AUD, user1, parseUnits("9000000", TOKENS_AUD_DECIMALS), curves['AUD']],
+    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), oq_curves['AUD']],
+    // [TOKEN_AUD, user1, parseUnits("9000000", TOKENS_AUD_DECIMALS), oq_curves['AUD']],
 
-    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['CHF']],
-    // [TOKEN_CHF, user1, parseUnits("9000000", TOKENS_CHF_DECIMALS), curves['CHF']],
+    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), oq_curves['CHF']],
+    // [TOKEN_CHF, user1, parseUnits("9000000", TOKENS_CHF_DECIMALS), oq_curves['CHF']],
 
-    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), curves['GBP']],
-    // [TOKEN_GBP, user1, parseUnits("9000000", TOKENS_GBP_DECIMALS), curves['GBP']]
+    // [TOKEN_USDC, user1, parseUnits("9000000", TOKENS_USDC_DECIMALS), oq_curves['GBP']],
+    // [TOKEN_GBP, user1, parseUnits("9000000", TOKENS_GBP_DECIMALS), oq_curves['GBP']]
   ]);
 
   const amt = parseUnits("700000"); // EURS
@@ -77,10 +77,10 @@ async function main() {
   // const amt = parseUnits("70000"); // CHF
   // const amt = parseUnits("700000"); // GBP
 
-  const curveEURS = (await ethers.getContractAt("Curve", curves['EURS'])) as Curve;
-  // const curveAUD = (await ethers.getContractAt("Curve", curves['AUD'])) as Curve;
-  // const curveCHF = (await ethers.getContractAt("Curve", curves['CHF'])) as Curve;
-  // const curveGBP = (await ethers.getContractAt("Curve", curves['GBP'])) as Curve;
+  const curveEURS = (await ethers.getContractAt("Curve", oq_curves['EURS'])) as Curve;
+  // const curveAUD = (await ethers.getContractAt("Curve", oq_curves['AUD'])) as Curve;
+  // const curveCHF = (await ethers.getContractAt("Curve", oq_curves['CHF'])) as Curve;
+  // const curveGBP = (await ethers.getContractAt("Curve", oq_curves['GBP'])) as Curve;
 
   try {
     // Supply liquidity to the pools

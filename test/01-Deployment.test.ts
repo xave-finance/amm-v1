@@ -75,7 +75,7 @@ describe("Deployment", () => {
     quoteAssimilator: string;
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
-    curve: Curve;
+    oq_curve: Curve;
     curveLpToken: ERC20;
   }>;
 
@@ -133,7 +133,7 @@ describe("Deployment", () => {
     const SYMBOL = "CADC";
 
     it("CADC:USDC", async () => {
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: TOKENS.CADC.address,
@@ -145,7 +145,7 @@ describe("Deployment", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const curveAddrA = curve.address;
+      const curveAddrA = oq_curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));

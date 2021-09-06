@@ -106,29 +106,29 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     quoteAssimilator: string;
     params?: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
     yesWhitelisting?: boolean;
-  }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
-    await curveFactory.newCurve(name, symbol, base, quote, baseWeight, quoteWeight, baseAssimilator, quoteAssimilator);
+  }): Promise<{ oq_curve: Curve; curveLpToken: ERC20 }> {
+    await curveFactory.oq_newCurve(name, symbol, base, quote, baseWeight, quoteWeight, baseAssimilator, quoteAssimilator);
 
-    // Get curve address
-    const curveAddress = await curveFactory.curves(
+    // Get oq_curve address
+    const curveAddress = await curveFactory.oq_curves(
       ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
     );
     const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
-    const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
+    const oq_curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
     if (!yesWhitelisting) {
-      await curve.turnOffWhitelisting();
+      await oq_curve.turnOffWhitelisting();
     }
 
-    // Set params for the curve
+    // Set params for the oq_curve
     if (params) {
-      await curve.setParams(...params);
+      await oq_curve.oq_setParams(...params);
     } else {
-      await curve.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA);
+      await oq_curve.oq_setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA);
     }
 
     return {
-      curve,
+      oq_curve,
       curveLpToken,
     };
   };
@@ -156,7 +156,7 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
     yesWhitelisting?: boolean;
   }) {
-    const { curve, curveLpToken } = await createCurve({
+    const { oq_curve, curveLpToken } = await createCurve({
       name,
       symbol,
       base,
@@ -168,11 +168,11 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
       yesWhitelisting,
     });
 
-    const tx = await curve.setParams(...params);
+    const tx = await oq_curve.oq_setParams(...params);
     await tx.wait();
 
     return {
-      curve,
+      oq_curve,
       curveLpToken,
     };
   };

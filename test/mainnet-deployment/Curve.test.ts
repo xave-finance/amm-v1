@@ -66,7 +66,7 @@ describe("Curve Mainnet Sanity Checks", function () {
     quote: string,
     baseDecimals: number,
     quoteDecimals: number,
-    curve: Curve,
+    oq_curve: Curve,
   ) => {
     const userAddress = "0x1407C9d09d1603A9A5b806A0C00f4D3734df15E0";
     const user = await unlockAccountAndGetSigner(userAddress);
@@ -87,11 +87,11 @@ describe("Curve Mainnet Sanity Checks", function () {
     };
 
     await multiMintAndApprove([
-      [base, user, parseUnits("100000", baseDecimals), curve.address],
-      [quote, user, parseUnits("100000", quoteDecimals), curve.address],
+      [base, user, parseUnits("100000", baseDecimals), oq_curve.address],
+      [quote, user, parseUnits("100000", quoteDecimals), oq_curve.address],
     ]);
 
-    await curve
+    await oq_curve
       .connect(user)
       .depositWithWhitelist(
         userProof.index,
@@ -105,40 +105,40 @@ describe("Curve Mainnet Sanity Checks", function () {
         },
       );
 
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(base, quote, parseUnits("1", baseDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(quote, base, parseUnits("1", quoteDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(base, quote, parseUnits("100", baseDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(quote, base, parseUnits("100", quoteDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(base, quote, parseUnits("500", baseDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(quote, base, parseUnits("500", quoteDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(base, quote, parseUnits("1000", baseDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(quote, base, parseUnits("1000", quoteDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(base, quote, parseUnits("3000", baseDecimals), 0, await getFutureTime(), { gasPrice: 0 });
-    await curve
+    await oq_curve
       .connect(user)
       .originSwap(quote, base, parseUnits("3000", quoteDecimals), 0, await getFutureTime(), { gasPrice: 0 });
 
-    await curve
+    await oq_curve
       .connect(user)
-      .withdraw(await curve.connect(user).balanceOf(userAddress), await getFutureTime(), { gasPrice: 0 });
+      .oq_withdraw(await oq_curve.connect(user).balanceOf(userAddress), await getFutureTime(), { gasPrice: 0 });
   };
 
   // it("CADC", async function () {
@@ -146,9 +146,9 @@ describe("Curve Mainnet Sanity Checks", function () {
   //   const quote = TOKENS.USDC.address;
   //   const baseDecimals = TOKENS.CADC.decimals;
   //   const quoteDecimals = TOKENS.USDC.decimals;
-  //   const curve = curveCADC;
+  //   const oq_curve = curveCADC;
 
-  //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, curve);
+  //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, oq_curve);
   // });
 
   // it("EURS", async function () {
@@ -156,9 +156,9 @@ describe("Curve Mainnet Sanity Checks", function () {
   //   const quote = TOKENS.USDC.address;
   //   const baseDecimals = TOKENS.EURS.decimals;
   //   const quoteDecimals = TOKENS.USDC.decimals;
-  //   const curve = curveEURS;
+  //   const oq_curve = curveEURS;
 
-  //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, curve);
+  //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, oq_curve);
   // });
 
   // it("XSGD", async function () {
@@ -166,8 +166,8 @@ describe("Curve Mainnet Sanity Checks", function () {
   //   const quote = TOKENS.USDC.address;
   //   const baseDecimals = TOKENS.XSGD.decimals;
   //   const quoteDecimals = TOKENS.USDC.decimals;
-  //   const curve = curveXSGD;
+  //   const oq_curve = curveXSGD;
 
-  //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, curve);
+  //   await sanityCheck(base, quote, baseDecimals, quoteDecimals, oq_curve);
   // });
 });

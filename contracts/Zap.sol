@@ -29,7 +29,7 @@ contract Zap {
     IERC20 private constant USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
     struct ZapData {
-        address curve;
+        address oq_curve;
         address base;
         uint256 zapAmount;
         uint256 curveBaseBal;
@@ -45,12 +45,12 @@ contract Zap {
     }
 
     /// @notice Zaps from a quote token (non-USDC) into the LP pool
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
     /// @param _deadline Deadline for this zap to be completed by
     /// @param _minLPAmount Min LP amount to get
     /// @return uint256 - The amount of LP tokens received
-    function zapFromBase(
+    function oq_zapFromBase(
         address _curve,
         uint256 _zapAmount,
         uint256 _deadline,
@@ -60,12 +60,12 @@ contract Zap {
     }
 
     /// @notice Zaps from a quote token (USDC) into the LP pool
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
     /// @param _deadline Deadline for this zap to be completed by
     /// @param _minLPAmount Min LP amount to get
     /// @return uint256 - The amount of LP tokens received
-    function zapFromQuote(
+    function oq_zapFromQuote(
         address _curve,
         uint256 _zapAmount,
         uint256 _deadline,
@@ -75,7 +75,7 @@ contract Zap {
     }
 
     /// @notice Zaps from a single token into the LP pool
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
     /// @param _deadline Deadline for this zap to be completed by
     /// @param _minLPAmount Min LP amount to get
@@ -90,7 +90,7 @@ contract Zap {
     ) public returns (uint256) {
         (address base, uint256 swapAmount) = calcSwapAmountForZap(_curve, _zapAmount, isFromBase);
 
-        // Swap on curve
+        // Swap on oq_curve
         if (isFromBase) {
             IERC20(base).safeTransferFrom(msg.sender, address(this), _zapAmount);
             IERC20(base).safeApprove(_curve, 0);
@@ -141,25 +141,25 @@ contract Zap {
     // **** View only functions **** //
 
     /// @notice Iteratively calculates how much base to swap
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
     /// @return uint256 - The amount to swap
-    function calcSwapAmountForZapFromBase(address _curve, uint256 _zapAmount) public view returns (uint256) {
+    function oq_calcSwapAmountForZapFromBase(address _curve, uint256 _zapAmount) public view returns (uint256) {
         (, uint256 ret) = calcSwapAmountForZap(_curve, _zapAmount, true);
         return ret;
     }
 
     /// @notice Iteratively calculates how much quote to swap
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
     /// @return uint256 - The amount to swap
-    function calcSwapAmountForZapFromQuote(address _curve, uint256 _zapAmount) public view returns (uint256) {
+    function oq_calcSwapAmountForZapFromQuote(address _curve, uint256 _zapAmount) public view returns (uint256) {
         (, uint256 ret) = calcSwapAmountForZap(_curve, _zapAmount, false);
         return ret;
     }
 
     /// @notice Iteratively calculates how much to swap
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _zapAmount The amount to zap, denominated in the ERC20's decimal placing
     /// @param isFromBase Is the swap originating from the base?
     /// @return address - The address of the base
@@ -187,7 +187,7 @@ contract Zap {
                 _calcBaseSwapAmount(
                     initialSwapAmount,
                     ZapData({
-                        curve: _curve,
+                        oq_curve: _curve,
                         base: base,
                         zapAmount: _zapAmount,
                         curveBaseBal: curveBaseBal,
@@ -204,7 +204,7 @@ contract Zap {
             _calcQuoteSwapAmount(
                 initialSwapAmount,
                 ZapData({
-                    curve: _curve,
+                    oq_curve: _curve,
                     base: base,
                     zapAmount: _zapAmount,
                     curveBaseBal: curveBaseBal,
@@ -220,12 +220,12 @@ contract Zap {
     /// @notice Given a quote amount, calculate the maximum deposit amount, along with the
     ///         the number of LP tokens that will be generated, along with the maximized
     ///         base/quote amounts
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _quoteAmount The amount of quote tokens
     /// @return uint256 - The deposit amount
     /// @return uint256 - The LPTs received
     /// @return uint256[] memory - The baseAmount and quoteAmount
-    function calcMaxDepositAmountGivenQuote(address _curve, uint256 _quoteAmount)
+    function oq_calcMaxDepositAmountGivenQuote(address _curve, uint256 _quoteAmount)
         public
         view
         returns (
@@ -253,12 +253,12 @@ contract Zap {
     /// @notice Given a base amount, calculate the maximum deposit amount, along with the
     ///         the number of LP tokens that will be generated, along with the maximized
     ///         base/quote amounts
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _baseAmount The amount of base tokens
     /// @return uint256 - The deposit amount
     /// @return uint256 - The LPTs received
     /// @return uint256[] memory - The baseAmount and quoteAmount
-    function calcMaxDepositAmountGivenBase(address _curve, uint256 _baseAmount)
+    function oq_calcMaxDepositAmountGivenBase(address _curve, uint256 _baseAmount)
         public
         view
         returns (
@@ -284,7 +284,7 @@ contract Zap {
     }
 
     /// @notice Given a base amount, calculate the max base amount to be deposited
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _quoteAmount The amount of base tokens
     /// @return uint256 - The max quote amount
     function calcMaxBaseForDeposit(address _curve, uint256 _quoteAmount) public view returns (uint256) {
@@ -295,7 +295,7 @@ contract Zap {
     }
 
     /// @notice Given a base amount, calculate the max quote amount to be deposited
-    /// @param _curve The address of the curve
+    /// @param _curve The address of the oq_curve
     /// @param _baseAmount The amount of quote tokens
     /// @return uint256 - The max quote amount
     function calcMaxQuoteForDeposit(address _curve, uint256 _baseAmount) public view returns (uint256) {
@@ -329,7 +329,7 @@ contract Zap {
         // Computer bring me magic number
         for (uint256 i = 0; i < 32; i++) {
             // How much will we receive in return
-            recvAmount = Curve(zapData.curve).viewOriginSwap(address(USDC), zapData.base, swapAmount);
+            recvAmount = Curve(zapData.oq_curve).viewOriginSwap(address(USDC), zapData.base, swapAmount);
 
             // Update user's ratio
             userRatio = recvAmount.mul(10**(36 - uint256(zapData.curveBaseDecimals))).div(
@@ -339,7 +339,7 @@ contract Zap {
                 zapData.curveQuoteBal.add(swapAmount).mul(1e12)
             );
 
-            // If user's ratio is approx curve ratio, then just swap
+            // If user's ratio is approx oq_curve ratio, then just swap
             // I.e. ratio converges
             if (userRatio.div(1e16) == curveRatio.div(1e16)) {
                 return swapAmount;
@@ -380,7 +380,7 @@ contract Zap {
         // Computer bring me magic number
         for (uint256 i = 0; i < 32; i++) {
             // How much will we receive in return
-            recvAmount = Curve(zapData.curve).viewOriginSwap(zapData.base, address(USDC), swapAmount);
+            recvAmount = Curve(zapData.oq_curve).viewOriginSwap(zapData.base, address(USDC), swapAmount);
 
             // Update user's ratio
             userRatio = zapData.zapAmount.sub(swapAmount).mul(10**(36 - uint256(zapData.curveBaseDecimals))).div(
@@ -390,7 +390,7 @@ contract Zap {
                 zapData.curveQuoteBal.sub(recvAmount).mul(1e12)
             );
 
-            // If user's ratio is approx curve ratio, then just swap
+            // If user's ratio is approx oq_curve ratio, then just swap
             // I.e. ratio converges
             if (userRatio.div(1e16) == curveRatio.div(1e16)) {
                 return swapAmount;
@@ -418,8 +418,8 @@ contract Zap {
 
     /// @notice Given a DepositData structure, calculate the max depositAmount, the max
     ///          LP tokens received, and the required amounts
-    /// @param _curve The address of the curve
-    /// @param _base  The base address in the curve
+    /// @param _curve The address of the oq_curve
+    /// @param _base  The base address in the oq_curve
     /// @param dd     Deposit data
 
     /// @return uint256 - The deposit amount

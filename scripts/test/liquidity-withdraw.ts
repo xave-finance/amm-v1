@@ -82,7 +82,7 @@ async function main() {
   console.log('EURS: ', formatUnits(baseBal));
   console.log('USDC: ', formatUnits(quoteBal));
 
-  const [baseViewUser1, quoteViewUser1] = await curveEURS.connect(user1).viewWithdraw(amt);
+  const [baseViewUser1, quoteViewUser1] = await curveEURS.connect(user1).oq_viewWithdraw(amt);
 
   console.log('-----------------------------------------------------------------------');
   console.log('Liquidity To Withdraw');
@@ -93,7 +93,7 @@ async function main() {
   try {
     // Supply liquidity to the pools
     const withdrawCurveEURS = await curveEURS
-      .withdraw(amt, await getFutureTime(), { gasLimit: 12000000 })
+      .oq_withdraw(amt, await getFutureTime(), { gasLimit: 12000000 })
       .then(x => x.wait());
 
     console.log('withdrawCurveEURS', withdrawCurveEURS);

@@ -94,7 +94,7 @@ interface IOracle {
 
     function setController(address _accessController) external;
 
-    function transferOwnership(address _to) external;
+    function oq_transferOwnership(address _to) external;
 
     function version() external view returns (uint256);
 }

@@ -68,7 +68,7 @@ describe("Router", function () {
     quoteAssimilator: string;
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
-    curve: Curve;
+    oq_curve: Curve;
     curveLpToken: ERC20;
   }>;
 
@@ -103,7 +103,7 @@ describe("Router", function () {
     }));
   });
   beforeEach(async function () {
-    const { curve: curveCADC } = await createCurveAndSetParams({
+    const { oq_curve: curveCADC } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
       base: cadc.address,
@@ -115,7 +115,7 @@ describe("Router", function () {
       params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
     });
 
-    const { curve: curveXSGD } = await createCurveAndSetParams({
+    const { oq_curve: curveXSGD } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
       base: xsgd.address,
@@ -127,7 +127,7 @@ describe("Router", function () {
       params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
     });
 
-    const { curve: curveEURS } = await createCurveAndSetParams({
+    const { oq_curve: curveEURS } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
       base: eurs.address,
@@ -234,7 +234,7 @@ describe("Router", function () {
     const FROM_RATE8 = await getOracleAnswer(fromOracle);
     const TO_RATE8 = await getOracleAnswer(toOracle);
 
-    const sent = await router.connect(user).viewTargetSwap(TOKENS.USDC.address, fromToken, toToken, targetAmount);
+    const sent = await router.connect(user).oq_viewTargetSwap(TOKENS.USDC.address, fromToken, toToken, targetAmount);
 
     let expected = targetAmount.mul(TO_RATE8).div(FROM_RATE8);
 

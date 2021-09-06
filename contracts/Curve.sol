@@ -62,11 +62,11 @@ library Curves {
      * - the caller must have a balance of at least `amount`.
      */
     function transfer(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address recipient,
         uint256 amount
     ) external returns (bool) {
-        _transfer(curve, msg.sender, recipient, amount);
+        _transfer(oq_curve, msg.sender, recipient, amount);
         return true;
     }
 
@@ -78,11 +78,11 @@ library Curves {
      * - `spender` cannot be the zero address.
      */
     function approve(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address spender,
         uint256 amount
     ) external returns (bool) {
-        _approve(curve, msg.sender, spender, amount);
+        _approve(oq_curve, msg.sender, spender, amount);
         return true;
     }
 
@@ -99,17 +99,17 @@ library Curves {
      * `amount`
      */
     function transferFrom(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address sender,
         address recipient,
         uint256 amount
     ) external returns (bool) {
-        _transfer(curve, sender, recipient, amount);
+        _transfer(oq_curve, sender, recipient, amount);
         _approve(
-            curve,
+            oq_curve,
             sender,
             msg.sender,
-            sub(curve.allowances[sender][msg.sender], amount, "Curve/insufficient-allowance")
+            sub(oq_curve.allowances[sender][msg.sender], amount, "Curve/insufficient-allowance")
         );
         return true;
     }
@@ -127,15 +127,15 @@ library Curves {
      * - `spender` cannot be the zero address.
      */
     function increaseAllowance(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address spender,
         uint256 addedValue
     ) external returns (bool) {
         _approve(
-            curve,
+            oq_curve,
             msg.sender,
             spender,
-            add(curve.allowances[msg.sender][spender], addedValue, "Curve/approval-overflow")
+            add(oq_curve.allowances[msg.sender][spender], addedValue, "Curve/approval-overflow")
         );
         return true;
     }
@@ -155,15 +155,15 @@ library Curves {
      * `subtractedValue`.
      */
     function decreaseAllowance(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address spender,
         uint256 subtractedValue
     ) external returns (bool) {
         _approve(
-            curve,
+            oq_curve,
             msg.sender,
             spender,
-            sub(curve.allowances[msg.sender][spender], subtractedValue, "Curve/allowance-decrease-underflow")
+            sub(oq_curve.allowances[msg.sender][spender], subtractedValue, "Curve/allowance-decrease-underflow")
         );
         return true;
     }
@@ -183,7 +183,7 @@ library Curves {
      * - `sender` must have a balance of at least `amount`.
      */
     function _transfer(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address sender,
         address recipient,
         uint256 amount
@@ -191,8 +191,8 @@ library Curves {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
-        curve.balances[sender] = sub(curve.balances[sender], amount, "Curve/insufficient-balance");
-        curve.balances[recipient] = add(curve.balances[recipient], amount, "Curve/transfer-overflow");
+        oq_curve.balances[sender] = sub(oq_curve.balances[sender], amount, "Curve/insufficient-balance");
+        oq_curve.balances[recipient] = add(oq_curve.balances[recipient], amount, "Curve/transfer-overflow");
         emit Transfer(sender, recipient, amount);
     }
 
@@ -210,7 +210,7 @@ library Curves {
      * - `spender` cannot be the zero address.
      */
     function _approve(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address _owner,
         address spender,
         uint256 amount
@@ -218,7 +218,7 @@ library Curves {
         require(_owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
-        curve.allowances[_owner][spender] = amount;
+        oq_curve.allowances[_owner][spender] = amount;
         emit Approval(_owner, spender, amount);
     }
 }
@@ -272,12 +272,12 @@ contract Curve is Storage, MerkleProver {
     }
 
     modifier transactable() {
-        require(!frozen, "Curve/frozen-only-allowing-proportional-withdraw");
+        require(!oq_frozen, "Curve/oq_frozen-only-allowing-proportional-oq_withdraw");
         _;
     }
 
     modifier isEmergency() {
-        require(emergency, "Curve/emergency-only-allowing-emergency-proportional-withdraw");
+        require(oq_emergency, "Curve/oq_emergency-only-allowing-oq_emergency-proportional-oq_withdraw");
         _;
     }
 
@@ -307,7 +307,7 @@ contract Curve is Storage, MerkleProver {
         symbol = _symbol;
         emit OwnershipTransfered(address(0), msg.sender);
 
-        Orchestrator.initialize(curve, numeraires, reserves, derivatives, _assets, _assetWeights);
+        Orchestrator.initialize(oq_curve, numeraires, reserves, derivatives, _assets, _assetWeights);
     }
 
     /// @notice sets the parameters for the pool
@@ -316,17 +316,17 @@ contract Curve is Storage, MerkleProver {
     /// @param _feeAtHalt the maximum value for the fee at the halt point
     /// @param _epsilon the base fee for the pool
     /// @param _lambda the value for lambda must be less than or equal to 1 and greater than zero
-    function setParams(
+    function oq_setParams(
         uint256 _alpha,
         uint256 _beta,
         uint256 _feeAtHalt,
         uint256 _epsilon,
         uint256 _lambda
     ) external onlyOwner {
-        Orchestrator.setParams(curve, _alpha, _beta, _feeAtHalt, _epsilon, _lambda);
+        Orchestrator.oq_setParams(oq_curve, _alpha, _beta, _feeAtHalt, _epsilon, _lambda);
     }
 
-    /// @notice excludes an assimilator from the curve
+    /// @notice excludes an assimilator from the oq_curve
     /// @param _derivative the address of the assimilator to exclude
     function excludeDerivative(address _derivative) external onlyOwner {
         for (uint256 i = 0; i < numeraires.length; i++) {
@@ -334,10 +334,10 @@ contract Curve is Storage, MerkleProver {
             if (_derivative == reserves[i]) revert("Curve/cannot-delete-reserve");
         }
 
-        delete curve.assimilators[_derivative];
+        delete oq_curve.assimilators[_derivative];
     }
 
-    /// @notice view the current parameters of the curve
+    /// @notice view the current parameters of the oq_curve
     /// @return alpha_ the current alpha value
     ///  beta_ the current beta value
     ///  delta_ the current delta value
@@ -355,7 +355,7 @@ contract Curve is Storage, MerkleProver {
             uint256 lambda_
         )
     {
-        return Orchestrator.viewCurve(curve);
+        return Orchestrator.viewCurve(oq_curve);
     }
 
     function turnOffWhitelisting() external onlyOwner {
@@ -364,19 +364,19 @@ contract Curve is Storage, MerkleProver {
         whitelistingStage = false;
     }
 
-    function setEmergency(bool _emergency) external onlyOwner {
+    function oq_setEmergency(bool _emergency) external onlyOwner {
         emit EmergencyAlarm(_emergency);
 
-        emergency = _emergency;
+        oq_emergency = _emergency;
     }
 
-    function setFrozen(bool _toFreezeOrNotToFreeze) external onlyOwner {
+    function oq_setFrozen(bool _toFreezeOrNotToFreeze) external onlyOwner {
         emit FrozenSet(_toFreezeOrNotToFreeze);
 
-        frozen = _toFreezeOrNotToFreeze;
+        oq_frozen = _toFreezeOrNotToFreeze;
     }
 
-    function transferOwnership(address _newOwner) external onlyOwner {
+    function oq_transferOwnership(address _newOwner) external onlyOwner {
         require(_newOwner != address(0), "Curve/new-owner-cannot-be-zeroth-address");
 
         emit OwnershipTransfered(owner, _newOwner);
@@ -398,7 +398,7 @@ contract Curve is Storage, MerkleProver {
         uint256 _minTargetAmount,
         uint256 _deadline
     ) external deadline(_deadline) transactable nonReentrant returns (uint256 targetAmount_) {
-        targetAmount_ = Swaps.originSwap(curve, _origin, _target, _originAmount, msg.sender);
+        targetAmount_ = Swaps.originSwap(oq_curve, _origin, _target, _originAmount, msg.sender);
 
         require(targetAmount_ >= _minTargetAmount, "Curve/below-min-target-amount");
     }
@@ -413,7 +413,7 @@ contract Curve is Storage, MerkleProver {
         address _target,
         uint256 _originAmount
     ) external view transactable returns (uint256 targetAmount_) {
-        targetAmount_ = Swaps.viewOriginSwap(curve, _origin, _target, _originAmount);
+        targetAmount_ = Swaps.viewOriginSwap(oq_curve, _origin, _target, _originAmount);
     }
 
     /// @notice swap a dynamic origin amount for a fixed target amount
@@ -430,7 +430,7 @@ contract Curve is Storage, MerkleProver {
         uint256 _targetAmount,
         uint256 _deadline
     ) external deadline(_deadline) transactable nonReentrant returns (uint256 originAmount_) {
-        originAmount_ = Swaps.targetSwap(curve, _origin, _target, _targetAmount, msg.sender);
+        originAmount_ = Swaps.targetSwap(oq_curve, _origin, _target, _targetAmount, msg.sender);
 
         require(originAmount_ <= _maxOriginAmount, "Curve/above-max-origin-amount");
     }
@@ -440,12 +440,12 @@ contract Curve is Storage, MerkleProver {
     /// @param _target the address of the target
     /// @param _targetAmount the target amount
     /// @return originAmount_ the amount of target that has been swapped for the origin
-    function viewTargetSwap(
+    function oq_viewTargetSwap(
         address _origin,
         address _target,
         uint256 _targetAmount
     ) external view transactable returns (uint256 originAmount_) {
-        originAmount_ = Swaps.viewTargetSwap(curve, _origin, _target, _targetAmount);
+        originAmount_ = Swaps.oq_viewTargetSwap(oq_curve, _origin, _target, _targetAmount);
     }
 
     /// @notice deposit into the pool with no slippage from the numeraire assets the pool supports
@@ -455,7 +455,7 @@ contract Curve is Storage, MerkleProver {
     /// @param  merkleProof Merkle proof
     /// @param  _deposit the full amount you want to deposit into the pool which will be divided up evenly amongst
     ///                  the numeraire assets of the pool
-    /// @return (the amount of curves you receive in return for your deposit,
+    /// @return (the amount of oq_curves you receive in return for your deposit,
     ///          the amount deposited for each numeraire)
     function depositWithWhitelist(
         uint256 index,
@@ -468,8 +468,10 @@ contract Curve is Storage, MerkleProver {
         require(isWhitelisted(index, account, amount, merkleProof), "Curve/not-whitelisted");
         require(msg.sender == account, "Curve/not-approved-user");
 
-        (uint256 curvesMinted_, uint256[] memory deposits_) =
-            ProportionalLiquidity.proportionalDeposit(curve, _deposit);
+        (uint256 curvesMinted_, uint256[] memory deposits_) = ProportionalLiquidity.proportionalDeposit(
+            oq_curve,
+            _deposit
+        );
 
         whitelistedDeposited[msg.sender] = whitelistedDeposited[msg.sender].add(curvesMinted_);
 
@@ -484,7 +486,7 @@ contract Curve is Storage, MerkleProver {
     /// @notice deposit into the pool with no slippage from the numeraire assets the pool supports
     /// @param  _deposit the full amount you want to deposit into the pool which will be divided up evenly amongst
     ///                  the numeraire assets of the pool
-    /// @return (the amount of curves you receive in return for your deposit,
+    /// @return (the amount of oq_curves you receive in return for your deposit,
     ///          the amount deposited for each numeraire)
     function deposit(uint256 _deposit, uint256 _deadline)
         external
@@ -495,39 +497,39 @@ contract Curve is Storage, MerkleProver {
         returns (uint256, uint256[] memory)
     {
         // (curvesMinted_,  deposits_)
-        return ProportionalLiquidity.proportionalDeposit(curve, _deposit);
+        return ProportionalLiquidity.proportionalDeposit(oq_curve, _deposit);
     }
 
-    /// @notice view deposits and curves minted a given deposit would return
+    /// @notice view deposits and oq_curves minted a given deposit would return
     /// @param _deposit the full amount of stablecoins you want to deposit. Divided evenly according to the
     ///                 prevailing proportions of the numeraire assets of the pool
-    /// @return (the amount of curves you receive in return for your deposit,
+    /// @return (the amount of oq_curves you receive in return for your deposit,
     ///          the amount deposited for each numeraire)
     function viewDeposit(uint256 _deposit) external view transactable returns (uint256, uint256[] memory) {
         // curvesToMint_, depositsToMake_
-        return ProportionalLiquidity.viewProportionalDeposit(curve, _deposit);
+        return ProportionalLiquidity.viewProportionalDeposit(oq_curve, _deposit);
     }
 
-    /// @notice  Emergency withdraw tokens in the event that the oracle somehow bugs out
-    ///          and no one is able to withdraw due to the invariant check
-    /// @param   _curvesToBurn the full amount you want to withdraw from the pool which will be withdrawn from evenly amongst the
+    /// @notice  Emergency oq_withdraw tokens in the event that the oracle somehow bugs out
+    ///          and no one is able to oq_withdraw due to the invariant check
+    /// @param   _curvesToBurn the full amount you want to oq_withdraw from the pool which will be withdrawn from evenly amongst the
     ///                        numeraire assets of the pool
     /// @return withdrawals_ the amonts of numeraire assets withdrawn from the pool
-    function emergencyWithdraw(uint256 _curvesToBurn, uint256 _deadline)
+    function oq_emergencyWithdraw(uint256 _curvesToBurn, uint256 _deadline)
         external
         isEmergency
         deadline(_deadline)
         nonReentrant
         returns (uint256[] memory withdrawals_)
     {
-        return ProportionalLiquidity.emergencyProportionalWithdraw(curve, _curvesToBurn);
+        return ProportionalLiquidity.emergencyProportionalWithdraw(oq_curve, _curvesToBurn);
     }
 
-    /// @notice  withdrawas amount of curve tokens from the the pool equally from the numeraire assets of the pool with no slippage
-    /// @param   _curvesToBurn the full amount you want to withdraw from the pool which will be withdrawn from evenly amongst the
+    /// @notice  withdrawas amount of oq_curve tokens from the the pool equally from the numeraire assets of the pool with no slippage
+    /// @param   _curvesToBurn the full amount you want to oq_withdraw from the pool which will be withdrawn from evenly amongst the
     ///                        numeraire assets of the pool
     /// @return withdrawals_ the amonts of numeraire assets withdrawn from the pool
-    function withdraw(uint256 _curvesToBurn, uint256 _deadline)
+    function oq_withdraw(uint256 _curvesToBurn, uint256 _deadline)
         external
         deadline(_deadline)
         nonReentrant
@@ -537,15 +539,15 @@ contract Curve is Storage, MerkleProver {
             whitelistedDeposited[msg.sender] = whitelistedDeposited[msg.sender].sub(_curvesToBurn);
         }
 
-        return ProportionalLiquidity.proportionalWithdraw(curve, _curvesToBurn);
+        return ProportionalLiquidity.proportionalWithdraw(oq_curve, _curvesToBurn);
     }
 
     /// @notice  views the withdrawal information from the pool
-    /// @param   _curvesToBurn the full amount you want to withdraw from the pool which will be withdrawn from evenly amongst the
+    /// @param   _curvesToBurn the full amount you want to oq_withdraw from the pool which will be withdrawn from evenly amongst the
     ///                        numeraire assets of the pool
     /// @return the amonnts of numeraire assets withdrawn from the pool
-    function viewWithdraw(uint256 _curvesToBurn) external view transactable returns (uint256[] memory) {
-        return ProportionalLiquidity.viewProportionalWithdraw(curve, _curvesToBurn);
+    function oq_viewWithdraw(uint256 _curvesToBurn) external view transactable returns (uint256[] memory) {
+        return ProportionalLiquidity.viewProportionalWithdraw(oq_curve, _curvesToBurn);
     }
 
     function supportsInterface(bytes4 _interface) public pure returns (bool supports_) {
@@ -555,46 +557,46 @@ contract Curve is Storage, MerkleProver {
             bytes4(0x36372b07) == _interface; // erc20
     }
 
-    /// @notice transfers curve tokens
-    /// @param _recipient the address of where to send the curve tokens
-    /// @param _amount the amount of curve tokens to send
+    /// @notice transfers oq_curve tokens
+    /// @param _recipient the address of where to send the oq_curve tokens
+    /// @param _amount the amount of oq_curve tokens to send
     /// @return success_ the success bool of the call
     function transfer(address _recipient, uint256 _amount) public nonReentrant returns (bool success_) {
-        success_ = Curves.transfer(curve, _recipient, _amount);
+        success_ = Curves.transfer(oq_curve, _recipient, _amount);
     }
 
-    /// @notice transfers curve tokens from one address to another address
-    /// @param _sender the account from which the curve tokens will be sent
-    /// @param _recipient the account to which the curve tokens will be sent
-    /// @param _amount the amount of curve tokens to transfer
+    /// @notice transfers oq_curve tokens from one address to another address
+    /// @param _sender the account from which the oq_curve tokens will be sent
+    /// @param _recipient the account to which the oq_curve tokens will be sent
+    /// @param _amount the amount of oq_curve tokens to transfer
     /// @return success_ the success bool of the call
     function transferFrom(
         address _sender,
         address _recipient,
         uint256 _amount
     ) public nonReentrant returns (bool success_) {
-        success_ = Curves.transferFrom(curve, _sender, _recipient, _amount);
+        success_ = Curves.transferFrom(oq_curve, _sender, _recipient, _amount);
     }
 
-    /// @notice approves a user to spend curve tokens on their behalf
+    /// @notice approves a user to spend oq_curve tokens on their behalf
     /// @param _spender the account to allow to spend from msg.sender
     /// @param _amount the amount to specify the spender can spend
     /// @return success_ the success bool of this call
     function approve(address _spender, uint256 _amount) public nonReentrant returns (bool success_) {
-        success_ = Curves.approve(curve, _spender, _amount);
+        success_ = Curves.approve(oq_curve, _spender, _amount);
     }
 
-    /// @notice view the curve token balance of a given account
+    /// @notice view the oq_curve token balance of a given account
     /// @param _account the account to view the balance of
-    /// @return balance_ the curve token ballance of the given account
+    /// @return balance_ the oq_curve token ballance of the given account
     function balanceOf(address _account) public view returns (uint256 balance_) {
-        balance_ = curve.balances[_account];
+        balance_ = oq_curve.balances[_account];
     }
 
-    /// @notice views the total curve supply of the pool
-    /// @return totalSupply_ the total supply of curve tokens
+    /// @notice views the total oq_curve supply of the pool
+    /// @return totalSupply_ the total supply of oq_curve tokens
     function totalSupply() public view returns (uint256 totalSupply_) {
-        totalSupply_ = curve.totalSupply;
+        totalSupply_ = oq_curve.totalSupply;
     }
 
     /// @notice views the total allowance one address has to spend from another address
@@ -602,19 +604,19 @@ contract Curve is Storage, MerkleProver {
     /// @param _spender the address of the spender
     /// @return allowance_ the amount the owner has allotted the spender
     function allowance(address _owner, address _spender) public view returns (uint256 allowance_) {
-        allowance_ = curve.allowances[_owner][_spender];
+        allowance_ = oq_curve.allowances[_owner][_spender];
     }
 
-    /// @notice views the total amount of liquidity in the curve in numeraire value and format - 18 decimals
-    /// @return total_ the total value in the curve
-    /// @return individual_ the individual values in the curve
+    /// @notice views the total amount of liquidity in the oq_curve in numeraire value and format - 18 decimals
+    /// @return total_ the total value in the oq_curve
+    /// @return individual_ the individual values in the oq_curve
     function liquidity() public view returns (uint256 total_, uint256[] memory individual_) {
-        return ViewLiquidity.viewLiquidity(curve);
+        return ViewLiquidity.viewLiquidity(oq_curve);
     }
 
     /// @notice view the assimilator address for a derivative
     /// @return assimilator_ the assimilator address
     function assimilator(address _derivative) public view returns (address assimilator_) {
-        assimilator_ = curve.assimilators[_derivative].addr;
+        assimilator_ = oq_curve.assimilators[_derivative].addr;
     }
 }

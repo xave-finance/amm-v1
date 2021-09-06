@@ -78,7 +78,7 @@ describe("Whitelist", function () {
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
     yesWhitelisting?: boolean;
   }) => Promise<{
-    curve: Curve;
+    oq_curve: Curve;
     curveLpToken: ERC20;
   }>;
 
@@ -133,7 +133,7 @@ describe("Whitelist", function () {
   //   const { index, amount, proof } = merkleData.claims[whitelistedUserAddress];
   //   const whitelistedUser = await unlockAccountAndGetSigner(whitelistedUserAddress);
 
-  //   const { curve } = await createCurveAndSetParams({
+  //   const { oq_curve } = await createCurveAndSetParams({
   //     name: NAME,
   //     symbol: SYMBOL,
   //     base: base,
@@ -147,21 +147,21 @@ describe("Whitelist", function () {
   //   });
 
   //   await multiMintAndApprove([
-  //     [base, user1, parseUnits("10000000", baseDecimals), curve.address],
-  //     [TOKENS.USDC.address, user1, parseUnits("10000000", 6), curve.address],
-  //     [base, whitelistedUser, parseUnits("10000000", baseDecimals), curve.address],
-  //     [TOKENS.USDC.address, whitelistedUser, parseUnits("10000000", 6), curve.address],
+  //     [base, user1, parseUnits("10000000", baseDecimals), oq_curve.address],
+  //     [TOKENS.USDC.address, user1, parseUnits("10000000", 6), oq_curve.address],
+  //     [base, whitelistedUser, parseUnits("10000000", baseDecimals), oq_curve.address],
+  //     [TOKENS.USDC.address, whitelistedUser, parseUnits("10000000", 6), oq_curve.address],
   //   ]);
 
   //   try {
-  //     await curve.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+  //     await oq_curve.connect(user1).deposit(parseUnits("100"), await getFutureTime());
   //     throw new Error("Non whitelisted user shouldn't be able to deposit");
   //   } catch (e) {
   //     // eslint-disable-next-line
   //   }
 
   //   try {
-  //     await curve
+  //     await oq_curve
   //       .connect(user1)
   //       .depositWithWhitelist(index, whitelistedUserAddress, amount, proof, parseUnits("100"), await getFutureTime());
   //     throw new Error("Non whitelisted user shouldn't be able to deposit for someone else");
@@ -170,13 +170,13 @@ describe("Whitelist", function () {
   //   }
 
   //   // Whitelisted
-  //   await curve
+  //   await oq_curve
   //     .connect(whitelistedUser)
   //     .depositWithWhitelist(index, whitelistedUserAddress, amount, proof, parseUnits("10000"), await getFutureTime());
-  //   await curve.connect(whitelistedUser).withdraw(parseUnits("10000"), await getFutureTime());
+  //   await oq_curve.connect(whitelistedUser).oq_withdraw(parseUnits("10000"), await getFutureTime());
 
   //   try {
-  //     await curve
+  //     await oq_curve
   //       .connect(whitelistedUser)
   //       .depositWithWhitelist(index, whitelistedUserAddress, amount, proof, parseUnits("10001"), await getFutureTime());
   //     throw new Error("Only whitelisted users can deposit a max of 10k");
@@ -194,7 +194,7 @@ describe("Whitelist", function () {
   //   const { index, amount, proof } = merkleData.claims[whitelistedUserAddress];
   //   const whitelistedUser = await unlockAccountAndGetSigner(whitelistedUserAddress);
 
-  //   const { curve } = await createCurveAndSetParams({
+  //   const { oq_curve } = await createCurveAndSetParams({
   //     name: NAME,
   //     symbol: SYMBOL,
   //     base: base,
@@ -208,15 +208,15 @@ describe("Whitelist", function () {
   //   });
 
   //   await multiMintAndApprove([
-  //     [base, user1, parseUnits("10000000", baseDecimals), curve.address],
-  //     [TOKENS.USDC.address, user1, parseUnits("10000000", 6), curve.address],
-  //     [base, whitelistedUser, parseUnits("10000000", baseDecimals), curve.address],
-  //     [TOKENS.USDC.address, whitelistedUser, parseUnits("10000000", 6), curve.address],
+  //     [base, user1, parseUnits("10000000", baseDecimals), oq_curve.address],
+  //     [TOKENS.USDC.address, user1, parseUnits("10000000", 6), oq_curve.address],
+  //     [base, whitelistedUser, parseUnits("10000000", baseDecimals), oq_curve.address],
+  //     [TOKENS.USDC.address, whitelistedUser, parseUnits("10000000", 6), oq_curve.address],
   //   ]);
 
   //   // Whitelisted
   //   try {
-  //     await curve
+  //     await oq_curve
   //       .connect(whitelistedUser)
   //       .depositWithWhitelist(index, whitelistedUserAddress, amount, proof, parseUnits("10000"), await getFutureTime());
   //     throw new Error("Shouldn't be able to deposit via depositWithWhitelist");

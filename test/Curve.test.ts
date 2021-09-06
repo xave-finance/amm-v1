@@ -70,7 +70,7 @@ describe("Curve", function () {
     quoteAssimilator: string;
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
-    curve: Curve;
+    oq_curve: Curve;
     curveLpToken: ERC20;
   }>;
 
@@ -119,7 +119,7 @@ describe("Curve", function () {
   describe("Invariant Checking", function () {
     const checkInvariant = async function (base: string, baseAssimilator: string, baseDecimals: number) {
       // We're just flipping them around...
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
         base: base,
@@ -131,7 +131,7 @@ describe("Curve", function () {
         params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
       });
 
-      const c: Curve = curve as Curve;
+      const c: Curve = oq_curve as Curve;
 
       await multiMintAndApprove([
         [base, user1, parseUnits("10000000", baseDecimals), c.address],
@@ -156,13 +156,13 @@ describe("Curve", function () {
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
       await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", 6), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("1"), await getFutureTime());
+      await c.connect(user2).oq_withdraw(parseUnits("1"), await getFutureTime());
       await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", 6), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("10"), await getFutureTime());
+      await c.connect(user2).oq_withdraw(parseUnits("10"), await getFutureTime());
       await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", 6), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("15"), await getFutureTime());
+      await c.connect(user2).oq_withdraw(parseUnits("15"), await getFutureTime());
       await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", 6), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("30"), await getFutureTime());
+      await c.connect(user2).oq_withdraw(parseUnits("30"), await getFutureTime());
       await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", 6), 0, await getFutureTime());
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
@@ -171,7 +171,7 @@ describe("Curve", function () {
       await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
 
       const bal = await c.balanceOf(user2Address);
-      await c.connect(user2).withdraw(bal, await getFutureTime());
+      await c.connect(user2).oq_withdraw(bal, await getFutureTime());
     };
 
     it("CADC", async function () {
@@ -217,7 +217,7 @@ describe("Curve", function () {
       params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
       oracle: string;
     }) => {
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name,
         symbol,
         base,
@@ -234,19 +234,19 @@ describe("Curve", function () {
 
       // Mint tokens and approve
       await multiMintAndApprove([
-        [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-        [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
+        [base, user1, parseUnits("1000000", baseDecimals), oq_curve.address],
+        [quote, user1, parseUnits("1000000", quoteDecimals), oq_curve.address],
       ]);
 
       // Proportional Supply
-      await curve.deposit(parseUnits("1000000"), await getFutureTime());
+      await oq_curve.deposit(parseUnits("1000000"), await getFutureTime());
 
       // Swap
       let beforeBase = await erc20.attach(base).balanceOf(user1Address);
       let beforeQuote = await erc20.attach(quote).balanceOf(user1Address);
 
       const originSwapAmount = parseUnits(amount, baseDecimals);
-      await curve.originSwap(base, quote, originSwapAmount, 0, await getFutureTime());
+      await oq_curve.originSwap(base, quote, originSwapAmount, 0, await getFutureTime());
 
       let afterBase = await erc20.attach(base).balanceOf(user1Address);
       let afterQuote = await erc20.attach(quote).balanceOf(user1Address);
@@ -272,7 +272,7 @@ describe("Curve", function () {
       beforeQuote = await erc20.attach(quote).balanceOf(user1Address);
 
       const targetAmount = parseUnits(amount, quoteDecimals);
-      await curve.targetSwap(
+      await oq_curve.targetSwap(
         base,
         quote,
         ethers.constants.MaxUint256, // Max amount willing to spend
@@ -296,7 +296,7 @@ describe("Curve", function () {
 
     // Basically the same as the initial sanity check
     // but with swapped base/quote in originSwap/targetSwap
-    // However, the base/quote remains the same in the curve
+    // However, the base/quote remains the same in the oq_curve
     // as the oracle rate reports the price feed very specifically
     const originAndTargetSwapAndCheckSanityInverse = async ({
       amount,
@@ -328,7 +328,7 @@ describe("Curve", function () {
       oracle: string;
     }) => {
       // We're just flipping them around...
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         name: symbol,
         symbol: name,
         base: quote,
@@ -347,19 +347,19 @@ describe("Curve", function () {
 
       // Mint tokens and approve
       await multiMintAndApprove([
-        [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-        [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
+        [base, user1, parseUnits("1000000", baseDecimals), oq_curve.address],
+        [quote, user1, parseUnits("1000000", quoteDecimals), oq_curve.address],
       ]);
 
       // Proportional Supply
-      await curve.deposit(parseUnits("1000000"), await getFutureTime());
+      await oq_curve.deposit(parseUnits("1000000"), await getFutureTime());
 
       // Swap
       let beforeBase = await erc20.attach(base).balanceOf(user1Address);
       let beforeQuote = await erc20.attach(quote).balanceOf(user1Address);
 
       const originSwapAmount = parseUnits(amount, baseDecimals);
-      await curve.originSwap(base, quote, originSwapAmount, 0, await getFutureTime());
+      await oq_curve.originSwap(base, quote, originSwapAmount, 0, await getFutureTime());
 
       let afterBase = await erc20.attach(base).balanceOf(user1Address);
       let afterQuote = await erc20.attach(quote).balanceOf(user1Address);
@@ -385,7 +385,7 @@ describe("Curve", function () {
       beforeQuote = await erc20.attach(quote).balanceOf(user1Address);
 
       const targetAmount = parseUnits(amount, quoteDecimals);
-      await curve.targetSwap(
+      await oq_curve.targetSwap(
         base,
         quote,
         ethers.constants.MaxUint256, // Max amount willing to spend
@@ -507,7 +507,7 @@ describe("Curve", function () {
         params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
-        const { curve } = await createCurveAndSetParams({
+        const { oq_curve } = await createCurveAndSetParams({
           name,
           symbol,
           base,
@@ -521,10 +521,10 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("10000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("10000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user1, parseUnits("10000000", baseDecimals), oq_curve.address],
+          [quote, user1, parseUnits("10000000", quoteDecimals), oq_curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         const depositAmount = parseUnits("1000000");
@@ -532,7 +532,7 @@ describe("Curve", function () {
         // Make sure initial amount is the oracle value
         const ORACLE_RATE = await getOracleAnswer(oracle);
 
-        const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await curve.viewDeposit(depositAmount);
+        const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await oq_curve.viewDeposit(depositAmount);
         const expectedDepositAmountBase = parseUnits(formatUnits(depositAmount), baseDecimals)
           .mul(1e8)
           .div(ORACLE_RATE)
@@ -543,7 +543,7 @@ describe("Curve", function () {
         expectBNAproxEq(quoteViewUser1, expectedDepositAmountQuote, expectedDepositAmountQuote.div(2000));
 
         // Deposit user 1
-        await curve
+        await oq_curve
           .connect(user1)
           .deposit(depositAmount, await getFutureTime())
           .then(x => x.wait());
@@ -554,11 +554,11 @@ describe("Curve", function () {
         // with the same amount (say 100), he'll get less as
         // he's depositing 50 QUOTE (USDC), and LESS BASE (non-usdc)
         // Quote amount should remain the same
-        await curve
+        await oq_curve
           .connect(user1)
           .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(20), 0, await getFutureTime());
 
-        const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await curve.connect(user2).viewDeposit(depositAmount);
+        const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await oq_curve.connect(user2).viewDeposit(depositAmount);
 
         // Not "just" less than
         expect(lpAmountUser2.mul(102).div(100).lt(lpAmountUser1)).to.be.true;
@@ -571,11 +571,11 @@ describe("Curve", function () {
         // with the same amount (say 100), he'll get MORE
         // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
         // Quote amount should be the same
-        await curve
+        await oq_curve
           .connect(user1)
           .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(10), 0, await getFutureTime());
 
-        const [lpAmountUser3, [baseViewUser3, quoteViewUser3]] = await curve.connect(user2).viewDeposit(depositAmount);
+        const [lpAmountUser3, [baseViewUser3, quoteViewUser3]] = await oq_curve.connect(user2).viewDeposit(depositAmount);
 
         expect(lpAmountUser3.mul(100).div(102).gt(lpAmountUser1)).to.be.true;
         expectBNAproxEq(quoteViewUser3, quoteViewUser1, quoteViewUser2.div(2000));
@@ -643,7 +643,7 @@ describe("Curve", function () {
       }
     });
 
-    describe("viewWithdraw", function () {
+    describe("oq_viewWithdraw", function () {
       const viewLPWithdrawWithSanityChecks = async ({
         amount,
         name,
@@ -671,7 +671,7 @@ describe("Curve", function () {
         quoteAssimilator: string;
         params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
       }) => {
-        const { curve, curveLpToken } = await createCurveAndSetParams({
+        const { oq_curve, curveLpToken } = await createCurveAndSetParams({
           name,
           symbol,
           base,
@@ -685,33 +685,33 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("10000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("10000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user1, parseUnits("10000000", baseDecimals), oq_curve.address],
+          [quote, user1, parseUnits("10000000", quoteDecimals), oq_curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         const depositAmount = parseUnits("1000000");
 
         // Deposit user 1
-        await curve
+        await oq_curve
           .connect(user1)
           .deposit(depositAmount, await getFutureTime())
           .then(x => x.wait());
         const lpAmount = await curveLpToken.balanceOf(user1Address);
 
-        const [baseViewUser1, quoteViewUser1] = await curve.connect(user1).viewWithdraw(lpAmount);
+        const [baseViewUser1, quoteViewUser1] = await oq_curve.connect(user1).oq_viewWithdraw(lpAmount);
 
         // User swaps a large chunk of QUOTE -> BASE
         // Shortage of BASE (non-USDC) in the system
-        // Now, when user wants to withdraw from the system
+        // Now, when user wants to oq_withdraw from the system
         // with the same amount of LP tokens, he'll get more
         // QUOTE and less BASE
-        await curve
+        await oq_curve
           .connect(user1)
           .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(20), 0, await getFutureTime());
 
-        const [baseViewUser2, quoteViewUser2] = await curve.connect(user1).viewWithdraw(lpAmount);
+        const [baseViewUser2, quoteViewUser2] = await oq_curve.connect(user1).oq_viewWithdraw(lpAmount);
 
         expect(quoteViewUser2.mul(100).div(104).gt(quoteViewUser1)).to.be.true;
         expect(baseViewUser2.mul(104).div(100).lt(baseViewUser1)).to.be.true;
@@ -722,11 +722,11 @@ describe("Curve", function () {
         // with the same amount (say 100), he'll get MORE
         // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
         // Quote amount should be the same
-        await curve
+        await oq_curve
           .connect(user1)
           .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(10), 0, await getFutureTime());
 
-        const [baseViewUser3, quoteViewUser3] = await curve.connect(user1).viewWithdraw(lpAmount);
+        const [baseViewUser3, quoteViewUser3] = await oq_curve.connect(user1).oq_viewWithdraw(lpAmount);
 
         // Not "just" gt / lt
         expect(quoteViewUser3.mul(104).div(100).lt(quoteViewUser1)).to.be.true;
@@ -821,7 +821,7 @@ describe("Curve", function () {
         params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
-        const { curve, curveLpToken } = await createCurveAndSetParams({
+        const { oq_curve, curveLpToken } = await createCurveAndSetParams({
           base,
           name,
           symbol,
@@ -835,14 +835,14 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("10000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("10000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user1, parseUnits("10000000", baseDecimals), oq_curve.address],
+          [quote, user1, parseUnits("10000000", quoteDecimals), oq_curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         // Deposit user 1
-        await curve
+        await oq_curve
           .connect(user1)
           .deposit(parseUnits("1000000"), await getFutureTime())
           .then(x => x.wait());
@@ -855,7 +855,7 @@ describe("Curve", function () {
         let beforeLPBal = await curveLpToken.balanceOf(user2Address);
         expectBNEq(beforeLPBal, ethers.constants.Zero);
 
-        await curve
+        await oq_curve
           .connect(user2)
           .deposit(parseUnits(amount), await getFutureTime())
           .then(x => x.wait());
@@ -878,8 +878,8 @@ describe("Curve", function () {
 
         // Mint tokens and approve for 2nd deposit
         await multiMintAndApprove([
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
@@ -887,10 +887,10 @@ describe("Curve", function () {
         beforeLPBal = await curveLpToken.balanceOf(user2Address);
 
         // Update pool ratio
-        await curve
+        await oq_curve
           .connect(user1)
           .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(20), 0, await getFutureTime());
-        await curve
+        await oq_curve
           .connect(user2)
           .deposit(parseUnits(amount), await getFutureTime())
           .then(x => x.wait());
@@ -914,9 +914,9 @@ describe("Curve", function () {
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
-        await curve
+        await oq_curve
           .connect(user2)
-          .withdraw(totalReceivedLP.div(2), await getFutureTime())
+          .oq_withdraw(totalReceivedLP.div(2), await getFutureTime())
           .then(x => x.wait());
 
         afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
@@ -930,12 +930,12 @@ describe("Curve", function () {
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
-        await curve
+        await oq_curve
           .connect(user1)
           .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(10), 0, await getFutureTime());
-        await curve
+        await oq_curve
           .connect(user2)
-          .withdraw(totalReceivedLP.div(2), await getFutureTime())
+          .oq_withdraw(totalReceivedLP.div(2), await getFutureTime())
           .then(x => x.wait());
 
         afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
@@ -1042,7 +1042,7 @@ describe("Curve", function () {
         params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
-        const { curve } = await createCurveAndSetParams({
+        const { oq_curve } = await createCurveAndSetParams({
           name,
           symbol,
           base,
@@ -1056,10 +1056,10 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user1, parseUnits("1000000", baseDecimals), oq_curve.address],
+          [quote, user1, parseUnits("1000000", quoteDecimals), oq_curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         const depositAmount = parseUnits("1000000");
@@ -1067,7 +1067,7 @@ describe("Curve", function () {
         // Make sure initial amount is the oracle value
         const ORACLE_RATE = await getOracleAnswer(oracle);
 
-        const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await curve.viewDeposit(depositAmount);
+        const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await oq_curve.viewDeposit(depositAmount);
         const expectedDepositAmountBase = parseUnits(formatUnits(depositAmount), baseDecimals)
           .mul(1e8)
           .div(ORACLE_RATE)
@@ -1078,7 +1078,7 @@ describe("Curve", function () {
         expectBNAproxEq(quoteViewUser1, expectedDepositAmountQuote, expectedDepositAmountQuote.div(2000));
 
         // Deposit user 1
-        await curve
+        await oq_curve
           .connect(user1)
           .deposit(depositAmount, await getFutureTime())
           .then(x => x.wait());
@@ -1089,7 +1089,7 @@ describe("Curve", function () {
 
         // View for user 2 should be similar to user 1
         // Regardless of Oracle price
-        const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await curve.connect(user2).viewDeposit(depositAmount);
+        const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await oq_curve.connect(user2).viewDeposit(depositAmount);
 
         // Even if oracle updates, the deposit amount for user should be relative
         // to the LP pool. Its just the swaps that uses the oracle rate
@@ -1161,7 +1161,7 @@ describe("Curve", function () {
       }
     });
 
-    describe("viewWithdraw", function () {
+    describe("oq_viewWithdraw", function () {
       const viewWithdrawWithSanityChecks = async ({
         amount,
         name,
@@ -1191,7 +1191,7 @@ describe("Curve", function () {
         params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
-        const { curve, curveLpToken } = await createCurveAndSetParams({
+        const { oq_curve, curveLpToken } = await createCurveAndSetParams({
           name,
           symbol,
           base,
@@ -1205,14 +1205,14 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user1, parseUnits("1000000", baseDecimals), oq_curve.address],
+          [quote, user1, parseUnits("1000000", quoteDecimals), oq_curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         // Deposit user 1
-        await curve
+        await oq_curve
           .connect(user1)
           .deposit(parseUnits("1000000"), await getFutureTime())
           .then(x => x.wait());
@@ -1223,7 +1223,7 @@ describe("Curve", function () {
         const beforeLPBal = await curveLpToken.balanceOf(user2Address);
         expectBNEq(beforeLPBal, ethers.constants.Zero);
 
-        await curve
+        await oq_curve
           .connect(user2)
           .deposit(parseUnits(amount), await getFutureTime())
           .then(x => x.wait());
@@ -1240,7 +1240,7 @@ describe("Curve", function () {
         const ORACLE_RATE = await getOracleAnswer(oracle);
         await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
 
-        const [viewBase, viewQuote] = await curve.viewWithdraw(afterLPBal);
+        const [viewBase, viewQuote] = await oq_curve.oq_viewWithdraw(afterLPBal);
 
         // Fees take up small portion
         expectBNAproxEq(viewBase, baseSupplied, baseSupplied.div(1500));
@@ -1340,7 +1340,7 @@ describe("Curve", function () {
         params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
         oracle: string;
       }) => {
-        const { curve, curveLpToken } = await createCurveAndSetParams({
+        const { oq_curve, curveLpToken } = await createCurveAndSetParams({
           name,
           symbol,
           base,
@@ -1354,14 +1354,14 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user1, parseUnits("1000000", baseDecimals), oq_curve.address],
+          [quote, user1, parseUnits("1000000", quoteDecimals), oq_curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
 
         // Deposit user 1
-        await curve
+        await oq_curve
           .connect(user1)
           .deposit(parseUnits("1000000"), await getFutureTime())
           .then(x => x.wait());
@@ -1374,7 +1374,7 @@ describe("Curve", function () {
         let beforeLPBal = await curveLpToken.balanceOf(user2Address);
         expectBNEq(beforeLPBal, ethers.constants.Zero);
 
-        await curve
+        await oq_curve
           .connect(user2)
           .deposit(parseUnits(amount), await getFutureTime())
           .then(x => x.wait());
@@ -1397,8 +1397,8 @@ describe("Curve", function () {
 
         // Mint tokens and approve for 2nd deposit
         await multiMintAndApprove([
-          [base, user2, parseUnits(amount, baseDecimals), curve.address],
-          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), oq_curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), oq_curve.address],
         ]);
         await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
 
@@ -1406,7 +1406,7 @@ describe("Curve", function () {
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
         beforeLPBal = await curveLpToken.balanceOf(user2Address);
 
-        await curve
+        await oq_curve
           .connect(user2)
           .deposit(parseUnits(amount), await getFutureTime())
           .then(x => x.wait());
@@ -1428,9 +1428,9 @@ describe("Curve", function () {
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
-        await curve
+        await oq_curve
           .connect(user2)
-          .withdraw(lpBal, await getFutureTime())
+          .oq_withdraw(lpBal, await getFutureTime())
           .then(x => x.wait());
 
         afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
@@ -1444,9 +1444,9 @@ describe("Curve", function () {
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
-        await curve
+        await oq_curve
           .connect(user2)
-          .withdraw(lpBal2, await getFutureTime())
+          .oq_withdraw(lpBal2, await getFutureTime())
           .then(x => x.wait());
 
         afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
@@ -1554,7 +1554,7 @@ describe("Curve", function () {
 
   //   const params = [ALPHA, BETA, MAX, EPSILON, LAMBDA];
 
-  //   const { curve, curveLpToken } = await createCurveAndSetParams({
+  //   const { oq_curve, curveLpToken } = await createCurveAndSetParams({
   //     name: "DFX",
   //     symbol: "DFX",
   //     base,
@@ -1568,37 +1568,37 @@ describe("Curve", function () {
 
   //   // Mint tokens and approve
   //   await multiMintAndApprove([
-  //     [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-  //     [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
-  //     [base, user2, parseUnits("1000000", baseDecimals), curve.address],
-  //     [quote, user2, parseUnits("1000000", quoteDecimals), curve.address],
+  //     [base, user1, parseUnits("1000000", baseDecimals), oq_curve.address],
+  //     [quote, user1, parseUnits("1000000", quoteDecimals), oq_curve.address],
+  //     [base, user2, parseUnits("1000000", baseDecimals), oq_curve.address],
+  //     [quote, user2, parseUnits("1000000", quoteDecimals), oq_curve.address],
   //   ]);
 
   //   const logDelta = async (f, addr) => {
   //     const bbefore = await erc20.attach(base).balanceOf(addr);
   //     const qbefore = await erc20.attach(quote).balanceOf(addr);
-  //     const lpBefore = await curve.balanceOf(addr);
+  //     const lpBefore = await oq_curve.balanceOf(addr);
 
   //     await f();
 
   //     const bafter = await erc20.attach(base).balanceOf(addr);
   //     const qafter = await erc20.attach(quote).balanceOf(addr);
-  //     const lpAfter = await curve.balanceOf(addr);
+  //     const lpAfter = await oq_curve.balanceOf(addr);
 
   //     console.log("base delta", formatUnits(bbefore.sub(bafter), baseDecimals));
   //     console.log("quote delta", formatUnits(qbefore.sub(qafter), quoteDecimals));
   //     console.log("user lp balance delta", formatUnits(lpAfter.sub(lpBefore)));
-  //     console.log("total Supply", formatUnits(await curve.totalSupply()));
+  //     console.log("total Supply", formatUnits(await oq_curve.totalSupply()));
   //     console.log("========");
   //   };
 
   //   const getDepositAmountFromBase = async (baseMaxAmount: BigNumber) => {
   //     // Calculate internal pool ratio quote/base ratio
   //     // Can ignore weights cause they're always 50/50
-  //     const ratio = (await erc20.attach(quote).balanceOf(curve.address))
+  //     const ratio = (await erc20.attach(quote).balanceOf(oq_curve.address))
   //       .mul(parseUnits("1", 18 - quoteDecimals))
   //       .mul(parseUnits("1"))
-  //       .div((await erc20.attach(base).balanceOf(curve.address)).mul(parseUnits("1", 18 - baseDecimals)));
+  //       .div((await erc20.attach(base).balanceOf(oq_curve.address)).mul(parseUnits("1", 18 - baseDecimals)));
 
   //     const depositAmount = baseMaxAmount
   //       .mul(parseUnits("1", 18 - baseDecimals))
@@ -1606,7 +1606,7 @@ describe("Curve", function () {
   //       .div(parseUnits("1"))
   //       .mul(2);
 
-  //     const [lpTokens, amounts] = await curve.viewDeposit(depositAmount);
+  //     const [lpTokens, amounts] = await oq_curve.viewDeposit(depositAmount);
 
   //     console.log("#####");
   //     console.log("deposit", formatUnits(depositAmount));
@@ -1621,7 +1621,7 @@ describe("Curve", function () {
   //   const getDepositAmountFromQuote = async (quoteMaxAmount: BigNumber) => {
   //     const depositAmount = quoteMaxAmount.mul(2).mul(parseUnits("1", 18 - quoteDecimals));
 
-  //     const [lpTokens, amounts] = await curve.viewDeposit(depositAmount);
+  //     const [lpTokens, amounts] = await oq_curve.viewDeposit(depositAmount);
 
   //     console.log("#####");
   //     console.log("deposit", formatUnits(depositAmount));
@@ -1636,7 +1636,7 @@ describe("Curve", function () {
   //   // Deposit user 1
   //   await logDelta(
   //     async () =>
-  //       await curve
+  //       await oq_curve
   //         .connect(user1)
   //         .deposit(parseUnits("10000"), await getFutureTime())
   //         .then(x => x.wait()),
@@ -1647,20 +1647,20 @@ describe("Curve", function () {
   //   await getDepositAmountFromQuote(parseUnits("5000", quoteDecimals));
   //   await logDelta(
   //     async () =>
-  //       await curve
+  //       await oq_curve
   //         .connect(user2)
   //         .deposit(parseUnits("10000"), await getFutureTime())
   //         .then(x => x.wait()),
   //     user2Address,
   //   );
 
-  //   await curve.originSwap(base, quote, parseUnits("10", baseDecimals), 0, await getFutureTime());
+  //   await oq_curve.originSwap(base, quote, parseUnits("10", baseDecimals), 0, await getFutureTime());
 
   //   await getDepositAmountFromBase(parseUnits("6033"));
   //   await getDepositAmountFromQuote(parseUnits("5000", quoteDecimals));
   //   await logDelta(
   //     async () =>
-  //       await curve
+  //       await oq_curve
   //         .connect(user1)
   //         .deposit(parseUnits("10000"), await getFutureTime())
   //         .then(x => x.wait()),
@@ -1669,7 +1669,7 @@ describe("Curve", function () {
 
   //   await logDelta(
   //     async () =>
-  //       await curve
+  //       await oq_curve
   //         .connect(user2)
   //         .deposit(parseUnits("10000"), await getFutureTime())
   //         .then(x => x.wait()),

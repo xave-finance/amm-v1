@@ -91,7 +91,7 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights) => {
         CORE_ADDRESSES.curveFactory,
       )) as CurveFactory;
 
-      const { curve } = await createCurveAndSetParams({
+      const { oq_curve } = await createCurveAndSetParams({
         curveFactory,
         name: tokenName,
         symbol: tokenSymbol,
@@ -164,15 +164,15 @@ export const listFiles = async (directory, fileSuffix) => {
 }
 
 export const curveAddresses = async () => {
-  let curves = {};
-  const fileObj = await listFiles('curves', 'Curves.json');
+  let oq_curves = {};
+  const fileObj = await listFiles('oq_curves', 'Curves.json');
 
   Object.keys(fileObj).map(key => {
-    let curveAddr = require(configImporterNew(`curves/${fileObj[key]}`))
-    curves[key] = curveAddr[Object.keys(curveAddr)[0]];
+    let curveAddr = require(configImporterNew(`oq_curves/${fileObj[key]}`))
+    oq_curves[key] = curveAddr[Object.keys(curveAddr)[0]];
   });
 
-  return curves;
+  return oq_curves;
 }
 
 const logHelper = async (filename, output) => {
@@ -213,8 +213,8 @@ const createCurve = async function ({
   quoteWeight: BigNumberish;
   baseAssimilator: string;
   quoteAssimilator: string;
-}): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
-  const tx = await curveFactory.newCurve(
+}): Promise<{ oq_curve: Curve; curveLpToken: ERC20 }> {
+  const tx = await curveFactory.oq_newCurve(
     name,
     symbol,
     base,
@@ -229,30 +229,30 @@ const createCurve = async function ({
   );
   await tx.wait();
 
-  console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+  console.log('CurveFactory#oq_newCurve TX Hash: ', tx.hash)
 
-  // Get curve address
-  const curveAddress = await curveFactory.curves(
+  // Get oq_curve address
+  const curveAddress = await curveFactory.oq_curves(
     ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "address"], [base, quote])),
   );
   const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
-  const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
+  const oq_curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
 
   const output = {};
   output[symbol.toUpperCase()] = curveAddress;
 
   // Deployed contracts log
-  await configFileHelper(output, 'curves');
+  await configFileHelper(output, 'oq_curves');
 
   console.log(`curveAddress ${symbol}: `, curveAddress)
-  console.log(`Curve ${symbol} Address: `, curve.address)
+  console.log(`Curve ${symbol} Address: `, oq_curve.address)
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
-  const turnOffWhitelisting = await curve.turnOffWhitelisting();
+  const turnOffWhitelisting = await oq_curve.turnOffWhitelisting();
   console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
 
   return {
-    curve,
+    oq_curve,
     curveLpToken,
   };
 };
@@ -280,7 +280,7 @@ const createCurveAndSetParams = async function ({
   quoteAssimilator: string;
   params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
 }) {
-  const { curve, curveLpToken } = await createCurve({
+  const { oq_curve, curveLpToken } = await createCurve({
     curveFactory,
     name,
     symbol,
@@ -292,11 +292,11 @@ const createCurveAndSetParams = async function ({
     quoteAssimilator,
   });
   // Set parameters/dimensions here
-  const tx = await curve.setParams(...params, { gasLimit: 12000000 });
-  console.log('Curve#setParams TX Hash: ', tx.hash)
+  const tx = await oq_curve.oq_setParams(...params, { gasLimit: 12000000 });
+  console.log('Curve#oq_setParams TX Hash: ', tx.hash)
   await tx.wait();
   return {
-    curve,
+    oq_curve,
     curveLpToken,
   };
 };

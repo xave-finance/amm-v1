@@ -137,7 +137,7 @@ export const getFutureTime = async (): Promise<number> => {
 };
 
 export const getCurveAddressFromTxRecp = (txRecp: ContractReceipt): string => {
-  const abi = ["event NewCurve(address indexed caller, bytes32 indexed id, address indexed curve)"];
+  const abi = ["event NewCurve(address indexed caller, bytes32 indexed id, address indexed oq_curve)"];
   const iface = new ethers.utils.Interface(abi);
 
   const events = txRecp.logs
@@ -150,11 +150,11 @@ export const getCurveAddressFromTxRecp = (txRecp: ContractReceipt): string => {
     })
     .filter(x => x !== null);
 
-  if (!events[0]?.args.curve) {
-    throw new Error("Unable to find curve address from tx recp");
+  if (!events[0]?.args.oq_curve) {
+    throw new Error("Unable to find oq_curve address from tx recp");
   }
 
-  return events[0]?.args.curve;
+  return events[0]?.args.oq_curve;
 };
 
 export const BN = (a: number | string): BigNumber => {
@@ -209,7 +209,7 @@ export const expectEventIn = (txRecp: ContractReceipt, eventName: string, eventA
 
 export const expectRevert = async (promise: Promise<unknown>, expectedError: string): Promise<void> => {
   // eslint-disable-next-line
-  promise.catch(() => {}); // Catch all exceptions
+  promise.catch(() => { }); // Catch all exceptions
 
   try {
     await promise;

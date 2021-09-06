@@ -34,11 +34,11 @@ library CurveMath {
     function calculateFee(
         int128 _gLiq,
         int128[] memory _bals,
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         int128[] memory _weights
     ) internal view returns (int128 psi_) {
-        int128 _beta = curve.beta;
-        int128 _delta = curve.delta;
+        int128 _beta = oq_curve.beta;
+        int128 _delta = oq_curve.delta;
 
         psi_ = calculateFee(_gLiq, _bals, _beta, _delta, _weights);
     }
@@ -94,7 +94,7 @@ library CurveMath {
     }
 
     function calculateTrade(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         int128 _oGLiq,
         int128 _nGLiq,
         int128[] memory _oBals,
@@ -104,14 +104,14 @@ library CurveMath {
     ) internal view returns (int128 outputAmt_) {
         outputAmt_ = -_inputAmt;
 
-        int128 _lambda = curve.lambda;
-        int128[] memory _weights = curve.weights;
+        int128 _lambda = oq_curve.lambda;
+        int128[] memory _weights = oq_curve.weights;
 
-        int128 _omega = calculateFee(_oGLiq, _oBals, curve, _weights);
+        int128 _omega = calculateFee(_oGLiq, _oBals, oq_curve, _weights);
         int128 _psi;
 
         for (uint256 i = 0; i < 32; i++) {
-            _psi = calculateFee(_nGLiq, _nBals, curve, _weights);
+            _psi = calculateFee(_nGLiq, _nBals, oq_curve, _weights);
 
             int128 prevAmount;
             {
@@ -124,7 +124,7 @@ library CurveMath {
 
                 _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
 
-                enforceHalts(curve, _oGLiq, _nGLiq, _oBals, _nBals, _weights);
+                enforceHalts(oq_curve, _oGLiq, _nGLiq, _oBals, _nBals, _weights);
 
                 enforceSwapInvariant(_oGLiq, _omega, _nGLiq, _psi);
 
@@ -140,21 +140,21 @@ library CurveMath {
     }
 
     function calculateLiquidityMembrane(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         int128 _oGLiq,
         int128 _nGLiq,
         int128[] memory _oBals,
         int128[] memory _nBals
     ) internal view returns (int128 curves_) {
-        enforceHalts(curve, _oGLiq, _nGLiq, _oBals, _nBals, curve.weights);
+        enforceHalts(oq_curve, _oGLiq, _nGLiq, _oBals, _nBals, oq_curve.weights);
 
         int128 _omega;
         int128 _psi;
 
         {
-            int128 _beta = curve.beta;
-            int128 _delta = curve.delta;
-            int128[] memory _weights = curve.weights;
+            int128 _beta = oq_curve.beta;
+            int128 _delta = oq_curve.delta;
+            int128[] memory _weights = oq_curve.weights;
 
             _omega = calculateFee(_oGLiq, _oBals, _beta, _delta, _weights);
             _psi = calculateFee(_nGLiq, _nBals, _beta, _delta, _weights);
@@ -163,7 +163,7 @@ library CurveMath {
         int128 _feeDiff = _psi.sub(_omega);
         int128 _liqDiff = _nGLiq.sub(_oGLiq);
         int128 _oUtil = _oGLiq.sub(_omega);
-        int128 _totalShells = curve.totalSupply.divu(1e18);
+        int128 _totalShells = oq_curve.totalSupply.divu(1e18);
         int128 _curveMultiplier;
 
         if (_totalShells == 0) {
@@ -171,7 +171,7 @@ library CurveMath {
         } else if (_feeDiff >= 0) {
             _curveMultiplier = _liqDiff.sub(_feeDiff).div(_oUtil);
         } else {
-            _curveMultiplier = _liqDiff.sub(curve.lambda.mul(_feeDiff));
+            _curveMultiplier = _liqDiff.sub(oq_curve.lambda.mul(_feeDiff));
 
             _curveMultiplier = _curveMultiplier.div(_oUtil);
         }
@@ -218,7 +218,7 @@ library CurveMath {
     }
 
     function enforceHalts(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         int128 _oGLiq,
         int128 _nGLiq,
         int128[] memory _oBals,
@@ -226,7 +226,7 @@ library CurveMath {
         int128[] memory _weights
     ) private view {
         uint256 _length = _nBals.length;
-        int128 _alpha = curve.alpha;
+        int128 _alpha = oq_curve.alpha;
 
         for (uint256 i = 0; i < _length; i++) {
             int128 _nIdeal = _nGLiq.mul(_weights[i]);

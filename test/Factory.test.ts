@@ -61,7 +61,7 @@ describe("Factory", function () {
     quoteAssimilator: string;
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   }) => Promise<{
-    curve: Curve;
+    oq_curve: Curve;
     curveLpToken: ERC20;
   }>;
 
@@ -90,7 +90,7 @@ describe("Factory", function () {
   });
 
   it("No duplicate pairs", async function () {
-    const { curve } = await createCurveAndSetParams({
+    const { oq_curve } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
       base: cadc.address,
@@ -114,15 +114,15 @@ describe("Factory", function () {
         quoteAssimilator: usdcToUsdAssimilator.address,
         params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
       });
-      throw new Error("newCurve should throw error");
+      throw new Error("oq_newCurve should throw error");
     } catch (e) {
       expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
     }
 
-    const curveCadcUsdcAddress = await curveFactory.curves(
+    const curveCadcUsdcAddress = await curveFactory.oq_curves(
       ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [cadc.address, usdc.address])),
     );
 
-    expect(curve.address.toLowerCase()).to.be.eq(curveCadcUsdcAddress.toLowerCase());
+    expect(oq_curve.address.toLowerCase()).to.be.eq(curveCadcUsdcAddress.toLowerCase());
   });
 });

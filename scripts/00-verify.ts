@@ -94,7 +94,7 @@ const curvesVerify = async () => {
 
         const fileName = `${tokenSymbol}Curves`;
         const fullFileName = `${fileName}.json`;
-        const curveAddr = require(configImporterNew(`curves/${fullFileName}`))[fileName];
+        const curveAddr = require(configImporterNew(`oq_curves/${fullFileName}`))[fileName];
         const token = assimilators[index].split('ToUsdAssimilator')[0].toUpperCase();
         const assimfileName = `${token}ToUsdAssimilator`;
         const assimAddr = require(configImporterNew(`assimilators/${assimfileName}.json`))[assimfileName];

@@ -24,16 +24,16 @@ import "./interfaces/IFreeFromUpTo.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CurveFactory is Ownable {
-    event NewCurve(address indexed caller, bytes32 indexed id, address indexed curve);
+    event NewCurve(address indexed caller, bytes32 indexed id, address indexed oq_curve);
 
-    mapping(bytes32 => address) public curves;
+    mapping(bytes32 => address) public oq_curves;
 
     function getCurve(address _baseCurrency, address _quoteCurrency) external view returns (address) {
         bytes32 curveId = keccak256(abi.encode(_baseCurrency, _quoteCurrency));
-        return (curves[curveId]);
+        return (oq_curves[curveId]);
     }
 
-    function newCurve(
+    function oq_newCurve(
         string memory _name,
         string memory _symbol,
         address _baseCurrency,
@@ -44,7 +44,7 @@ contract CurveFactory is Ownable {
         address _quoteAssimilator
     ) public onlyOwner returns (Curve) {
         bytes32 curveId = keccak256(abi.encode(_baseCurrency, _quoteCurrency));
-        if (curves[curveId] != address(0)) revert("CurveFactory/currency-pair-already-exists");
+        if (oq_curves[curveId] != address(0)) revert("CurveFactory/currency-pair-already-exists");
 
         address[] memory _assets = new address[](10);
         uint256[] memory _assetWeights = new uint256[](2);
@@ -67,13 +67,13 @@ contract CurveFactory is Ownable {
         _assetWeights[0] = _baseWeight;
         _assetWeights[1] = _quoteWeight;
 
-        // New curve
-        Curve curve = new Curve(_name, _symbol, _assets, _assetWeights);
-        curve.transferOwnership(msg.sender);
-        curves[curveId] = address(curve);
+        // New oq_curve
+        Curve oq_curve = new Curve(_name, _symbol, _assets, _assetWeights);
+        oq_curve.oq_transferOwnership(msg.sender);
+        oq_curves[curveId] = address(oq_curve);
 
-        emit NewCurve(msg.sender, curveId, address(curve));
+        emit NewCurve(msg.sender, curveId, address(oq_curve));
 
-        return curve;
+        return oq_curve;
     }
 }

@@ -42,8 +42,8 @@ library Orchestrator {
         address assimilator
     );
 
-    function setParams(
-        Storage.Curve storage curve,
+    function oq_setParams(
+        Storage.Curve storage oq_curve,
         uint256 _alpha,
         uint256 _beta,
         uint256 _feeAtHalt,
@@ -60,44 +60,46 @@ library Orchestrator {
 
         require(_lambda <= 1e18, "Curve/parameter-invalid-lambda");
 
-        int128 _omega = getFee(curve);
+        int128 _omega = getFee(oq_curve);
 
-        curve.alpha = (_alpha + 1).divu(1e18);
+        oq_curve.alpha = (_alpha + 1).divu(1e18);
 
-        curve.beta = (_beta + 1).divu(1e18);
+        oq_curve.beta = (_beta + 1).divu(1e18);
 
-        curve.delta = (_feeAtHalt).divu(1e18).div(uint256(2).fromUInt().mul(curve.alpha.sub(curve.beta))) + ONE_WEI;
+        oq_curve.delta =
+            (_feeAtHalt).divu(1e18).div(uint256(2).fromUInt().mul(oq_curve.alpha.sub(oq_curve.beta))) +
+            ONE_WEI;
 
-        curve.epsilon = (_epsilon + 1).divu(1e18);
+        oq_curve.epsilon = (_epsilon + 1).divu(1e18);
 
-        curve.lambda = (_lambda + 1).divu(1e18);
+        oq_curve.lambda = (_lambda + 1).divu(1e18);
 
-        int128 _psi = getFee(curve);
+        int128 _psi = getFee(oq_curve);
 
         require(_omega >= _psi, "Curve/parameters-increase-fee");
 
-        emit ParametersSet(_alpha, _beta, curve.delta.mulu(1e18), _epsilon, _lambda);
+        emit ParametersSet(_alpha, _beta, oq_curve.delta.mulu(1e18), _epsilon, _lambda);
     }
 
-    function getFee(Storage.Curve storage curve) private view returns (int128 fee_) {
+    function getFee(Storage.Curve storage oq_curve) private view returns (int128 fee_) {
         int128 _gLiq;
 
         // Always pairs
         int128[] memory _bals = new int128[](2);
 
         for (uint256 i = 0; i < _bals.length; i++) {
-            int128 _bal = Assimilators.viewNumeraireBalance(curve.assets[i].addr);
+            int128 _bal = Assimilators.viewNumeraireBalance(oq_curve.assets[i].addr);
 
             _bals[i] = _bal;
 
             _gLiq += _bal;
         }
 
-        fee_ = CurveMath.calculateFee(_gLiq, _bals, curve.beta, curve.delta, curve.weights);
+        fee_ = CurveMath.calculateFee(_gLiq, _bals, oq_curve.beta, oq_curve.delta, oq_curve.weights);
     }
 
     function initialize(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address[] storage numeraires,
         address[] storage reserves,
         address[] storage derivatives,
@@ -117,7 +119,7 @@ library Orchestrator {
             if (_assets[ix] != _assets[2 + ix]) derivatives.push(_assets[2 + ix]);
 
             includeAsset(
-                curve,
+                oq_curve,
                 _assets[ix], // numeraire
                 _assets[1 + ix], // numeraire assimilator
                 _assets[2 + ix], // reserve
@@ -129,7 +131,7 @@ library Orchestrator {
     }
 
     function includeAsset(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address _numeraire,
         address _numeraireAssim,
         address _reserve,
@@ -149,23 +151,23 @@ library Orchestrator {
 
         if (_numeraire != _reserve) IERC20(_numeraire).safeApprove(_reserveApproveTo, uint256(-1));
 
-        Storage.Assimilator storage _numeraireAssimilator = curve.assimilators[_numeraire];
+        Storage.Assimilator storage _numeraireAssimilator = oq_curve.assimilators[_numeraire];
 
         _numeraireAssimilator.addr = _numeraireAssim;
 
-        _numeraireAssimilator.ix = uint8(curve.assets.length);
+        _numeraireAssimilator.ix = uint8(oq_curve.assets.length);
 
-        Storage.Assimilator storage _reserveAssimilator = curve.assimilators[_reserve];
+        Storage.Assimilator storage _reserveAssimilator = oq_curve.assimilators[_reserve];
 
         _reserveAssimilator.addr = _reserveAssim;
 
-        _reserveAssimilator.ix = uint8(curve.assets.length);
+        _reserveAssimilator.ix = uint8(oq_curve.assets.length);
 
         int128 __weight = _weight.divu(1e18).add(uint256(1).divu(1e18));
 
-        curve.weights.push(__weight);
+        oq_curve.weights.push(__weight);
 
-        curve.assets.push(_numeraireAssimilator);
+        oq_curve.assets.push(_numeraireAssimilator);
 
         emit AssetIncluded(_numeraire, _reserve, _weight);
 
@@ -177,7 +179,7 @@ library Orchestrator {
     }
 
     function includeAssimilator(
-        Storage.Curve storage curve,
+        Storage.Curve storage oq_curve,
         address _derivative,
         address _numeraire,
         address _reserve,
@@ -194,14 +196,14 @@ library Orchestrator {
 
         IERC20(_numeraire).safeApprove(_derivativeApproveTo, uint256(-1));
 
-        Storage.Assimilator storage _numeraireAssim = curve.assimilators[_numeraire];
+        Storage.Assimilator storage _numeraireAssim = oq_curve.assimilators[_numeraire];
 
-        curve.assimilators[_derivative] = Storage.Assimilator(_assimilator, _numeraireAssim.ix);
+        oq_curve.assimilators[_derivative] = Storage.Assimilator(_assimilator, _numeraireAssim.ix);
 
         emit AssimilatorIncluded(_derivative, _numeraire, _reserve, _assimilator);
     }
 
-    function viewCurve(Storage.Curve storage curve)
+    function viewCurve(Storage.Curve storage oq_curve)
         external
         view
         returns (
@@ -212,14 +214,14 @@ library Orchestrator {
             uint256 lambda_
         )
     {
-        alpha_ = curve.alpha.mulu(1e18);
+        alpha_ = oq_curve.alpha.mulu(1e18);
 
-        beta_ = curve.beta.mulu(1e18);
+        beta_ = oq_curve.beta.mulu(1e18);
 
-        delta_ = curve.delta.mulu(1e18);
+        delta_ = oq_curve.delta.mulu(1e18);
 
-        epsilon_ = curve.epsilon.mulu(1e18);
+        epsilon_ = oq_curve.epsilon.mulu(1e18);
 
-        lambda_ = curve.lambda.mulu(1e18);
+        lambda_ = oq_curve.lambda.mulu(1e18);
     }
 }

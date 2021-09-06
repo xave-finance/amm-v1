@@ -75,12 +75,12 @@ describe("Zap", function () {
     zap = (await Factory.deploy()) as Zap;
   });
 
-  const testZapFunctionality = async (base, quote, baseDecimals, quoteDecimals, curve: Curve, oracle) => {
+  const testZapFunctionality = async (base, quote, baseDecimals, quoteDecimals, oq_curve: Curve, oracle) => {
     await multiMintAndApprove([
       [base, user, parseUnits("100000", baseDecimals), zap.address],
       [quote, user, parseUnits("100000", quoteDecimals), zap.address],
-      [base, user, parseUnits("100000", baseDecimals), curve.address],
-      [quote, user, parseUnits("100000", quoteDecimals), curve.address],
+      [base, user, parseUnits("100000", baseDecimals), oq_curve.address],
+      [quote, user, parseUnits("100000", quoteDecimals), oq_curve.address],
     ]);
 
     // Make sure we can zap from a range of values
@@ -91,15 +91,15 @@ describe("Zap", function () {
         }
       }
 
-      const outB = await zap.callStatic.zapFromBase(
-        curve.address,
+      const outB = await zap.callStatic.oq_zapFromBase(
+        oq_curve.address,
         parseUnits(i.toString(), baseDecimals),
         await getFutureTime(),
         0,
       );
 
-      const outQ = await zap.callStatic.zapFromQuote(
-        curve.address,
+      const outQ = await zap.callStatic.oq_zapFromQuote(
+        oq_curve.address,
         parseUnits(i.toString(), quoteDecimals),
         await getFutureTime(),
         0,
@@ -111,14 +111,14 @@ describe("Zap", function () {
     }
   };
 
-  const testZapCalcDepositLogic = async (base, quote, baseDecimals, quoteDecimals, curve: Curve, oracle) => {
+  const testZapCalcDepositLogic = async (base, quote, baseDecimals, quoteDecimals, oq_curve: Curve, oracle) => {
     // Make sure we can zap from a range of values
     for (let i = 1; i <= 100000; i *= 10) {
       const baseAmount = parseUnits(i.toString(), baseDecimals);
       const quoteAmount = parseUnits(i.toString(), quoteDecimals);
 
-      const [depositAmountA, lpsA, amountsA] = await zap.calcMaxDepositAmountGivenBase(curve.address, baseAmount);
-      const [depositAmountB, lpsB, amountsB] = await zap.calcMaxDepositAmountGivenQuote(curve.address, quoteAmount);
+      const [depositAmountA, lpsA, amountsA] = await zap.oq_calcMaxDepositAmountGivenBase(oq_curve.address, baseAmount);
+      const [depositAmountB, lpsB, amountsB] = await zap.oq_calcMaxDepositAmountGivenQuote(oq_curve.address, quoteAmount);
 
       if (baseDecimals === 2) {
         expectBNAproxEq(amountsA[0], baseAmount, baseAmount.div(10));
@@ -135,11 +135,11 @@ describe("Zap", function () {
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.CADC.decimals;
     const quoteDecimals = TOKENS.USDC.decimals;
-    const curve = curveCADC;
+    const oq_curve = curveCADC;
     const oracle = ORACLES.EURS.address;
 
-    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
-    await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
+    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, oq_curve, oracle);
+    await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, oq_curve, oracle);
   });
 
   it("XSGD", async function () {
@@ -147,11 +147,11 @@ describe("Zap", function () {
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.XSGD.decimals;
     const quoteDecimals = TOKENS.USDC.decimals;
-    const curve = curveXSGD;
+    const oq_curve = curveXSGD;
     const oracle = ORACLES.EURS.address;
 
-    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
-    await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
+    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, oq_curve, oracle);
+    await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, oq_curve, oracle);
   });
 
   it("EURS", async function () {
@@ -159,10 +159,10 @@ describe("Zap", function () {
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.EURS.decimals;
     const quoteDecimals = TOKENS.USDC.decimals;
-    const curve = curveEURS;
+    const oq_curve = curveEURS;
     const oracle = ORACLES.EURS.address;
 
-    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
-    await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
+    await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, oq_curve, oracle);
+    await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, oq_curve, oracle);
   });
 });

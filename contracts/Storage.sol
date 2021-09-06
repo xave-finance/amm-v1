@@ -46,7 +46,7 @@ contract Storage {
     }
 
     // Curve parameters
-    Curve public curve;
+    Curve public oq_curve;
 
     // Ownable
     address public owner;
@@ -60,8 +60,8 @@ contract Storage {
     address[] public reserves;
 
     // Curve operational state
-    bool public frozen = false;
-    bool public emergency = false;
+    bool public oq_frozen = false;
+    bool public oq_emergency = false;
     bool public whitelistingStage = true;
     bool internal notEntered = true;
 

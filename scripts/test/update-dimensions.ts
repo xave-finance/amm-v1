@@ -19,7 +19,7 @@ const DIMENSION = {
 
 async function main() {
   const curveEURS = (await ethers.getContractAt("Curve", CONTRACT_CURVE_EURS_ADDR)) as Curve;
-  const txAUD = await curveEURS.setParams(
+  const txAUD = await curveEURS.oq_setParams(
     DIMENSION.alpha,
     DIMENSION.beta,
     DIMENSION.max,
