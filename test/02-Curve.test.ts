@@ -110,6 +110,37 @@ describe("Curve Contract", () => {
     }));
   });
 
+  describe("Curve/Caps", async () => {
+    it("Should not deposit if over cap", async () => {
+      const NAME = "Coin";
+      const SYMBOL = "COIN";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+
+
+      try {
+        // Deposit
+        await curve.setCap(parseUnits("100000"));
+
+        const amt = parseUnits("1000000");
+        await curve.deposit(amt, await getFutureTime());
+      } catch (e) {
+        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
+      }
+    });
+  });
+
   describe("Curve/Pair Creation", async () => {
     it("CADC:USDC", async () => {
       const NAME = "CAD Coin";
