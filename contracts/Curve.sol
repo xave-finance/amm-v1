@@ -296,6 +296,11 @@ contract Curve is Storage, MerkleProver {
         _;
     }
 
+    modifier underCap(uint256 amount) {
+        require(curve.cap == 0 || curve.cap < amount, "Curve/cap-is-zero");
+        _;
+    }
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -464,7 +469,7 @@ contract Curve is Storage, MerkleProver {
         bytes32[] calldata merkleProof,
         uint256 _deposit,
         uint256 _deadline
-    ) external deadline(_deadline) transactable nonReentrant inWhitelistingStage returns (uint256, uint256[] memory) {
+    ) external deadline(_deadline) transactable nonReentrant inWhitelistingStage underCap(_deposit) returns (uint256, uint256[] memory) {
         require(isWhitelisted(index, account, amount, merkleProof), "Curve/not-whitelisted");
         require(msg.sender == account, "Curve/not-approved-user");
 
@@ -492,9 +497,9 @@ contract Curve is Storage, MerkleProver {
         transactable
         nonReentrant
         notInWhitelistingStage
+        underCap(_deposit)
         returns (uint256, uint256[] memory)
     {
-        // (curvesMinted_,  deposits_)
         return ProportionalLiquidity.proportionalDeposit(curve, _deposit);
     }
 
@@ -617,4 +622,13 @@ contract Curve is Storage, MerkleProver {
     function assimilator(address _derivative) public view returns (address assimilator_) {
         assimilator_ = curve.assimilators[_derivative].addr;
     }
+
+    function setCap(uint256 _cap) public onlyOwner {
+        require(_cap != curve.cap, "Curve/cap is already set");
+        curve.cap = _cap;
+
+        emit CapChanged(_cap);
+    }
+
+    event CapChanged(uint256 _cap);
 }
