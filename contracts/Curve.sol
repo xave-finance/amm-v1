@@ -508,7 +508,7 @@ contract Curve is Storage, MerkleProver {
     ///                 prevailing proportions of the numeraire assets of the pool
     /// @return (the amount of curves you receive in return for your deposit,
     ///          the amount deposited for each numeraire)
-    function viewDeposit(uint256 _deposit) external view transactable returns (uint256, uint256[] memory) {
+    function viewDeposit(uint256 _deposit) external view transactable underCap(_deposit) returns (uint256, uint256[] memory) {
         // curvesToMint_, depositsToMake_
         return ProportionalLiquidity.viewProportionalDeposit(curve, _deposit);
     }
