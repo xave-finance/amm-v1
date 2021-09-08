@@ -111,9 +111,9 @@ describe("Curve Contract", () => {
   });
 
   describe("Curve/Caps", async () => {
-    it("Should not deposit if over cap", async () => {
-      const NAME = "Coin";
-      const SYMBOL = "COIN";
+    it("Should still deposit if under cap", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
 
       const { curve } = await createCurveAndSetParams({
         name: NAME,
@@ -127,17 +127,83 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
 
+      await tx.wait();
+
+      await curve.setCap(10000);
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(10000);
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
+
+      await curve.deposit(100, await getFutureTime());
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+      expect(lpAmountBefore).to.be.equal(99);
+    });
+
+    it("Should not be able to deposit if over cap", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+
+      await curve.setCap(10000);
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(10000);
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
 
       try {
-        // Deposit
-        await curve.setCap(parseUnits("100000"));
-
-        const amt = parseUnits("1000000");
-        await curve.deposit(amt, await getFutureTime());
+        await curve.deposit(10001, await getFutureTime());
+        throw new Error("newCurve should throw error");
       } catch (e) {
-        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exists");
+        expect(e.toString()).to.include("Curve/amount-too-large");
       }
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+      expect(lpAmountBefore).to.be.equal(0);
     });
   });
 

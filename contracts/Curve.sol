@@ -297,8 +297,8 @@ contract Curve is Storage, MerkleProver {
     }
 
     modifier underCap(uint256 amount) {
-        ( uint256 _liquidity, ) = liquidity();
-        require(curve.cap == 0 || curve.cap < amount.add(_liquidity), "Curve/cap-is-zero");
+        ( uint256 total_, ) = liquidity();
+        require(curve.cap == 0 || curve.cap > amount.add(total_), "Curve/amount-too-large");
         _;
     }
 
