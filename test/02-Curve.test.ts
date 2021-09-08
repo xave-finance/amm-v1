@@ -14,7 +14,7 @@ import { assert } from "console";
 
 import { TOKENS } from "./Constants";
 
-import { getFutureTime } from "./Utils";
+import { getFutureTime, unlockAccountAndGetSigner } from "./Utils";
 import { formatUnits } from "ethers/lib/utils";
 
 chai.use(chaiBigNumber(BigNumber));
@@ -156,7 +156,7 @@ describe("Curve Contract", () => {
       expect(lpAmountBefore).to.be.equal(99);
     });
 
-    it("Should not be able to deposit if over cap", async () => {
+    it.only("Should not be able to deposit if over cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -172,15 +172,15 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const tx = await curve.setParams(
-        DIMENSION.alpha,
-        DIMENSION.beta,
-        DIMENSION.max,
-        DIMENSION.epsilon,
-        DIMENSION.lambda
-      );
+      // const tx = await curve.setParams(
+      //   DIMENSION.alpha,
+      //   DIMENSION.beta,
+      //   DIMENSION.max,
+      //   DIMENSION.epsilon,
+      //   DIMENSION.lambda
+      // );
 
-      await tx.wait();
+      // await tx.wait();
 
       await curve.setCap(10000);
       const _curve = await curve.curve();
@@ -196,6 +196,85 @@ describe("Curve Contract", () => {
       ]);
 
       try {
+        await curve.deposit(10001, await getFutureTime());
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/amount-too-large");
+      }
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+      expect(lpAmountBefore).to.be.equal(0);
+    });
+
+    it("Should not be able to white list deposit if over cap", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      // const tx = await curve.setParams(
+      //   DIMENSION.alpha,
+      //   DIMENSION.beta,
+      //   DIMENSION.max,
+      //   DIMENSION.epsilon,
+      //   DIMENSION.lambda
+      // );
+
+      // await tx.wait();
+
+      const userAddress = "0x1407C9d09d1603A9A5b806A0C00f4D3734df15E0";
+      const user = await unlockAccountAndGetSigner(userAddress);
+      const userProof = {
+        index: 28,
+        amount: "0x01",
+        proof: [
+          "0x06c2671dbde443244feb8752d425a7650bed5af1383a0a121d54efd6a78a521f",
+          "0x4ebddc87e24770dece2462ce30fffdc4da32c5563b0fdf3dd385307e2c694fe1",
+          "0xca83c9a54c59c94b8b9bfbd9b58aa056a136058596b5e6bcb1989761920a2cad",
+          "0x9676136c72ff4bf6148b9ce0cb49b7aab69ba1fe742b2f202ee7c664413de070",
+          "0x291a036fdbf1876b96d9cc0138227ba144941ea8dcef8a2b817a0a21aedb01c7",
+          "0xb63b8842ea1e9e4219e797fef7266f9466147413e0f5e90f80e6cd89def28b5d",
+          "0x7d98a4db6824fa949e214d5eae8d2f26a02e9d510cc29a0dbf61843f4913cb98",
+          "0x4c931488ffcbe48e2790c170e3d163d96bc94f9b02b84f5cd5a6558d75c8bf0f",
+          "0x6fc939303414c593ab76806b3df8ad39854cf220c30a0c48747a81c3e9ffcf2a",
+        ],
+      };
+
+      await curve.setCap(10000);
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(10000);
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
+
+    try {
+        await curve
+          .connect(user)
+          .depositWithWhitelist(
+            userProof.index,
+            userAddress,
+            userProof.amount,
+            userProof.proof,
+            parseUnits("9999"),
+            await getFutureTime()
+          );
+
         await curve.deposit(10001, await getFutureTime());
         throw new Error("newCurve should throw error");
       } catch (e) {
