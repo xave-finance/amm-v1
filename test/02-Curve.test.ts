@@ -282,7 +282,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(0);
     });
 
-    it.only("Should not be able to view deposit if over cap", async () => {
+    it("Should not be able to view deposit if over cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -319,10 +319,7 @@ describe("Curve Contract", () => {
       };
     });
     
-    // it.only("Should not be able to white list deposit if over cap", async () => {
-    // });
-
-    it("Should be able to white list deposit if under cap", async () => {
+    it.skip("Should be able to white list deposit if under cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -368,6 +365,8 @@ describe("Curve Contract", () => {
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
         [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
       ]);
+
+      await curve.turnOffWhitelisting();
 
       //try {
         await curve
