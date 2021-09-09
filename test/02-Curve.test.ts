@@ -351,7 +351,12 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(0);
     });
   });
+it.only("Should not be able to view deposit if over cap", async () => {
 
+});
+
+it.only("Should not be able to white list deposit if over cap", async () => {
+});
   describe("Curve/Pair Creation", async () => {
     it("CADC:USDC", async () => {
       const NAME = "CAD Coin";
