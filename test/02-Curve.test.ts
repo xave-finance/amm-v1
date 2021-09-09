@@ -111,7 +111,7 @@ describe("Curve Contract", () => {
   });
 
   describe("Curve/Caps", async () => {
-    it.only("Should still deposit if under cap", async () => {
+    it("Should still deposit if under cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -146,7 +146,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(parseUnits("100"));
     });
 
-    it.only("Should still view deposit if under cap", async () => {
+    it("Should still view deposit if under cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -179,7 +179,7 @@ describe("Curve Contract", () => {
       expect(result[0]).to.be.equal(parseUnits("100"));
     });
 
-    it.only("Should still deposit if under cap not set", async () => {
+    it("Should still deposit if under cap not set", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -213,7 +213,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(parseUnits("100"));
     });
 
-    it.only("Should still view deposit if cap not set", async () => {
+    it("Should still view deposit if cap not set", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -242,7 +242,7 @@ describe("Curve Contract", () => {
       expect(result[0]).to.be.equal(parseUnits("100"));
     });
 
-    it.only("Should not be able to deposit if over cap", async () => {
+    it("Should not be able to deposit if over cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -347,8 +347,8 @@ describe("Curve Contract", () => {
       //   expect(e.toString()).to.include("Curve/amount-too-large");
       // }
 
-    //   const lpAmountAfter = await curve.balanceOf(user1Address);
-    //   expect(lpAmountAfter).to.be.equal(0);
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(lpAmountAfter).to.be.equal(0);
     });
   });
 
