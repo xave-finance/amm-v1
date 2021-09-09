@@ -282,7 +282,47 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(0);
     });
 
-    it.only("Should be able to white list deposit if under cap", async () => {
+    it.only("Should not be able to view deposit if over cap", async () => {
+      const NAME = "CAD Coin";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: cadcToUsdAssimilator.address,
+        quoteAssimilator: usdcToUsdAssimilator.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      await curve.setCap(parseUnits("10000"));
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(parseUnits("10000"));
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+      ]);
+
+      try {
+        await curve.viewDeposit(parseUnits("10001"));
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/amount-too-large");
+      };
+    });
+    
+    // it.only("Should not be able to white list deposit if over cap", async () => {
+    // });
+
+    it("Should be able to white list deposit if under cap", async () => {
       const NAME = "CAD Coin";
       const SYMBOL = "CADC";
 
@@ -351,12 +391,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(0);
     });
   });
-it.only("Should not be able to view deposit if over cap", async () => {
 
-});
-
-it.only("Should not be able to white list deposit if over cap", async () => {
-});
   describe("Curve/Pair Creation", async () => {
     it("CADC:USDC", async () => {
       const NAME = "CAD Coin";
