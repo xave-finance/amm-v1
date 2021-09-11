@@ -28,9 +28,9 @@ contract TcadToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0xACA44ABb8B04D07D883202F99FA5E3c53ed57Fb5);
-    IERC20 private constant usdc = IERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
-    IERC20 private constant tcad = IERC20(0x6d3cC56DFC016151eE2613BdDe0e03Af9ba885CC);
+    IOracle private constant oracle = IOracle(0xa34317DB73e77d453b1B8d04550c44D10e981C8e);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IERC20 private constant tcad = IERC20(0x00000100F2A2bd000715001920eB70D229700085);
 
     uint256 private constant DECIMALS = 1e18;
 

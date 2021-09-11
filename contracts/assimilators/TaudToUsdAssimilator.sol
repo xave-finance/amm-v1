@@ -28,9 +28,9 @@ contract TaudToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0x062Df9C4efd2030e243ffCc398b652e8b8F95C6f);
-    IERC20 private constant usdc = IERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
-    IERC20 private constant taud = IERC20(0xe4F7761b541668f88d04fe9F2E9DF10CA613aEf7);
+    IOracle private constant oracle = IOracle(0x77F9710E7d0A19669A13c055F62cd80d313dF022);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IERC20 private constant taud = IERC20(0x00006100F7090010005F1bd7aE6122c3C2CF0090);
 
     uint256 private constant DECIMALS = 1e18;
 

@@ -28,9 +28,9 @@ contract TgbpToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0x099a2540848573e94fb1Ca0Fa420b00acbBc845a);
-    IERC20 private constant usdc = IERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
-    IERC20 private constant tgbp = IERC20(0x81A123f10C78216d32F8655eb1A88B5E9A3e9f2F);
+    IOracle private constant oracle = IOracle(0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IERC20 private constant tgbp = IERC20(0x00000000441378008EA67F4284A57932B1c000a5);
 
     uint256 private constant DECIMALS = 1e18;
 
