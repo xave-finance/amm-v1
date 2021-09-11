@@ -58,7 +58,8 @@ const config: HardhatUserConfig = {
       chainId: 1,
       accounts: {
         mnemonic: MNEMONIC
-      }
+      },
+      blockGasLimit: 20000000
     },
     maticTestnet: {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
