@@ -29,6 +29,7 @@ contract Storage {
         int128 gamma; // protocol fee
 
         int128[] weights;
+        uint256 cap;
         // Assets and their assimilators
         Assimilator[] assets;
         mapping(address => Assimilator) assimilators;
