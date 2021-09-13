@@ -333,7 +333,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const userAddress = "0x1407C9d09d1603A9A5b806A0C00f4D3734df15E0";
@@ -790,7 +790,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -848,7 +848,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: eursToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -906,7 +906,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: xsgdToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -966,7 +966,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: cadcToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -1048,7 +1048,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: eursToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
@@ -1130,7 +1130,7 @@ describe("Curve Contract", () => {
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: xsgdToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda, DIMENSION.gamma],
       });
 
       const txR = await curve.turnOffWhitelisting();
