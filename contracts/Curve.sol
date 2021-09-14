@@ -296,6 +296,12 @@ contract Curve is Storage, MerkleProver {
         _;
     }
 
+    modifier underCap(uint256 amount) {
+        ( uint256 total_, ) = liquidity();
+        require(curve.cap == 0 || curve.cap > amount.add(total_), "Curve/amount-too-large");
+        _;
+    }
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -492,9 +498,9 @@ contract Curve is Storage, MerkleProver {
         transactable
         nonReentrant
         notInWhitelistingStage
+        underCap(_deposit)
         returns (uint256, uint256[] memory)
     {
-        // (curvesMinted_,  deposits_)
         return ProportionalLiquidity.proportionalDeposit(curve, _deposit);
     }
 
@@ -503,7 +509,7 @@ contract Curve is Storage, MerkleProver {
     ///                 prevailing proportions of the numeraire assets of the pool
     /// @return (the amount of curves you receive in return for your deposit,
     ///          the amount deposited for each numeraire)
-    function viewDeposit(uint256 _deposit) external view transactable returns (uint256, uint256[] memory) {
+    function viewDeposit(uint256 _deposit) external view transactable underCap(_deposit) returns (uint256, uint256[] memory) {
         // curvesToMint_, depositsToMake_
         return ProportionalLiquidity.viewProportionalDeposit(curve, _deposit);
     }
@@ -617,4 +623,13 @@ contract Curve is Storage, MerkleProver {
     function assimilator(address _derivative) public view returns (address assimilator_) {
         assimilator_ = curve.assimilators[_derivative].addr;
     }
+
+    function setCap(uint256 _cap) public onlyOwner {
+        require(_cap != curve.cap, "Curve/cap is already set");
+        curve.cap = _cap;
+
+        emit CapChanged(_cap);
+    }
+
+    event CapChanged(uint256 _cap);
 }
