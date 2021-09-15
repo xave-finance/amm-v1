@@ -22,30 +22,30 @@ import "../lib/ABDKMath64x64.sol";
 import "../interfaces/IAssimilator.sol";
 import "../interfaces/IOracle.sol";
 
-contract XsgdToUsdAssimilator is IAssimilator {
+contract ChfToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0xe25277fF4bbF9081C75Ab0EB13B4A13a721f3E13);
-    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    IERC20 private constant xsgd = IERC20(0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96);
+    IOracle private constant oracle = IOracle(0xed0616BeF04D374969f302a34AE4A63882490A8C);
+    IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
+    IERC20 private constant chf = IERC20(0xE9958574866587c391735b7e7CE0D79432d3b9d0);
 
-    uint256 private constant DECIMALS = 1e6;
+    uint256 private constant DECIMALS = 1e18;
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
         return uint256(price);
     }
 
-    // takes raw xsgd amount, transfers it in, calculates corresponding numeraire amount and returns it
+    // takes raw chf amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRawAndGetBalance(uint256 _amount) external override returns (int128 amount_, int128 balance_) {
-        bool _transferSuccess = xsgd.transferFrom(msg.sender, address(this), _amount);
+        bool _transferSuccess = chf.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-from-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-from-failed");
 
-        uint256 _balance = xsgd.balanceOf(address(this));
+        uint256 _balance = chf.balanceOf(address(this));
 
         uint256 _rate = getRate();
 
@@ -54,56 +54,56 @@ contract XsgdToUsdAssimilator is IAssimilator {
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // takes raw xsgd amount, transfers it in, calculates corresponding numeraire amount and returns it
+    // takes raw chf amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRaw(uint256 _amount) external override returns (int128 amount_) {
-        bool _transferSuccess = xsgd.transferFrom(msg.sender, address(this), _amount);
+        bool _transferSuccess = chf.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-from-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-from-failed");
 
         uint256 _rate = getRate();
 
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // takes a numeraire amount, calculates the raw amount of xsgd, transfers it in and returns the corresponding raw amount
+    // takes a numeraire amount, calculates the raw amount of chf, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
         amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
-        bool _transferSuccess = xsgd.transferFrom(msg.sender, address(this), amount_);
+        bool _transferSuccess = chf.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-from-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-from-failed");
     }
 
-    // takes a numeraire amount, calculates the raw amount of xsgd, transfers it in and returns the corresponding raw amount
+    // takes a numeraire amount, calculates the raw amount of chf, transfers it in and returns the corresponding raw amount
     function intakeNumeraireLPRatio(
         uint256 _baseWeight,
         uint256 _quoteWeight,
         address _addr,
         int128 _amount
     ) external override returns (uint256 amount_) {
-        uint256 _xsgdBal = xsgd.balanceOf(_addr);
+        uint256 _chfBal = chf.balanceOf(_addr);
 
-        if (_xsgdBal <= 0) return 0;
+        if (_chfBal <= 0) return 0;
 
         // DECIMALS
-        _xsgdBal = _xsgdBal.mul(1e18).div(_baseWeight);
+        _chfBal = _chfBal.mul(1e18).div(_baseWeight);
 
         // DECIMALS
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
         // Rate is in DECIMALS
-        uint256 _rate = _usdcBal.mul(DECIMALS).div(_xsgdBal);
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_chfBal);
 
         amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
 
-        bool _transferSuccess = xsgd.transferFrom(msg.sender, address(this), amount_);
+        bool _transferSuccess = chf.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-failed");
     }
 
-    // takes a raw amount of xsgd and transfers it out, returns numeraire value of the raw amount
+    // takes a raw amount of chf and transfers it out, returns numeraire value of the raw amount
     function outputRawAndGetBalance(address _dst, uint256 _amount)
         external
         override
@@ -111,41 +111,41 @@ contract XsgdToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _xsgdAmount = ((_amount) * _rate) / 1e8;
+        uint256 _chfAmount = ((_amount) * _rate) / 1e8;
 
-        bool _transferSuccess = xsgd.transfer(_dst, _xsgdAmount);
+        bool _transferSuccess = chf.transfer(_dst, _chfAmount);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-failed");
 
-        uint256 _balance = xsgd.balanceOf(address(this));
+        uint256 _balance = chf.balanceOf(address(this));
 
-        amount_ = _xsgdAmount.divu(DECIMALS);
+        amount_ = _chfAmount.divu(DECIMALS);
 
         balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // takes a raw amount of xsgd and transfers it out, returns numeraire value of the raw amount
+    // takes a raw amount of chf and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _xsgdAmount = (_amount * _rate) / 1e8;
+        uint256 _chfAmount = (_amount * _rate) / 1e8;
 
-        bool _transferSuccess = xsgd.transfer(_dst, _xsgdAmount);
+        bool _transferSuccess = chf.transfer(_dst, _chfAmount);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-failed");
 
-        amount_ = _xsgdAmount.divu(DECIMALS);
+        amount_ = _chfAmount.divu(DECIMALS);
     }
 
-    // takes a numeraire value of xsgd, figures out the raw amount, transfers raw amount out, and returns raw amount
+    // takes a numeraire value of chf, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
         amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
-        bool _transferSuccess = xsgd.transfer(_dst, amount_);
+        bool _transferSuccess = chf.transfer(_dst, amount_);
 
-        require(_transferSuccess, "Curve/XSGD-transfer-failed");
+        require(_transferSuccess, "Curve/CHF-transfer-failed");
     }
 
     // takes a numeraire amount and returns the raw amount
@@ -161,18 +161,18 @@ contract XsgdToUsdAssimilator is IAssimilator {
         address _addr,
         int128 _amount
     ) external view override returns (uint256 amount_) {
-        uint256 _xsgdBal = xsgd.balanceOf(_addr);
+        uint256 _chfBal = chf.balanceOf(_addr);
 
-        if (_xsgdBal <= 0) return 0;
+        if (_chfBal <= 0) return 0;
 
         // DECIMALS
-        _xsgdBal = _xsgdBal.mul(1e18).div(_baseWeight);
+        _chfBal = _chfBal.mul(1e18).div(_baseWeight);
 
         // DECIMALS
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
         // Rate is in DECIMALS
-        uint256 _rate = _usdcBal.mul(DECIMALS).div(_xsgdBal);
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_chfBal);
 
         amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
     }
@@ -184,18 +184,18 @@ contract XsgdToUsdAssimilator is IAssimilator {
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case xsgd
+    // views the numeraire value of the current balance of the reserve, in this case chf
     function viewNumeraireBalance(address _addr) external view override returns (int128 balance_) {
         uint256 _rate = getRate();
 
-        uint256 _balance = xsgd.balanceOf(_addr);
+        uint256 _balance = chf.balanceOf(_addr);
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
         balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case xsgd
+    // views the numeraire value of the current balance of the reserve, in this case chf
     function viewNumeraireAmountAndBalance(address _addr, uint256 _amount)
         external
         view
@@ -206,12 +206,12 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
 
-        uint256 _balance = xsgd.balanceOf(_addr);
+        uint256 _balance = chf.balanceOf(_addr);
 
         balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case xsgd
+    // views the numeraire value of the current balance of the reserve, in this case chf
     // instead of calculating with chainlink's "rate" it'll be determined by the existing
     // token ratio
     // Mainly to protect LP from losing
@@ -220,15 +220,15 @@ contract XsgdToUsdAssimilator is IAssimilator {
         uint256 _quoteWeight,
         address _addr
     ) external view override returns (int128 balance_) {
-        uint256 _xsgdBal = xsgd.balanceOf(_addr);
+        uint256 _chfBal = chf.balanceOf(_addr);
 
-        if (_xsgdBal <= 0) return ABDKMath64x64.fromUInt(0);
+        if (_chfBal <= 0) return ABDKMath64x64.fromUInt(0);
 
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
         // Rate is in DECIMALS
-        uint256 _rate = _usdcBal.mul(1e18).div(_xsgdBal.mul(1e18).div(_baseWeight));
+        uint256 _rate = _usdcBal.mul(1e18).div(_chfBal.mul(1e18).div(_baseWeight));
 
-        balance_ = ((_xsgdBal * _rate) / DECIMALS).divu(1e18);
+        balance_ = ((_chfBal * _rate) / DECIMALS).divu(1e18);
     }
 }
