@@ -1,30 +1,42 @@
 import { ethers } from "hardhat";
+import { parseUnits } from "@ethersproject/units";
 import { Curve } from "../../typechain/Curve";
 import { getAccounts, getFastGasPrice } from "../common";
 import { curveAddresses } from "../Utils";
-import chalk from "chalk";
-import { formatUnits } from "ethers/lib/utils";
 
-const GOVERNANCE_ADDRESS = process.env.GOVERNANCE_ADDRESS;
+const DIMENSION = {
+  alpha: parseUnits(process.env.DIMENSION_ALPHA),
+  beta: parseUnits(process.env.DIMENSION_BETA),
+  max: parseUnits(process.env.DIMENSION_MAX),
+  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
+  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+}
 
 async function main() {
   console.time('Deployment Time');
   const users = await getAccounts();
   const user1 = users[0];
-  const balance = await user1.getBalance();
-  console.log(chalk.blueBright(`Deployer balance: ${formatUnits(balance)} ETH`));
   const curves = await curveAddresses();
   const TOKEN = 'XSGD';
   const curve = (await ethers.getContractAt("Curve", curves[TOKEN])) as Curve;
-  const gasPrice = await getFastGasPrice();
 
   try {
-    // Change ownership
     console.log('\r');
-    const tx = await curve.transferOwnership(GOVERNANCE_ADDRESS, { gasPrice });
-    console.log("tx hash", tx.hash);
-    await tx.wait();
-    console.log(`${TOKEN} ownership xferred`);
+
+    try {
+      const gasPrice = await getFastGasPrice();
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda, { gasPrice });
+      console.log('Curve#setParams TX Hash: ', tx.hash)
+
+      await tx.wait();
+    } catch (error) {
+      console.log(`Error: ${error}`);
+    }
 
     console.timeEnd('Deployment Time');
   } catch (error) {

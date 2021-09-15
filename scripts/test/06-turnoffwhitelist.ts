@@ -8,34 +8,15 @@ async function main() {
   const users = await getAccounts();
   const user1 = users[0];
   const curves = await curveAddresses();
+  const TOKEN = 'XSGD';
 
-  const curveXSGD = (await ethers.getContractAt("Curve", curves['XSGD'])) as Curve;
-  const curveTCAD = (await ethers.getContractAt("Curve", curves['TCAD'])) as Curve;
-  const curveTAUD = (await ethers.getContractAt("Curve", curves['TAUD'])) as Curve;
-  const curveTGBP = (await ethers.getContractAt("Curve", curves['TGBP'])) as Curve;
-  const curveTUSD = (await ethers.getContractAt("Curve", curves['TUSD'])) as Curve;
+  const curve = (await ethers.getContractAt("Curve", curves[TOKEN])) as Curve;
 
   try {
     // Turn off whitelisting
-    // console.log('\r');
-    // const toCurveXSGD = await curveXSGD.turnOffWhitelisting();
-    // console.log('toCurveXSGD#turnOffWhitelisting TX Hash: ', toCurveXSGD.hash)
-
     console.log('\r');
-    const toCurveTCAD = await curveTCAD.turnOffWhitelisting();
-    console.log('toCurveTCAD#turnOffWhitelisting TX Hash: ', toCurveTCAD.hash)
-
-    console.log('\r');
-    const toCurveTAUD = await curveTAUD.turnOffWhitelisting();
-    console.log('toCurveTAUD#turnOffWhitelisting TX Hash: ', toCurveTAUD.hash)
-
-    console.log('\r');
-    const toCurveTGBP = await curveTGBP.turnOffWhitelisting();
-    console.log('toCurveTGBP#turnOffWhitelisting TX Hash: ', toCurveTGBP.hash)
-
-    console.log('\r');
-    const toCurveTUSD = await curveTUSD.turnOffWhitelisting();
-    console.log('toCurveTUSD#turnOffWhitelisting TX Hash: ', toCurveTUSD.hash)
+    const tx = await curve.turnOffWhitelisting();
+    console.log(`Curve${TOKEN}#turnOffWhitelisting TX Hash: `, tx.hash);
 
     console.timeEnd('Deployment Time');
   } catch (error) {

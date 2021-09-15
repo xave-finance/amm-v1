@@ -189,6 +189,7 @@ export const deployContract = async ({
     gasPrice = await getFastGasPrice();
   }
 
+  console.log(`Deploying ${name} with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
   const spinner = ora(`Deploying ${name} with gasPrice ${formatUnits(gasPrice, 9)} gwei`).start();
 
   let contract;
