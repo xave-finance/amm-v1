@@ -212,3 +212,40 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
 
   return { createCurveAndSetParams, createCurve, mintAndApprove, multiMintAndApprove };
 };
+
+export const scaffoldMockTokens = async () => {
+  const Tgbp = await ethers.getContractFactory("MockTgbp");
+  const Taud = await ethers.getContractFactory("MockTaud");
+  const TgbpToUsdAssimilator = await ethers.getContractFactory("MockTgbpToUsdAssimilator");
+  const TaudToUsdAssimilator = await ethers.getContractFactory("MockTaudToUsdAssimilator");
+
+  const tgbpContract = await Tgbp.deploy();
+  const taudContract = await Taud.deploy();
+  const tgbpAssimilator = await TgbpToUsdAssimilator.deploy(
+    "0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5", // Chainlink address
+    tgbpContract.address
+  );
+  const taudAssimilator = await TaudToUsdAssimilator.deploy(
+    "0x77F9710E7d0A19669A13c055F62cd80d313dF022", // Chainlink address
+    taudContract.address
+  );
+
+  const tgbp = (await ethers.getContractAt("ERC20", tgbpContract.address)) as ERC20;
+  const taud = (await ethers.getContractAt("ERC20", taudContract.address)) as ERC20;
+
+  const tokens = { tgbp, taud };
+
+  for (const key in tokens) {
+    if (!key.includes("Assimilator")) {
+      TOKENS[await tokens[key].symbol()] = {
+        address: tokens[key].address,
+        decimals: await tokens[key].decimals()
+      }
+    }
+  }
+
+  return {
+    tokens: TOKENS,
+    assimilators: { tgbp: tgbpAssimilator.address, taud: taudAssimilator.address }
+  }
+}
