@@ -187,9 +187,9 @@ describe("Curve Contract", () => {
               const quoteDeposit: BigNumber = result[1][1];
 
               // Compare estimate and viewDeposit LPT
-              expect(depositPreview.deposit.lte(viewLpt));
-              // Compare estimate and viewDeposit base amount
-              expect(depositPreview.base.lte(baseDeposit));
+              expect(depositPreview.deposit.gte(viewLpt));
+              // Compare estimate/user input and viewDeposit base amount
+              expect(depositPreview.base.gte(baseDeposit));
 
               const baseBalA: BigNumber = await baseToken.balanceOf(user1Address);
               const quoteBalA: BigNumber = await quoteToken.balanceOf(user1Address);
