@@ -245,3 +245,19 @@ export const previewDepositGivenBase = async (baseAmount: number, baseRate: numb
 
   return depositPreview;
 }
+
+export const previewDepositGivenQuote = async (quoteAmount: number, key: string, curve: Curve) => {
+  const quoteNumeraire = quoteAmount;
+  const multiplier = key === "XSGD" ? 1 : 2;
+  const totalNumeraire = parseUnits((quoteNumeraire * multiplier).toString());
+  const estimate = await curve.viewDeposit(totalNumeraire);
+
+  let depositPreview = {
+    deposit: totalNumeraire,
+    lpToken: estimate[0],
+    base: estimate[1][0],
+    quote: estimate[1][1],
+  }
+
+  return depositPreview;
+}
