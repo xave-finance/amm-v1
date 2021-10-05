@@ -8,6 +8,7 @@ import EURSABI from "./abi/EURSABI.json";
 import FiatTokenV1ABI from "./abi/FiatTokenV1ABI.json";
 import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
 import { Result } from "ethers/lib/utils";
+import { Curve } from "../typechain/Curve";
 
 const { provider } = ethers;
 const { parseUnits } = ethers.utils;
@@ -209,7 +210,7 @@ export const expectEventIn = (txRecp: ContractReceipt, eventName: string, eventA
 
 export const expectRevert = async (promise: Promise<unknown>, expectedError: string): Promise<void> => {
   // eslint-disable-next-line
-  promise.catch(() => {}); // Catch all exceptions
+  promise.catch(() => { }); // Catch all exceptions
 
   try {
     await promise;
@@ -228,3 +229,19 @@ export const expectRevert = async (promise: Promise<unknown>, expectedError: str
 
   expect.fail("Expected an exception but none was received");
 };
+
+export const previewDepositGivenBase = async (baseAmount: number, baseRate: number, key: string, baseWeight: number, curve: Curve) => {
+  const baseNumeraire = baseAmount * baseRate
+  const multiplier = key === "XSGD" ? 1 : baseWeight > 0 ? 1 / baseWeight : 2
+  const totalNumeraire = parseUnits((baseNumeraire * multiplier).toString());
+  const estimate = await curve.viewDeposit(totalNumeraire);
+
+  let depositPreview = {
+    deposit: totalNumeraire,
+    lpToken: estimate[0],
+    base: estimate[1][0],
+    quote: estimate[1][1],
+  }
+
+  return depositPreview;
+}
