@@ -181,15 +181,8 @@ describe("Curve Contract", () => {
               // Estimate deposit given base
               const depositPreview = await previewDepositGivenBase(d, rateBase, key, weightBase, curve);
 
-              const result = await curve.viewDeposit(depositPreview.deposit);
-              const viewLpt = result[0];
-              const baseDeposit: BigNumber = result[1][0];
-              const quoteDeposit: BigNumber = result[1][1];
-
-              // Compare estimate and viewDeposit LPT
-              expect(depositPreview.deposit.gte(viewLpt));
-              // Compare estimate/user input and viewDeposit base amount
-              expect(depositPreview.base.gte(baseDeposit));
+              // User input should be gte then estimate base
+              expect(parseUnits(d.toString()).gte(depositPreview.base))
 
               const baseBalA: BigNumber = await baseToken.balanceOf(user1Address);
               const quoteBalA: BigNumber = await quoteToken.balanceOf(user1Address);
@@ -200,9 +193,9 @@ describe("Curve Contract", () => {
               const baseBalB: BigNumber = await baseToken.balanceOf(user1Address);
               const quoteBalB: BigNumber = await quoteToken.balanceOf(user1Address);
 
-              // Compare balance after deposit
-              expect(baseBalA.sub(baseDeposit).gte(baseBalB)).to.be.true;
-              expect(quoteBalA.sub(quoteDeposit).gte(quoteBalB)).to.be.true;
+              // Compare balance before and after deposit
+              expect(baseBalA.sub(depositPreview.base).gte(baseBalB)).to.be.true;
+              expect(quoteBalA.sub(depositPreview.quote).gte(quoteBalB)).to.be.true;
             });
           }
         }
