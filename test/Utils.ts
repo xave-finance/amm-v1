@@ -232,7 +232,7 @@ export const expectRevert = async (promise: Promise<unknown>, expectedError: str
 
 export const previewDepositGivenBase = async (baseAmount: number, baseRate: number, key: string, baseWeight: number, curve: Curve) => {
   const baseNumeraire = baseAmount * baseRate
-  const multiplier = key === "XSGD" ? 1 : baseWeight > 0 ? 1 / baseWeight : 2
+  const multiplier = key !== "XSGD" ? 1 : baseWeight > 0 ? 1 / baseWeight : 2
   const totalNumeraire = parseUnits((baseNumeraire * multiplier).toString());
   const estimate = await curve.viewDeposit(totalNumeraire);
 
@@ -248,7 +248,7 @@ export const previewDepositGivenBase = async (baseAmount: number, baseRate: numb
 
 export const previewDepositGivenQuote = async (quoteAmount: number, key: string, curve: Curve) => {
   const quoteNumeraire = quoteAmount;
-  const multiplier = key === "XSGD" ? 1 : 2;
+  const multiplier = key !== "XSGD" ? 1 : 2;
   const totalNumeraire = parseUnits((quoteNumeraire * multiplier).toString());
   const estimate = await curve.viewDeposit(totalNumeraire);
 

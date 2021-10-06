@@ -146,15 +146,15 @@ describe("Curve Contract", () => {
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
           });
 
+          // Approve Deposit
+          await multiMintAndApprove([
+            [TOKENS[key].address, user1, parseUnits("10000000", TOKENS[key].decimals), curve.address],
+            [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+          ]);
+
           for (let d = 10; d <= maxDeposit; d *= 10) {
             describe(`${key}:USDC`, async () => {
               it(`Base Deposit Amount: ${d}`, async () => {
-                // Approve Deposit
-                await multiMintAndApprove([
-                  [TOKENS[key].address, user1, parseUnits("10000000", TOKENS[key].decimals), curve.address],
-                  [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
-                ]);
-
                 // Preview given base
                 const rateBase = Number(formatUnits(await baseAssimilatorContract.getRate(), 8));
                 const liquidity = await curve.liquidity();
@@ -226,15 +226,15 @@ describe("Curve Contract", () => {
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
           });
 
+          // Approve Deposit
+          await multiMintAndApprove([
+            [TOKENS[key].address, user1, parseUnits("10000000", TOKENS[key].decimals), curve.address],
+            [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+          ]);
+
           for (let d = 10; d <= maxDeposit; d *= 10) {
             describe(`${key}:USDC`, async () => {
               it(`Quote Deposit Amount: ${d}`, async () => {
-                // Approve Deposit
-                await multiMintAndApprove([
-                  [TOKENS[key].address, user1, parseUnits("10000000", TOKENS[key].decimals), curve.address],
-                  [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
-                ]);
-
                 // Estimate deposit given quote
                 const depositPreview = await previewDepositGivenQuote(d, key, curve);
 
