@@ -53,6 +53,7 @@ describe("Curve Contract", () => {
   let baseToken: ERC20;
   let quoteToken: ERC20;
   const maxDeposit: number = 90000000;
+  const maxSwap: number = 90000000;
 
   let mintAndApprove: (tokenAddress: string, minter: Signer, amount: BigNumberish, recipient: string) => Promise<void>;
   let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
@@ -110,16 +111,18 @@ describe("Curve Contract", () => {
   });
 
   describe("viewDeposit on XSGD/USDC curve", () => {
+    const tokenQuote = "XSGD";
+
     before(async () => {
-      const NAME = `Token XSGD`;
-      const SYMBOL = `XSGD`;
-      baseToken = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
+      const NAME = `Token ${tokenQuote}`;
+      const SYMBOL = tokenQuote;
+      baseToken = (await ethers.getContractAt("ERC20", TOKENS[tokenQuote].address)) as ERC20;
       quoteToken = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
 
       ({ curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
-        base: TOKENS.XSGD.address,
+        base: TOKENS[tokenQuote].address,
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits(".5"),
         quoteWeight: parseUnits(".5"),
@@ -130,7 +133,7 @@ describe("Curve Contract", () => {
 
       // Approve Deposit
       await multiMintAndApprove([
-        [TOKENS.XSGD.address, user1, parseUnits("900000000", TOKENS.XSGD.decimals), curve.address],
+        [TOKENS[tokenQuote].address, user1, parseUnits("900000000", TOKENS[tokenQuote].decimals), curve.address],
         [TOKENS.USDC.address, user1, parseUnits("900000000", TOKENS.USDC.decimals), curve.address],
       ]);
     });
@@ -141,7 +144,7 @@ describe("Curve Contract", () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
-            await previewDepositGivenQuote(deposit, "XSGD", curve),
+            await previewDepositGivenQuote(deposit, tokenQuote, curve),
             deposit,
             TOKENS.USDC.decimals,
             curve
@@ -181,13 +184,13 @@ describe("Curve Contract", () => {
           // Estimate deposit given base
           const depositPreview = await adjustViewDeposit(
             "base",
-            await previewDepositGivenBase(deposit, rateBase, "XSGD", weightBase, curve),
+            await previewDepositGivenBase(deposit, rateBase, tokenQuote, weightBase, curve),
             deposit,
             TOKENS.XSGD.decimals,
             curve
           );
 
-          console.log("Estimate Base: ", formatUnits(depositPreview.base, TOKENS.XSGD.decimals));
+          console.log("Estimate Base: ", formatUnits(depositPreview.base, TOKENS[tokenQuote].decimals));
 
           // User input should be gte the estimate base
           expect(parseUnits(deposit.toString()).gte(depositPreview.base))
@@ -207,103 +210,46 @@ describe("Curve Contract", () => {
         });
       }
     });
-  });
 
-  describe("viewDeposit on EURS/USDC curve", () => {
-    before(async () => {
-      const NAME = `Token EURS`;
-      const SYMBOL = `EURS`;
-      baseToken = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
-      quoteToken = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
+    describe("deposit when pool have unbalanced ratio", () => {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+        const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-      ({ curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.EURS.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits(".5"),
-        quoteWeight: parseUnits(".5"),
-        baseAssimilator: eursToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      }));
-
-      // Approve Deposit
-      await multiMintAndApprove([
-        [TOKENS.EURS.address, user1, parseUnits("900000000", TOKENS.EURS.decimals), curve.address],
-        [TOKENS.USDC.address, user1, parseUnits("900000000", TOKENS.USDC.decimals), curve.address],
-      ]);
-    });
-
-    describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
-        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
-          // Estimate deposit given quote
-          const depositPreview = await adjustViewDeposit(
-            "quote",
-            await previewDepositGivenQuote(deposit, "EURS", curve),
-            deposit,
-            TOKENS.USDC.decimals,
-            curve
-          );
-
-          console.log("Estimate Quote: ", formatUnits(depositPreview.quote, TOKENS.USDC.decimals));
-
-          // User input should be gte the estimate quote
-          expect(parseUnits(deposit.toString()).gte(depositPreview.quote))
-
-          const baseBalA: BigNumber = await baseToken.balanceOf(user1Address);
-          const quoteBalA: BigNumber = await quoteToken.balanceOf(user1Address);
-
-          // Deposit
-          await curve.deposit(parseUnits((depositPreview.deposit).toString()), await getFutureTime());
-
-          const baseBalB: BigNumber = await baseToken.balanceOf(user1Address);
-          const quoteBalB: BigNumber = await quoteToken.balanceOf(user1Address);
-
-          // Compare balance before and after deposit
-          expect(baseBalA.sub(depositPreview.base).gte(baseBalB)).to.be.true;
-          expect(quoteBalA.sub(depositPreview.quote).gte(quoteBalB)).to.be.true;
-        });
-      }
-    });
-
-    describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
-        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
-          // Preview given base
-          const rateBase = Number(formatUnits(await eursToUsdAssimilator.getRate(), 8));
+        it(`swapping amount: ${amt}`, async () => {
+          await curve
+            .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
           const liquidity = await curve.liquidity();
           const liquidityTotal = parseFloat(formatUnits(liquidity.total_));
           const numeraireBase = parseFloat(formatUnits(liquidity.individual_[0]));
           const weightBase = numeraireBase / liquidityTotal;
 
-          // Estimate deposit given base
-          const depositPreview = await adjustViewDeposit(
-            "base",
-            await previewDepositGivenBase(deposit, rateBase, "EURS", weightBase, curve),
-            deposit,
-            TOKENS.EURS.decimals,
+          // Estimate deposit given quote
+          const depositPreviewGivenQuote = await adjustViewDeposit(
+            "quote",
+            await previewDepositGivenQuote(swapAmt, tokenQuote, curve),
+            swapAmt,
+            TOKENS.USDC.decimals,
             curve
           );
 
-          console.log("Estimate Base: ", formatUnits(depositPreview.base, TOKENS.EURS.decimals));
+          console.log("Estimate Quote: ", formatUnits(depositPreviewGivenQuote.quote, TOKENS.USDC.decimals));
+          // User input should be gte the estimate quote
+          expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenQuote.quote))
 
+          // Preview given base
+          const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
+          // Estimate deposit given base
+          const depositPreviewGivenBase = await adjustViewDeposit(
+            "base",
+            await previewDepositGivenBase(swapAmt, rateBase, tokenQuote, weightBase, curve),
+            swapAmt,
+            TOKENS[tokenQuote].decimals,
+            curve
+          );
+
+          console.log("Estimate Base: ", formatUnits(depositPreviewGivenBase.base, TOKENS[tokenQuote].decimals));
           // User input should be gte the estimate base
-          expect(parseUnits(deposit.toString()).gte(depositPreview.base))
-
-          const baseBalA: BigNumber = await baseToken.balanceOf(user1Address);
-          const quoteBalA: BigNumber = await quoteToken.balanceOf(user1Address);
-
-          // Deposit
-          await curve.deposit(parseUnits(depositPreview.deposit.toString()), await getFutureTime());
-
-          const baseBalB: BigNumber = await baseToken.balanceOf(user1Address);
-          const quoteBalB: BigNumber = await quoteToken.balanceOf(user1Address);
-
-          // Compare balance before and after deposit
-          expect(baseBalA.sub(depositPreview.base).gte(baseBalB)).to.be.true;
-          expect(quoteBalA.sub(depositPreview.quote).gte(quoteBalB)).to.be.true;
+          expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenBase.base))
         });
       }
     });
