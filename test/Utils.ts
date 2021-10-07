@@ -11,7 +11,7 @@ import { Result } from "ethers/lib/utils";
 import { Curve } from "../typechain/Curve";
 
 const { provider } = ethers;
-const { parseUnits, parseEther, formatUnits } = ethers.utils;
+const { parseUnits, parseEther, formatUnits, formatEther } = ethers.utils;
 
 const sendETH = async (address, amount = 0.1) => {
   const signer = await provider.getSigner(0);
@@ -233,8 +233,8 @@ export const expectRevert = async (promise: Promise<unknown>, expectedError: str
 export const previewDepositGivenBase = async (baseAmount: number, baseRate: number, key: string, baseWeight: number, curve: Curve) => {
   const baseNumeraire = baseAmount * baseRate
   const multiplier = key !== "XSGD" ? 1 : baseWeight > 0 ? 1 / baseWeight : 2
-  const totalNumeraire = parseUnits((baseNumeraire * multiplier).toString());
-  const estimate = await curve.viewDeposit(totalNumeraire);
+  const totalNumeraire = baseNumeraire * multiplier;
+  const estimate = await curve.viewDeposit(parseUnits((totalNumeraire).toString()));
 
   let depositPreview = {
     deposit: totalNumeraire,
@@ -249,8 +249,8 @@ export const previewDepositGivenBase = async (baseAmount: number, baseRate: numb
 export const previewDepositGivenQuote = async (quoteAmount: number, key: string, curve: Curve) => {
   const quoteNumeraire = quoteAmount;
   const multiplier = key !== "XSGD" ? 1 : 2;
-  const totalNumeraire = parseUnits((quoteNumeraire * multiplier).toString());
-  const estimate = await curve.viewDeposit(totalNumeraire);
+  const totalNumeraire = quoteNumeraire * multiplier;
+  const estimate = await curve.viewDeposit(parseUnits((totalNumeraire).toString()));
 
   let depositPreview = {
     deposit: totalNumeraire,
@@ -282,13 +282,15 @@ export const adjustViewDeposit = async (inputType: string, depositPreview, input
 
   if (estimatedVal < inputAmount) {
     while (estimatedVal - inputAmount < -THRESHOLD) {
-      depositPreview = await errorRateHelper(inputAmount, estimatedVal, parseFloat(formatUnits(depositPreview.deposit)), curve)
-      estimatedVal = parseFloat(formatUnits(estimateAmt, decimal))
+      depositPreview = await errorRateHelper(inputAmount, estimatedVal, depositPreview.deposit, curve)
+      const newEstimatedVal = parseFloat(formatUnits(inputType === "quote" ? depositPreview.quote : depositPreview.base, decimal));
+      estimatedVal = newEstimatedVal;
     }
   } else {
     while (estimatedVal - inputAmount > THRESHOLD) {
-      depositPreview = await errorRateHelper(inputAmount, estimatedVal, parseFloat(formatUnits(depositPreview.deposit)), curve)
-      estimatedVal = parseFloat(formatUnits(estimateAmt, decimal))
+      depositPreview = await errorRateHelper(inputAmount, estimatedVal, depositPreview.deposit, curve)
+      const newEstimatedVal = parseFloat(formatUnits(inputType === "quote" ? depositPreview.quote : depositPreview.base, decimal));
+      estimatedVal = newEstimatedVal;
     }
   }
 
