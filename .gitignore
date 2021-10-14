@@ -131,9 +131,11 @@ typechain
 # Contract config
 scripts/deployed_contract_logs/localhost
 scripts/deployed_contract_logs/kovan
+scripts/deployed_contract_logs/hardhat
 
 scripts/config/kovan
 scripts/config/localhost
+scripts/config/hardhat
 
 # Temporary, assimilator templates
 *Mainnet*
