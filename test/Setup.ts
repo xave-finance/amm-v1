@@ -40,19 +40,19 @@ export const scaffoldTest = async () => {
 
   const BaseToUsdAssimilator = await ethers.getContractFactory("BaseToUsdAssimilator");
   const eursToUsdAssimilator = await BaseToUsdAssimilator.deploy(
-    EURS_USDC_ASSIM.baseDecimals,
+    parseUnits("1", EURS_USDC_ASSIM.baseDecimals),
     EURS_USDC_ASSIM.baseTokenAddress,
     EURS_USDC_ASSIM.quoteTokenAddress,
     EURS_USDC_ASSIM.oracleAddress,
   );
   const xsgdToUsdAssimilator = await BaseToUsdAssimilator.deploy(
-    XSGD_USDC_ASSIM.baseDecimals,
+    parseUnits("1", XSGD_USDC_ASSIM.baseDecimals),
     XSGD_USDC_ASSIM.baseTokenAddress,
     XSGD_USDC_ASSIM.quoteTokenAddress,
     XSGD_USDC_ASSIM.oracleAddress,
   );
   const cadcToUsdAssimilator = await BaseToUsdAssimilator.deploy(
-    CADC_USDC_ASSIM.baseDecimals,
+    parseUnits("1", CADC_USDC_ASSIM.baseDecimals),
     CADC_USDC_ASSIM.baseTokenAddress,
     CADC_USDC_ASSIM.quoteTokenAddress,
     CADC_USDC_ASSIM.oracleAddress,

@@ -33,7 +33,7 @@ contract BaseToUsdAssimilator is IAssimilator {
     IERC20 public immutable baseToken;
     uint256 public immutable baseDecimals;
 
-    constructor(uint256 _baseDecimals, IERC20 _baseToken, IERC20 _quoteToken, IOracle _oracle) public {
+    constructor(uint256 _baseDecimals, IERC20 _baseToken, IERC20 _quoteToken, IOracle _oracle) {
         baseDecimals = _baseDecimals;
         baseToken = _baseToken;
         usdc = _quoteToken;

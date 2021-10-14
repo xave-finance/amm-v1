@@ -5,6 +5,7 @@ import { configFileHelper } from "../Utils";
 import { deployContract } from "../common";
 import fs from "fs";
 import path from "path";
+import { parseUnits } from "@ethersproject/units";
 
 async function main() {
   console.time("Deployment Time");
@@ -36,7 +37,7 @@ async function main() {
       deployer: user,
       factory: contractInstance,
       args: [
-        assimilatorConfigs[index].baseDecimals,
+        parseUnits("1", assimilatorConfigs[index].baseDecimals),
         assimilatorConfigs[index].baseTokenAddress,
         assimilatorConfigs[index].quoteTokenAddress,
         assimilatorConfigs[index].oracleAddress,
