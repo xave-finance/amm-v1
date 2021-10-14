@@ -22,16 +22,16 @@ import "../lib/ABDKMath64x64.sol";
 import "../interfaces/IAssimilator.sol";
 import "../interfaces/IOracle.sol";
 
-contract CadcToUsdAssimilator is IAssimilator {
+contract TrybToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0x3f6b134c851B087B1269c00A451243e2ad892E66);
+    IOracle private constant oracle = IOracle(0x26498113fe2dEA4cb89Db56405bddbEbDe4E3819);
     IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
-    IERC20 private constant cadc = IERC20(0x9cB746e38E5A1A30e40A9675DA0ea68c69276B56);
-    uint256 private constant BASE_DECIMALS = 1e18;
+    IERC20 private constant tryb = IERC20(0x6B9eB3c04b7C78052D11b9eBC27aFa6eD9938763);
+    uint256 private constant BASE_DECIMALS = 1e6;
 
     // solhint-disable-next-line
     constructor() {}
@@ -41,13 +41,13 @@ contract CadcToUsdAssimilator is IAssimilator {
         return uint256(price);
     }
 
-    // takes raw cadc amount, transfers it in, calculates corresponding numeraire amount and returns it
+    // takes raw tryb amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRawAndGetBalance(uint256 _amount) external override returns (int128 amount_, int128 balance_) {
-        bool _transferSuccess = cadc.transferFrom(msg.sender, address(this), _amount);
+        bool _transferSuccess = tryb.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/CADC-transfer-from-failed");
+        require(_transferSuccess, "Curve/TRYB-transfer-from-failed");
 
-        uint256 _balance = cadc.balanceOf(address(this));
+        uint256 _balance = tryb.balanceOf(address(this));
 
         uint256 _rate = getRate();
 
@@ -56,36 +56,36 @@ contract CadcToUsdAssimilator is IAssimilator {
         amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
-    // takes raw cadc amount, transfers it in, calculates corresponding numeraire amount and returns it
+    // takes raw tryb amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRaw(uint256 _amount) external override returns (int128 amount_) {
-        bool _transferSuccess = cadc.transferFrom(msg.sender, address(this), _amount);
+        bool _transferSuccess = tryb.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/cadc-transfer-from-failed");
+        require(_transferSuccess, "Curve/tryb-transfer-from-failed");
 
         uint256 _rate = getRate();
 
         amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
-    // takes a numeraire amount, calculates the raw amount of cadc, transfers it in and returns the corresponding raw amount
+    // takes a numeraire amount, calculates the raw amount of tryb, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
         amount_ = (_amount.mulu(BASE_DECIMALS) * 1e8) / _rate;
 
-        bool _transferSuccess = cadc.transferFrom(msg.sender, address(this), amount_);
+        bool _transferSuccess = tryb.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/CADC-transfer-from-failed");
+        require(_transferSuccess, "Curve/TRYB-transfer-from-failed");
     }
 
-    // takes a numeraire account, calculates the raw amount of cadc, transfers it in and returns the corresponding raw amount
+    // takes a numeraire account, calculates the raw amount of tryb, transfers it in and returns the corresponding raw amount
     function intakeNumeraireLPRatio(
         uint256 _baseWeight,
         uint256 _quoteWeight,
         address _addr,
         int128 _amount
     ) external override returns (uint256 amount_) {
-        uint256 _cadcBal = cadc.balanceOf(_addr);
+        uint256 _cadcBal = tryb.balanceOf(_addr);
 
         if (_cadcBal <= 0) return 0;
 
@@ -100,12 +100,12 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         amount_ = (_amount.mulu(BASE_DECIMALS) * 1e6) / _rate;
 
-        bool _transferSuccess = cadc.transferFrom(msg.sender, address(this), amount_);
+        bool _transferSuccess = tryb.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/CADC-transfer-from-failed");
+        require(_transferSuccess, "Curve/TRYB-transfer-from-failed");
     }
 
-    // takes a raw amount of cadc and transfers it out, returns numeraire value of the raw amount
+    // takes a raw amount of tryb and transfers it out, returns numeraire value of the raw amount
     function outputRawAndGetBalance(address _dst, uint256 _amount)
         external
         override
@@ -115,39 +115,39 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         uint256 _cadcAmount = ((_amount) * _rate) / 1e8;
 
-        bool _transferSuccess = cadc.transfer(_dst, _cadcAmount);
+        bool _transferSuccess = tryb.transfer(_dst, _cadcAmount);
 
-        require(_transferSuccess, "Curve/CADC-transfer-failed");
+        require(_transferSuccess, "Curve/TRYB-transfer-failed");
 
-        uint256 _balance = cadc.balanceOf(address(this));
+        uint256 _balance = tryb.balanceOf(address(this));
 
         amount_ = _cadcAmount.divu(BASE_DECIMALS);
 
         balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
-    // takes a raw amount of cadc and transfers it out, returns numeraire value of the raw amount
+    // takes a raw amount of tryb and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
         uint256 _cadcAmount = (_amount * _rate) / 1e8;
 
-        bool _transferSuccess = cadc.transfer(_dst, _cadcAmount);
+        bool _transferSuccess = tryb.transfer(_dst, _cadcAmount);
 
-        require(_transferSuccess, "Curve/CADC-transfer-failed");
+        require(_transferSuccess, "Curve/TRYB-transfer-failed");
 
         amount_ = _cadcAmount.divu(BASE_DECIMALS);
     }
 
-    // takes a numeraire value of cadc, figures out the raw amount, transfers raw amount out, and returns raw amount
+    // takes a numeraire value of tryb, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
         amount_ = (_amount.mulu(BASE_DECIMALS) * 1e8) / _rate;
 
-        bool _transferSuccess = cadc.transfer(_dst, amount_);
+        bool _transferSuccess = tryb.transfer(_dst, amount_);
 
-        require(_transferSuccess, "Curve/CADC-transfer-failed");
+        require(_transferSuccess, "Curve/TRYB-transfer-failed");
     }
 
     // takes a numeraire amount and returns the raw amount
@@ -163,7 +163,7 @@ contract CadcToUsdAssimilator is IAssimilator {
         address _addr,
         int128 _amount
     ) external view override returns (uint256 amount_) {
-        uint256 _cadcBal = cadc.balanceOf(_addr);
+        uint256 _cadcBal = tryb.balanceOf(_addr);
 
         if (_cadcBal <= 0) return 0;
 
@@ -186,18 +186,18 @@ contract CadcToUsdAssimilator is IAssimilator {
         amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case cadc
+    // views the numeraire value of the current balance of the reserve, in this case tryb
     function viewNumeraireBalance(address _addr) external view override returns (int128 balance_) {
         uint256 _rate = getRate();
 
-        uint256 _balance = cadc.balanceOf(_addr);
+        uint256 _balance = tryb.balanceOf(_addr);
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
         balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case cadc
+    // views the numeraire value of the current balance of the reserve, in this case tryb
     function viewNumeraireAmountAndBalance(address _addr, uint256 _amount)
         external
         view
@@ -208,12 +208,12 @@ contract CadcToUsdAssimilator is IAssimilator {
 
         amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
 
-        uint256 _balance = cadc.balanceOf(_addr);
+        uint256 _balance = tryb.balanceOf(_addr);
 
         balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case cadc
+    // views the numeraire value of the current balance of the reserve, in this case tryb
     // instead of calculating with chainlink's "rate" it'll be determined by the existing
     // token ratio. This is in here to prevent LPs from losing out on future oracle price updates
     function viewNumeraireBalanceLPRatio(
@@ -221,7 +221,7 @@ contract CadcToUsdAssimilator is IAssimilator {
         uint256 _quoteWeight,
         address _addr
     ) external view override returns (int128 balance_) {
-        uint256 _cadcBal = cadc.balanceOf(_addr);
+        uint256 _cadcBal = tryb.balanceOf(_addr);
 
         if (_cadcBal <= 0) return ABDKMath64x64.fromUInt(0);
 

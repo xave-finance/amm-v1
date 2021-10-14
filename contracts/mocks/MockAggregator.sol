@@ -2,14 +2,28 @@
 pragma solidity ^0.7.3;
 
 contract MockAggregator {
-    int256 internal _answer;
+    uint80 internal roundId;
+    int256 internal answer;
+    uint256 internal startedAt;
+    uint256 internal updatedAt;
+    uint80 internal answeredInRound;
 
-    function setAnswer(int256 _a) external {
-        _answer = _a;
+    function setter(
+        uint80 _roundId,
+        int256 _answer,
+        uint256 _startedAt,
+        uint256 _updatedAt,
+        uint80 _answeredInRound
+    ) external {
+        roundId = _roundId;
+        answer = _answer;
+        startedAt = _startedAt;
+        updatedAt = _updatedAt;
+        answeredInRound = _answeredInRound;
     }
 
     function latestAnswer() external view returns (int256) {
-        return _answer;
+        return answer;
     }
 
     function latestRoundData()
@@ -23,6 +37,6 @@ contract MockAggregator {
             uint80
         )
     {
-        return (0, _answer, 0, 0, 0);
+        return (roundId, answer, startedAt, updatedAt, answeredInRound);
     }
 }

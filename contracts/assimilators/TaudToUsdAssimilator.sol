@@ -28,11 +28,13 @@ contract TaudToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0x77F9710E7d0A19669A13c055F62cd80d313dF022);
-    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    IERC20 private constant taud = IERC20(0x00006100F7090010005F1bd7aE6122c3C2CF0090);
+    IOracle private constant oracle = IOracle(0x5813A90f826e16dB392abd2aF7966313fc1fd5B8);
+    IERC20 private constant usdc = IERC20(0x12513dd17Ae75AF37d9eb21124f98b04705Be906);
+    IERC20 private constant taud = IERC20(0x4a69CdFE3fdC4a26838224aA17F0Bb8612B2E6B7);
+    uint256 private constant BASE_DECIMALS = 1e18;
 
-    uint256 private constant DECIMALS = 1e18;
+    // solhint-disable-next-line
+    constructor() {}
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
@@ -49,58 +51,58 @@ contract TaudToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
 
-        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
     // takes raw taud amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRaw(uint256 _amount) external override returns (int128 amount_) {
         bool _transferSuccess = taud.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/TAUD-transfer-from-failed");
+        require(_transferSuccess, "Curve/taud-transfer-from-failed");
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
     // takes a numeraire amount, calculates the raw amount of taud, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
+        amount_ = (_amount.mulu(BASE_DECIMALS) * 1e8) / _rate;
 
         bool _transferSuccess = taud.transferFrom(msg.sender, address(this), amount_);
 
         require(_transferSuccess, "Curve/TAUD-transfer-from-failed");
     }
 
-    // takes a numeraire amount, calculates the raw amount of taud, transfers it in and returns the corresponding raw amount
+    // takes a numeraire account, calculates the raw amount of taud, transfers it in and returns the corresponding raw amount
     function intakeNumeraireLPRatio(
         uint256 _baseWeight,
         uint256 _quoteWeight,
         address _addr,
         int128 _amount
     ) external override returns (uint256 amount_) {
-        uint256 _taudBal = taud.balanceOf(_addr);
+        uint256 _cadcBal = taud.balanceOf(_addr);
 
-        if (_taudBal <= 0) return 0;
+        if (_cadcBal <= 0) return 0;
 
-        // DECIMALS
-        _taudBal = _taudBal.mul(1e18).div(_baseWeight);
+        // BASE_DECIMALS
+        _cadcBal = _cadcBal.mul(1e18).div(_baseWeight);
 
-        // DECIMALS
+        // 1e6
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in DECIMALS
-        uint256 _rate = _usdcBal.mul(DECIMALS).div(_taudBal);
+        // Rate is in 1e6
+        uint256 _rate = _usdcBal.mul(BASE_DECIMALS).div(_cadcBal);
 
-        amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
+        amount_ = (_amount.mulu(BASE_DECIMALS) * 1e6) / _rate;
 
         bool _transferSuccess = taud.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/TAUD-transfer-failed");
+        require(_transferSuccess, "Curve/TAUD-transfer-from-failed");
     }
 
     // takes a raw amount of taud and transfers it out, returns numeraire value of the raw amount
@@ -111,37 +113,37 @@ contract TaudToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _taudAmount = ((_amount) * _rate) / 1e8;
+        uint256 _cadcAmount = ((_amount) * _rate) / 1e8;
 
-        bool _transferSuccess = taud.transfer(_dst, _taudAmount);
+        bool _transferSuccess = taud.transfer(_dst, _cadcAmount);
 
         require(_transferSuccess, "Curve/TAUD-transfer-failed");
 
         uint256 _balance = taud.balanceOf(address(this));
 
-        amount_ = _taudAmount.divu(DECIMALS);
+        amount_ = _cadcAmount.divu(BASE_DECIMALS);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
     // takes a raw amount of taud and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _taudAmount = (_amount * _rate) / 1e8;
+        uint256 _cadcAmount = (_amount * _rate) / 1e8;
 
-        bool _transferSuccess = taud.transfer(_dst, _taudAmount);
+        bool _transferSuccess = taud.transfer(_dst, _cadcAmount);
 
         require(_transferSuccess, "Curve/TAUD-transfer-failed");
 
-        amount_ = _taudAmount.divu(DECIMALS);
+        amount_ = _cadcAmount.divu(BASE_DECIMALS);
     }
 
     // takes a numeraire value of taud, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
+        amount_ = (_amount.mulu(BASE_DECIMALS) * 1e8) / _rate;
 
         bool _transferSuccess = taud.transfer(_dst, amount_);
 
@@ -152,7 +154,7 @@ contract TaudToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
+        amount_ = (_amount.mulu(BASE_DECIMALS) * 1e8) / _rate;
     }
 
     function viewRawAmountLPRatio(
@@ -161,27 +163,27 @@ contract TaudToUsdAssimilator is IAssimilator {
         address _addr,
         int128 _amount
     ) external view override returns (uint256 amount_) {
-        uint256 _taudBal = taud.balanceOf(_addr);
+        uint256 _cadcBal = taud.balanceOf(_addr);
 
-        if (_taudBal <= 0) return 0;
+        if (_cadcBal <= 0) return 0;
 
-        // DECIMALS
-        _taudBal = _taudBal.mul(1e18).div(_baseWeight);
+        // BASE_DECIMALS
+        _cadcBal = _cadcBal.mul(1e18).div(_baseWeight);
 
-        // DECIMALS
+        // 1e6
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in DECIMALS
-        uint256 _rate = _usdcBal.mul(DECIMALS).div(_taudBal);
+        // Rate is in 1e6
+        uint256 _rate = _usdcBal.mul(BASE_DECIMALS).div(_cadcBal);
 
-        amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
+        amount_ = (_amount.mulu(BASE_DECIMALS) * 1e6) / _rate;
     }
 
     // takes a raw amount and returns the numeraire amount
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case taud
@@ -192,7 +194,7 @@ contract TaudToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case taud
@@ -204,31 +206,30 @@ contract TaudToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
+        amount_ = ((_amount * _rate) / 1e8).divu(BASE_DECIMALS);
 
         uint256 _balance = taud.balanceOf(_addr);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
+        balance_ = ((_balance * _rate) / 1e8).divu(BASE_DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case taud
     // instead of calculating with chainlink's "rate" it'll be determined by the existing
-    // token ratio
-    // Mainly to protect LP from losing
+    // token ratio. This is in here to prevent LPs from losing out on future oracle price updates
     function viewNumeraireBalanceLPRatio(
         uint256 _baseWeight,
         uint256 _quoteWeight,
         address _addr
     ) external view override returns (int128 balance_) {
-        uint256 _taudBal = taud.balanceOf(_addr);
+        uint256 _cadcBal = taud.balanceOf(_addr);
 
-        if (_taudBal <= 0) return ABDKMath64x64.fromUInt(0);
+        if (_cadcBal <= 0) return ABDKMath64x64.fromUInt(0);
 
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in DECIMALS
-        uint256 _rate = _usdcBal.mul(1e18).div(_taudBal.mul(1e18).div(_baseWeight));
+        // Rate is in 1e6
+        uint256 _rate = _usdcBal.mul(1e18).div(_cadcBal.mul(1e18).div(_baseWeight));
 
-        balance_ = ((_taudBal * _rate) / DECIMALS).divu(1e18);
+        balance_ = ((_cadcBal * _rate) / 1e6).divu(1e18);
     }
 }
