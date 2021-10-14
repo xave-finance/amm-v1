@@ -25,6 +25,8 @@ async function main() {
   const users = await getAccounts();
   const user1 = users[0];
   const curves = await curveAddresses();
+  const TOKEN = 'TCAD';
+  const curve = (await ethers.getContractAt("Curve", curves[TOKEN])) as Curve;
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
   // Approve tokens
@@ -34,18 +36,6 @@ async function main() {
     amount: BigNumberish,
     recipient: string,
   ) {
-    const minterAddress = await minter.getAddress();
-
-    if (hre.network.name === 'localhost') {
-      if (tokenAddress.toLowerCase() === TOKEN_USDC.toLowerCase()) {
-        await mintUSDC(minterAddress, amount);
-      }
-
-      if (tokenAddress.toLowerCase() === TOKEN_EURS.toLowerCase()) {
-        await mintEURS(minterAddress, amount);
-      }
-    }
-
     await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);
   };
 
@@ -56,40 +46,18 @@ async function main() {
   };
 
   await multiMintAndApprove([
-    // [TOKEN_USDC, user1, parseUnits("5000", TOKENS_USDC_DECIMALS), curves['XSGD']],
-    // [TOKEN_XSGD, user1, parseUnits("10000", TOKENS_XSGD_DECIMALS), curves['XSGD']],
-
-    [TOKEN_USDC, user1, parseUnits("10000", TOKENS_USDC_DECIMALS), curves['TCAD']],
-    [TOKEN_TCAD, user1, parseUnits("10000", TOKENS_TCAD_DECIMALS), curves['TCAD']],
+    [TOKEN_USDC, user1, parseUnits("10000", TOKENS_USDC_DECIMALS), curves[TOKEN]],
+    [TOKEN_TCAD, user1, parseUnits("10000", TOKENS_TCAD_DECIMALS), curves[TOKEN]],
   ]);
 
   const amt = parseUnits("9000");
-  // const curveXSGD = (await ethers.getContractAt("Curve", curves['XSGD'])) as Curve;
-  const curveTCAD = (await ethers.getContractAt("Curve", curves['TCAD'])) as Curve;
-
-  const tcad = (await ethers.getContractAt("ERC20", TOKEN_TCAD)) as ERC20;
-  const tcadAllowanceBefore = await tcad.allowance(user1.address, curves['TCAD']);
-
-  console.log('TCAD Allowance Before: ', formatUnits(tcadAllowanceBefore, TOKENS_TCAD_DECIMALS));
 
   try {
     // Supply liquidity to the pools
-    // const [lpt, [baseViewUser1, quoteViewUser1]] = await curveXSGD.viewDeposit(amt);
-    // console.log('formatUnits(lpt): ', formatUnits(lpt));
-
-    // const depositCurveXSGD = await curveXSGD
-    //   .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
-    //   .then(x => x.wait());
-    // console.log('depositCurveXSGD', depositCurveXSGD);
-
-
-    const [lpt, [baseViewUser1, quoteViewUser1]] = await curveTCAD.viewDeposit(amt);
-    console.log('formatUnits(lpt): ', formatUnits(lpt));
-
-    const depositCurveTCAD = await curveTCAD
+    const depositCurve = await curve
       .deposit(amt, await getFutureTime(), { gasLimit: 12000000 })
       .then(x => x.wait());
-    console.log('depositCurveTCAD', depositCurveTCAD);
+    console.log('depositCurve', depositCurve);
 
     console.timeEnd('Deployment Time');
   } catch (error) {
