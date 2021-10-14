@@ -133,7 +133,7 @@ export const getLatestBlockTime = async (): Promise<number> => {
 
 export const getFutureTime = async (): Promise<number> => {
   const t = await getLatestBlockTime();
-  return t + 60;
+  return t + (60 * 5);
 };
 
 export const getCurveAddressFromTxRecp = (txRecp: ContractReceipt): string => {
@@ -209,7 +209,7 @@ export const expectEventIn = (txRecp: ContractReceipt, eventName: string, eventA
 
 export const expectRevert = async (promise: Promise<unknown>, expectedError: string): Promise<void> => {
   // eslint-disable-next-line
-  promise.catch(() => {}); // Catch all exceptions
+  promise.catch(() => { }); // Catch all exceptions
 
   try {
     await promise;
