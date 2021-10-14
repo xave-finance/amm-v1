@@ -28,17 +28,16 @@ contract BaseToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IERC20 private usdc;
-    IOracle private oracle;
-    IERC20 private baseToken;
-    uint256 private baseDecimals;
+    IERC20 public immutable usdc;
+    IOracle public immutable oracle;
+    IERC20 public immutable baseToken;
+    uint256 public immutable baseDecimals;
 
-    // solhint-disable-next-line
-    constructor(uint256 etherUnit, address baseTokenAddress, address quoteTokenAddress, address oracleAddress) {
-        baseDecimals = etherUnit;
-        baseToken = IERC20(baseTokenAddress);
-        usdc = IERC20(quoteTokenAddress);
-        oracle = IOracle(oracleAddress);
+    constructor(uint256 _baseDecimals, IERC20 _baseToken, IERC20 _quoteToken, IOracle _oracle) public {
+        baseDecimals = _baseDecimals;
+        baseToken = _baseToken;
+        usdc = _quoteToken;
+        oracle = _oracle;
     }
 
     function getRate() public view override returns (uint256) {
