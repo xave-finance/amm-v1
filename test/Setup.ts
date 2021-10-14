@@ -8,6 +8,10 @@ import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { mintCADC, mintEURS, mintUSDC, mintXSGD } from "./Utils";
 
+import EURS_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/EURS_USDC_local.json";
+import XSGD_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/XSGD_USDC_local.json";
+import CADC_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/CADC_USDC_local.json";
+
 export const ALPHA = parseUnits("0.5");
 export const BETA = parseUnits("0.35");
 export const MAX = parseUnits("0.15");
@@ -31,15 +35,28 @@ export const scaffoldTest = async () => {
   const swapsLib = await SwapsLib.deploy();
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
 
-  const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
-
-  const cadcToUsdAssimilator = await CadcToUsdAssimilator.deploy();
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy();
-  const eursToUsdAssimilator = await EursToUsdAssimilator.deploy();
-  const xsgdToUsdAssimilator = await XsgdToUsdAssimilator.deploy();
+
+  const BaseToUsdAssimilator = await ethers.getContractFactory("BaseToUsdAssimilator");
+  const eursToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    EURS_USDC_ASSIM.baseDecimals,
+    EURS_USDC_ASSIM.baseTokenAddress,
+    EURS_USDC_ASSIM.quoteTokenAddress,
+    EURS_USDC_ASSIM.oracleAddress,
+  );
+  const xsgdToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    XSGD_USDC_ASSIM.baseDecimals,
+    XSGD_USDC_ASSIM.baseTokenAddress,
+    XSGD_USDC_ASSIM.quoteTokenAddress,
+    XSGD_USDC_ASSIM.oracleAddress,
+  );
+  const cadcToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    CADC_USDC_ASSIM.baseDecimals,
+    CADC_USDC_ASSIM.baseTokenAddress,
+    CADC_USDC_ASSIM.quoteTokenAddress,
+    CADC_USDC_ASSIM.oracleAddress,
+  );
 
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
   const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
@@ -78,7 +95,7 @@ export const scaffoldTest = async () => {
     orchestratorLib,
     proportionalLiquidityLib,
     swapsLib,
-    viewLiquidityLib
+    viewLiquidityLib,
   };
 };
 
