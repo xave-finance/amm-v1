@@ -22,30 +22,30 @@ import "../lib/ABDKMath64x64.sol";
 import "../interfaces/IAssimilator.sol";
 import "../interfaces/IOracle.sol";
 
-contract EursToUsdAssimilator is IAssimilator {
+contract TusdToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
     using SafeMath for uint256;
 
-    IOracle private constant oracle = IOracle(0xb49f677943BC038e9857d61E7d053CaA2C1734C1);
-    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    IERC20 private constant eurs = IERC20(0xdB25f211AB05b1c97D595516F45794528a807ad8);
+    IOracle private constant oracle = IOracle(0x7C5D415B64312D38c56B54358449d0a4058339d2);
+    IERC20 private constant usdc = IERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+    IERC20 private constant tusd = IERC20(0x2e1AD108fF1D8C782fcBbB89AAd783aC49586756);
 
-    uint256 private constant DECIMALS = 1e2;
+    uint256 private constant DECIMALS = 1e6;
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
         return uint256(price);
     }
 
-    // takes raw eurs amount, transfers it in, calculates corresponding numeraire amount and returns it
+    // takes raw tusd amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRawAndGetBalance(uint256 _amount) external override returns (int128 amount_, int128 balance_) {
-        bool _transferSuccess = eurs.transferFrom(msg.sender, address(this), _amount);
+        bool _transferSuccess = tusd.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/EURS-transfer-from-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-from-failed");
 
-        uint256 _balance = eurs.balanceOf(address(this));
+        uint256 _balance = tusd.balanceOf(address(this));
 
         uint256 _rate = getRate();
 
@@ -54,56 +54,56 @@ contract EursToUsdAssimilator is IAssimilator {
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // takes raw eurs amount, transfers it in, calculates corresponding numeraire amount and returns it
+    // takes raw tusd amount, transfers it in, calculates corresponding numeraire amount and returns it
     function intakeRaw(uint256 _amount) external override returns (int128 amount_) {
-        bool _transferSuccess = eurs.transferFrom(msg.sender, address(this), _amount);
+        bool _transferSuccess = tusd.transferFrom(msg.sender, address(this), _amount);
 
-        require(_transferSuccess, "Curve/eurs-transfer-from-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-from-failed");
 
         uint256 _rate = getRate();
 
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // takes a numeraire amount, calculates the raw amount of eurs, transfers it in and returns the corresponding raw amount
+    // takes a numeraire amount, calculates the raw amount of tusd, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
         amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
-        bool _transferSuccess = eurs.transferFrom(msg.sender, address(this), amount_);
+        bool _transferSuccess = tusd.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/EURS-transfer-from-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-from-failed");
     }
 
-    // takes a numeraire amount, calculates the raw amount of eurs, transfers it in and returns the corresponding raw amount
+    // takes a numeraire amount, calculates the raw amount of tusd, transfers it in and returns the corresponding raw amount
     function intakeNumeraireLPRatio(
         uint256 _baseWeight,
         uint256 _quoteWeight,
         address _addr,
         int128 _amount
     ) external override returns (uint256 amount_) {
-        uint256 _eursBal = eurs.balanceOf(_addr);
+        uint256 _tusdBal = tusd.balanceOf(_addr);
 
-        if (_eursBal <= 0) return 0;
+        if (_tusdBal <= 0) return 0;
 
         // DECIMALS
-        _eursBal = _eursBal.mul(1e18).div(_baseWeight);
+        _tusdBal = _tusdBal.mul(1e18).div(_baseWeight);
 
-        // 1e6
+        // DECIMALS
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(DECIMALS).div(_eursBal);
+        // Rate is in DECIMALS
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_tusdBal);
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
 
-        bool _transferSuccess = eurs.transferFrom(msg.sender, address(this), amount_);
+        bool _transferSuccess = tusd.transferFrom(msg.sender, address(this), amount_);
 
-        require(_transferSuccess, "Curve/EURS-transfer-from-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-failed");
     }
 
-    // takes a raw amount of eurs and transfers it out, returns numeraire value of the raw amount
+    // takes a raw amount of tusd and transfers it out, returns numeraire value of the raw amount
     function outputRawAndGetBalance(address _dst, uint256 _amount)
         external
         override
@@ -111,41 +111,41 @@ contract EursToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        uint256 _eursAmount = ((_amount) * _rate) / 1e8;
+        uint256 _tusdAmount = ((_amount) * _rate) / 1e8;
 
-        bool _transferSuccess = eurs.transfer(_dst, _eursAmount);
+        bool _transferSuccess = tusd.transfer(_dst, _tusdAmount);
 
-        require(_transferSuccess, "Curve/EURS-transfer-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-failed");
 
-        uint256 _balance = eurs.balanceOf(address(this));
+        uint256 _balance = tusd.balanceOf(address(this));
 
-        amount_ = _eursAmount.divu(DECIMALS);
+        amount_ = _tusdAmount.divu(DECIMALS);
 
         balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // takes a raw amount of eurs and transfers it out, returns numeraire value of the raw amount
+    // takes a raw amount of tusd and transfers it out, returns numeraire value of the raw amount
     function outputRaw(address _dst, uint256 _amount) external override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        uint256 _eursAmount = (_amount * _rate) / 1e8;
+        uint256 _tusdAmount = (_amount * _rate) / 1e8;
 
-        bool _transferSuccess = eurs.transfer(_dst, _eursAmount);
+        bool _transferSuccess = tusd.transfer(_dst, _tusdAmount);
 
-        require(_transferSuccess, "Curve/EURS-transfer-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-failed");
 
-        amount_ = _eursAmount.divu(DECIMALS);
+        amount_ = _tusdAmount.divu(DECIMALS);
     }
 
-    // takes a numeraire value of eurs, figures out the raw amount, transfers raw amount out, and returns raw amount
+    // takes a numeraire value of tusd, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
         amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
-        bool _transferSuccess = eurs.transfer(_dst, amount_);
+        bool _transferSuccess = tusd.transfer(_dst, amount_);
 
-        require(_transferSuccess, "Curve/EURS-transfer-failed");
+        require(_transferSuccess, "Curve/TUSD-transfer-failed");
     }
 
     // takes a numeraire amount and returns the raw amount
@@ -161,20 +161,20 @@ contract EursToUsdAssimilator is IAssimilator {
         address _addr,
         int128 _amount
     ) external view override returns (uint256 amount_) {
-        uint256 _eursBal = eurs.balanceOf(_addr);
+        uint256 _tusdBal = tusd.balanceOf(_addr);
 
-        if (_eursBal <= 0) return 0;
+        if (_tusdBal <= 0) return 0;
 
         // DECIMALS
-        _eursBal = _eursBal.mul(1e18).div(_baseWeight);
+        _tusdBal = _tusdBal.mul(1e18).div(_baseWeight);
 
-        // 1e6
+        // DECIMALS
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(DECIMALS).div(_eursBal);
+        // Rate is in DECIMALS
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_tusdBal);
 
-        amount_ = (_amount.mulu(DECIMALS) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
     }
 
     // takes a raw amount and returns the numeraire amount
@@ -184,18 +184,18 @@ contract EursToUsdAssimilator is IAssimilator {
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case eurs
+    // views the numeraire value of the current balance of the reserve, in this case tusd
     function viewNumeraireBalance(address _addr) external view override returns (int128 balance_) {
         uint256 _rate = getRate();
 
-        uint256 _balance = eurs.balanceOf(_addr);
+        uint256 _balance = tusd.balanceOf(_addr);
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
         balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case eurs
+    // views the numeraire value of the current balance of the reserve, in this case tusd
     function viewNumeraireAmountAndBalance(address _addr, uint256 _amount)
         external
         view
@@ -206,28 +206,29 @@ contract EursToUsdAssimilator is IAssimilator {
 
         amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
 
-        uint256 _balance = eurs.balanceOf(_addr);
+        uint256 _balance = tusd.balanceOf(_addr);
 
         balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
-    // views the numeraire value of the current balance of the reserve, in this case eurs
+    // views the numeraire value of the current balance of the reserve, in this case tusd
     // instead of calculating with chainlink's "rate" it'll be determined by the existing
-    // token ratio. This is in here to prevent LPs from losing out on future oracle price updates
+    // token ratio
+    // Mainly to protect LP from losing
     function viewNumeraireBalanceLPRatio(
         uint256 _baseWeight,
         uint256 _quoteWeight,
         address _addr
     ) external view override returns (int128 balance_) {
-        uint256 _eursBal = eurs.balanceOf(_addr);
+        uint256 _tusdBal = tusd.balanceOf(_addr);
 
-        if (_eursBal <= 0) return ABDKMath64x64.fromUInt(0);
+        if (_tusdBal <= 0) return ABDKMath64x64.fromUInt(0);
 
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e18).div(_eursBal.mul(1e18).div(_baseWeight));
+        // Rate is in DECIMALS
+        uint256 _rate = _usdcBal.mul(1e18).div(_tusdBal.mul(1e18).div(_baseWeight));
 
-        balance_ = ((_eursBal * _rate) / 1e6).divu(1e18);
+        balance_ = ((_tusdBal * _rate) / DECIMALS).divu(1e18);
     }
 }

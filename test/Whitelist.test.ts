@@ -34,7 +34,7 @@ const MAX = parseUnits("0.15");
 const EPSILON = parseUnits("0.0004");
 const LAMBDA = parseUnits("0.3");
 
-describe("Whitelist", function () {
+describe("Whitelist", () => {
   let [owner, user1, user2]: Signer[] = [];
   let [ownerAddress, user1Address, user2Address]: string[] = [];
 
@@ -96,7 +96,7 @@ describe("Whitelist", function () {
     await Promise.all(rates.map((x, i) => updateOracleAnswer(oracles[i], x)));
   });
 
-  before(async function () {
+  before(async () => {
     ({
       users: [owner, user1, user2],
       userAddresses: [ownerAddress, user1Address, user2Address],
@@ -114,7 +114,7 @@ describe("Whitelist", function () {
     } = await scaffoldTest());
   });
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
     router = (await RouterFactory.deploy(curveFactory.address)) as Router;
 

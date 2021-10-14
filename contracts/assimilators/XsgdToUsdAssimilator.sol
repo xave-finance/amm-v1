@@ -28,13 +28,11 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
     using SafeMath for uint256;
 
-    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-
     IOracle private constant oracle = IOracle(0xe25277fF4bbF9081C75Ab0EB13B4A13a721f3E13);
+    IERC20 private constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     IERC20 private constant xsgd = IERC20(0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96);
 
-    // solhint-disable-next-line
-    constructor() {}
+    uint256 private constant DECIMALS = 1e6;
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
@@ -51,9 +49,9 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e6);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e6);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
     // takes raw xsgd amount, transfers it in, calculates corresponding numeraire amount and returns it
@@ -64,14 +62,14 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e6);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
     // takes a numeraire amount, calculates the raw amount of xsgd, transfers it in and returns the corresponding raw amount
     function intakeNumeraire(int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e6) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
         bool _transferSuccess = xsgd.transferFrom(msg.sender, address(this), amount_);
 
@@ -89,16 +87,16 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         if (_xsgdBal <= 0) return 0;
 
-        // 1e6
+        // DECIMALS
         _xsgdBal = _xsgdBal.mul(1e18).div(_baseWeight);
 
-        // 1e6
+        // DECIMALS
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e6).div(_xsgdBal);
+        // Rate is in DECIMALS
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_xsgdBal);
 
-        amount_ = (_amount.mulu(1e6) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
 
         bool _transferSuccess = xsgd.transferFrom(msg.sender, address(this), amount_);
 
@@ -121,9 +119,9 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         uint256 _balance = xsgd.balanceOf(address(this));
 
-        amount_ = _xsgdAmount.divu(1e6);
+        amount_ = _xsgdAmount.divu(DECIMALS);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e6);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
     // takes a raw amount of xsgd and transfers it out, returns numeraire value of the raw amount
@@ -136,14 +134,14 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         require(_transferSuccess, "Curve/XSGD-transfer-failed");
 
-        amount_ = _xsgdAmount.divu(1e6);
+        amount_ = _xsgdAmount.divu(DECIMALS);
     }
 
     // takes a numeraire value of xsgd, figures out the raw amount, transfers raw amount out, and returns raw amount
     function outputNumeraire(address _dst, int128 _amount) external override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e6) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
 
         bool _transferSuccess = xsgd.transfer(_dst, amount_);
 
@@ -154,7 +152,7 @@ contract XsgdToUsdAssimilator is IAssimilator {
     function viewRawAmount(int128 _amount) external view override returns (uint256 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = (_amount.mulu(1e6) * 1e8) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * 1e8) / _rate;
     }
 
     function viewRawAmountLPRatio(
@@ -167,23 +165,23 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         if (_xsgdBal <= 0) return 0;
 
-        // 1e6
+        // DECIMALS
         _xsgdBal = _xsgdBal.mul(1e18).div(_baseWeight);
 
-        // 1e6
+        // DECIMALS
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in 1e6
-        uint256 _rate = _usdcBal.mul(1e6).div(_xsgdBal);
+        // Rate is in DECIMALS
+        uint256 _rate = _usdcBal.mul(DECIMALS).div(_xsgdBal);
 
-        amount_ = (_amount.mulu(1e6) * 1e6) / _rate;
+        amount_ = (_amount.mulu(DECIMALS) * DECIMALS) / _rate;
     }
 
     // takes a raw amount and returns the numeraire amount
     function viewNumeraireAmount(uint256 _amount) external view override returns (int128 amount_) {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e6);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case xsgd
@@ -194,7 +192,7 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e6);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case xsgd
@@ -206,11 +204,11 @@ contract XsgdToUsdAssimilator is IAssimilator {
     {
         uint256 _rate = getRate();
 
-        amount_ = ((_amount * _rate) / 1e8).divu(1e6);
+        amount_ = ((_amount * _rate) / 1e8).divu(DECIMALS);
 
         uint256 _balance = xsgd.balanceOf(_addr);
 
-        balance_ = ((_balance * _rate) / 1e8).divu(1e6);
+        balance_ = ((_balance * _rate) / 1e8).divu(DECIMALS);
     }
 
     // views the numeraire value of the current balance of the reserve, in this case xsgd
@@ -228,9 +226,9 @@ contract XsgdToUsdAssimilator is IAssimilator {
 
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
 
-        // Rate is in 1e6
+        // Rate is in DECIMALS
         uint256 _rate = _usdcBal.mul(1e18).div(_xsgdBal.mul(1e18).div(_baseWeight));
 
-        balance_ = ((_xsgdBal * _rate) / 1e6).divu(1e18);
+        balance_ = ((_xsgdBal * _rate) / DECIMALS).divu(1e18);
     }
 }

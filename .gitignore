@@ -71,6 +71,10 @@ web_modules/
 # dotenv environment variables file
 .env
 .env.test
+.env.kovan.example
+.env.mainnet.example
+.env.matic.example
+env_examples
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -120,3 +124,17 @@ artifacts
 typechain
 
 .vscode/
+
+.DS_Store
+
+
+# Contract config
+scripts/deployed_contract_logs/localhost
+scripts/deployed_contract_logs/kovan
+
+scripts/config/kovan
+scripts/config/localhost
+
+# Temporary, assimilator templates
+*Mainnet*
+*Polygon*

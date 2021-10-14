@@ -27,6 +27,7 @@ contract Storage {
         int128 epsilon;
         int128 lambda;
         int128[] weights;
+        uint256 cap;
         // Assets and their assimilators
         Assimilator[] assets;
         mapping(address => Assimilator) assimilators;

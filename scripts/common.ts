@@ -1,3 +1,4 @@
+import hre from "hardhat";
 import { ethers } from "hardhat";
 import { formatUnits } from "ethers/lib/utils";
 
@@ -8,13 +9,25 @@ import ora from "ora";
 import { Contract, ContractFactory, Wallet } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { use } from "chai";
+
+const CONFIRM_ALL = process.env.CONFIRM_ALL;
 
 export const getAccounts = async () => {
-  const [user] = await ethers.getSigners();
+  const accounts = await hre.ethers.getSigners();
+  const NETWORK = hre.network.name === 'hardhat' ? hre.network.name : (hre.network.config as any).url;
+  const BLOCK_NO = await ethers.provider.getBlockNumber();
 
-  return {
-    user,
-  };
+  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${NETWORK} <<<<<<<<<<<<`));
+  console.log(chalk.blue(`>>>>>>>>>>>> Block Number: ${BLOCK_NO} <<<<<<<<<<<<`));
+
+  // for (let index = 0; index < accounts.length; index++) {
+  //   const account = accounts[index];
+  //   console.log(index, account.address);
+  //   console.log(ethers.utils.formatEther(await account.getBalance()));
+  // }
+
+  return accounts;
 };
 
 export const ask = async (question: string, color: string = "orange"): Promise<string> => {
@@ -154,10 +167,13 @@ export const deployContract = async ({
 
   console.log(chalk.keyword("orange")(`Deploy ${name} with the following args: `));
   console.log(chalk.keyword("orange")(JSON.stringify(displayArgs, null, 4)));
-  let confirmDeploy = await ask("Continue? (y/n): ");
+  let confirmDeploy = CONFIRM_ALL;
 
-  while (confirmDeploy === "" || (confirmDeploy !== "y" && confirmDeploy !== "n")) {
+  if (CONFIRM_ALL !== 'y') {
     confirmDeploy = await ask("Continue? (y/n): ");
+    while (confirmDeploy === "" || (confirmDeploy !== "y" && confirmDeploy !== "n")) {
+      confirmDeploy = await ask("Continue? (y/n): ");
+    }
   }
 
   if (confirmDeploy.toLowerCase() !== "y") {
@@ -173,6 +189,7 @@ export const deployContract = async ({
     gasPrice = await getFastGasPrice();
   }
 
+  console.log(`Deploying ${name} with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
   const spinner = ora(`Deploying ${name} with gasPrice ${formatUnits(gasPrice, 9)} gwei`).start();
 
   let contract;

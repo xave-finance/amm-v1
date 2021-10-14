@@ -61,36 +61,118 @@ Withdrawing and depositing related operations will respect the existing LP ratio
 - [ABDKMath (v2.4)](https://github.com/abdk-consulting/abdk-libraries-solidity/releases/tag/v2.4)
 - [Shell Protocol@48dac1c](https://github.com/cowri/shell-solidity-v1/tree/48dac1c1a18e2da292b0468577b9e6cbdb3786a4)
 
-## Testing
+## Environment Variables
+You can download the `.env` from the password manager
 
-We recommend that you run this against a local node. The difference in latency will make a huge difference.
-
+`.env` file variables
 ```
-yarn
-RPC_URL=<MAINNET NODE> yarn test
+RPC_URL=
+MNEMONIC=
+ETHERSCAN_API_KEY=
+
+ORACLES_CADC_USD=0xa34317DB73e77d453b1B8d04550c44D10e981C8e
+ORACLES_EURS_USD=0xb49f677943BC038e9857d61E7d053CaA2C1734C1
+ORACLES_USDC_USD=0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6
+ORACLES_XSGD_USD=0xe25277fF4bbF9081C75Ab0EB13B4A13a721f3E13
+
+TOKEN_USDC=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+TOKEN_EURS=0xdB25f211AB05b1c97D595516F45794528a807ad8
+TOKEN_CADC=0xcaDC0acd4B445166f12d2C07EAc6E2544FbE2Eef
+TOKEN_XSGD=0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96
+
+GOVERNANCE_ADDRESS=0x27E843260c71443b4CC8cB6bF226C3f77b9695AF
+
+DIMENSION_ALPHA=0.8
+DIMENSION_BETA=0.5
+DIMENSION_MAX=0.15
+DIMENSION_EPSILON=0.0005
+DIMENSION_LAMBDA=0.3
+
+CONFIRM_ALL=y
 ```
 
-## Deploy Locally
+### Description
 
-1. Create a `.env` file at project root with the following contents:
+**RPC_URL**
 
-   ```
-   RPC_URL=<insert Alchemy API URL here>
-   ```
+This is the node address, if you are trying to run your local node, you need to use Alchemy’s endpoint in mainnet. This will start an instance of Hardhat Network that forks mainnet. This means that it will simulate having the same state as mainnet, but it will work as a local development network.
 
-2. Start the local testnet:
+**MNEMONIC**
 
-   ```
-   yarn hh:node
-   ```
+This is your deployer wallet's mnemonic seed.
 
-3. In another terminal, run the scaffolding script:
+*Note:*
 
-   ```
-   yarn hh:run scripts/testnet/scaffold.ts --network localhost
-   ```
+When running a local node, your deployer wallet's addresses and private keys will be displayed in your local
 
-4. Observe console output and proceed to frontend testing setup (if required).
+Example.
+
+<img width="576" alt="Screen Shot 2021-07-23 at 10 03 28 AM" src="https://user-images.githubusercontent.com/81855319/126729573-dd1a2153-ab7c-4d06-bdcb-8a68467c2dc9.png">
+
+
+**ETHERSCAN_API_KEY**
+
+This will be used for contract verifications
+
+**ORACLES_[BASE]_[QUOTE]**
+
+*e.g ORACLES_USDC_USD, ORACLES_EURS_USD*
+
+These are the Chainlink's oracle addresses for currency pairs, this is used to get the FX rate of the base currency in USD. You can find these addresses in contracts under `/contracts/assimilators` directory
+
+**TOKEN_[CURRENCY]**
+
+*e.g TOKEN_USDC, TOKEN_EURS*
+
+Token addresses for assimilators. You can find these addresses in contracts under `/contracts/assimilators` directory
+
+**GOVERNANCE_ADDRESS**
+
+Used to transfer ownership of a curve/pool/
+
+
+**DIMENSION_[value]**
+
+*e.g DIMENSION_ALPHA, DIMENSION_BETA*
+
+See **Curve Parameter Terminology** above
+
+**CONFIRM_ALL**
+
+If set to **n**(no), then you will be asked wether you want to proceed or not on every contract deployment, setting this to *y* will proceed and bypass all the confirmation input
+
+Example.
+
+<img width="309" alt="Screen Shot 2021-07-23 at 10 52 11 AM" src="https://user-images.githubusercontent.com/81855319/126732382-7ad00c50-101c-488a-827f-5199b0a64002.png">
+
+## Quickstart
+
+### Local deployment
+1. Deploy core contracts
+```
+> yarn deploy:local:1
+```
+2. Deploy assimilator contracts
+```
+> yarn deploy:local:2
+```
+3. Create new curve and set dimensions
+```
+> yarn deploy:local:3
+```
+4. Deploy zap contracts
+```
+> yarn deploy:local:3
+```
+Deploy everything in one command
+```
+> yarn deploy:local:all
+```
+
+Verify script for public networks (kovan for example)
+```
+> yarn deploy:kovan:verify
+```
 
 # Router API
 

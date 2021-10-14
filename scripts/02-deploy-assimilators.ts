@@ -1,72 +1,26 @@
 import hre from "hardhat";
-import chalk from "chalk";
-import path from "path";
-import fs from "fs";
 
-import { getAccounts, deployContract } from "./common";
+import { getAccounts } from "./common";
+import { deployerHelper, configFileHelper } from "./Utils";
 
-const { ethers } = hre;
+const ASSIMILATORS = process.env.ASSIMILATORS;
 
 async function main() {
-  const { user } = await getAccounts();
+  console.time('Deployment Time');
+  const users = await getAccounts();
+  const user1 = users[0];
+  let output = {};
+  let assimilators = ASSIMILATORS.indexOf(',') > -1 ? ASSIMILATORS.split(',') : [ASSIMILATORS];
 
-  console.log(chalk.blue(`>>>>>>>>>>>> Network: ${(hre.network.config as any).url} <<<<<<<<<<<<`));
-  console.log(chalk.blue(`>>>>>>>>>>>> Deployer: ${user.address} <<<<<<<<<<<<`));
+  for (let index = 0; index < assimilators.length; index++) {
+    const res = await deployerHelper(user1, assimilators[index]);
 
-  const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
-  const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
+    output[res.key] = res.address;
+  }
 
-  const cadcToUsdAssimilator = await deployContract({
-    name: "CadcToUsdAssimilator",
-    deployer: user,
-    factory: CadcToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const usdcToUsdAssimilator = await deployContract({
-    name: "UsdcToUsdAssimilator",
-    deployer: user,
-    factory: UsdcToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const eursToUsdAssimilator = await deployContract({
-    name: "EursToUsdAssimilator",
-    deployer: user,
-    factory: EursToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const xsgdToUsdAssimilator = await deployContract({
-    name: "XsgdToUsdAssimilator",
-    deployer: user,
-    factory: XsgdToUsdAssimilator,
-    args: [],
-    opts: {
-      gasLimit: 2000000,
-    },
-  });
-
-  const output = {
-    cadcToUsdAssimilator: cadcToUsdAssimilator.address,
-    usdcToUsdAssimilator: usdcToUsdAssimilator.address,
-    eursToUsdAssimilator: eursToUsdAssimilator.address,
-    xsgdToUsdAssimilator: xsgdToUsdAssimilator.address,
-  };
-
-  const outputPath = path.join(__dirname, new Date().getTime().toString() + `_assimilators_deployed.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 4));
+  // Deployed contracts log
+  await configFileHelper(output, 'assimilators');
+  console.timeEnd('Deployment Time');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
