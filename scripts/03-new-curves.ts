@@ -1,5 +1,8 @@
 import hre from "hardhat";
 import { curveConfig } from "./Utils";
+import { getAccounts } from "./common";
+import chalk from "chalk";
+import { formatUnits } from "ethers/lib/utils";
 
 const TOKEN_SYMBOL = process.env.TOKEN_SYMBOL;
 const TOKEN_NAME = process.env.TOKEN_NAME;
@@ -7,7 +10,17 @@ const CURVE_WEIGHTS = process.env.CURVE_WEIGHTS;
 
 async function main() {
   console.time('Deployment Time');
-  await curveConfig(TOKEN_SYMBOL, TOKEN_NAME, CURVE_WEIGHTS);
+  const users = await getAccounts();
+  const user1 = users[0];
+  const balance = await user1.getBalance();
+  console.log(chalk.blueBright(`Deployer balance: ${formatUnits(balance)} ETH`));
+
+  try {
+    await curveConfig(TOKEN_SYMBOL, TOKEN_NAME, CURVE_WEIGHTS);
+  } catch (error) {
+    console.log(`Error: ${error}`);
+  }
+
   console.timeEnd('Deployment Time');
 }
 
