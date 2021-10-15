@@ -7,6 +7,8 @@ import fs from "fs";
 import path from "path";
 import { parseUnits } from "@ethersproject/units";
 
+const NETWORK = hre.network.name;
+
 async function main() {
   console.time("Deployment Time");
   const users = await getAccounts();
@@ -24,7 +26,7 @@ async function main() {
   const pairs = assimilatorPairs ? assimilatorPairs.split(",") : [];
 
   pairs.forEach(pair => {
-    let data = fs.readFileSync(path.join(__dirname, `./assimilatorConfigs/${pair}.json`));
+    let data = fs.readFileSync(path.join(__dirname, `./assimilatorConfigs/${NETWORK}/${pair}.json`));
     let config = JSON.parse(data.toString());
     assimilatorConfigs.push(config);
   });

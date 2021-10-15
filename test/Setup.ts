@@ -8,9 +8,9 @@ import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { mintCADC, mintEURS, mintUSDC, mintXSGD } from "./Utils";
 
-import EURS_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/EURS_USDC_local.json";
-import XSGD_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/XSGD_USDC_local.json";
-import CADC_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/CADC_USDC_local.json";
+import EURS_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/EURS_USDC.json";
+import XSGD_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/XSGD_USDC.json";
+import CADC_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/CADC_USDC.json";
 
 export const ALPHA = parseUnits("0.5");
 export const BETA = parseUnits("0.35");
