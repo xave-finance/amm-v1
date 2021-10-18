@@ -148,22 +148,35 @@ Example.
 ## Quickstart
 
 ### Local deployment
+0. Update .env for the assimilators that you wish to deploy
+```
+ASSIMILATORS=UsdcToUsdAssimilator
+ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
+```
+
 1. Deploy core contracts
 ```
 > yarn deploy:local:1
 ```
-2. Deploy assimilator contracts
-```
-> yarn deploy:local:2
-```
+2. Deploy assimilators
+    
+    - Deploy USDC assimilator (`ASSIMILATORS` env var)
+    ```
+    > yarn deploy:local:2
+    ```
+    - Deploy other assimilators (`ASSIMILATOR_PAIRS` env var)
+    ```
+    > yarn deploy:local:assimilators
+    ```
 3. Create new curve and set dimensions
 ```
 > yarn deploy:local:3
 ```
 4. Deploy zap contracts
 ```
-> yarn deploy:local:3
+> yarn deploy:local:4
 ```
+
 Deploy everything in one command
 ```
 > yarn deploy:local:all
@@ -172,6 +185,55 @@ Deploy everything in one command
 Verify script for public networks (kovan for example)
 ```
 > yarn deploy:kovan:verify
+```
+
+### Kovan deployment
+
+0. Update .env for the assimilators & curves that you wish to deploy
+
+1. Update oracle and usdc address of `contracts/assimilators/UsdcToUsdAssimilator.sol`
+
+2. Run the deployment scripts
+```
+yarn deploy:kovan:1
+yarn deploy:kovan:2
+yarn deploy:kovan:assimilators
+yarn deploy:kovan:3
+yarn deploy:kovan:4
+yarn deploy:kovan:verify // (optional)
+```
+
+### Adding a new curve
+
+1. Verify that you have `factory_deployed.json` and `assimilators/USDCToUSDAssimilator.json` inside `scripts/config/<network>` diretory. These files are generated from previous deploy.
+
+    Please refer to these confluence pages for the deployed addresses per network: 
+
+    - https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/137330714/Rewards+AMM+mapping
+    - https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/101023769/Deployed+Contracts
+
+2. Create a new json config for the curve's base assimilator. This file will be placed in `scripts/halo/assimilatorConfigs/<network>`. **IMPORTANT:** this change needs to be merged via a PR so it can be reviewed by another peer.
+
+3. Update .env for the assimilator and curve you wish to deploy. As an example, if you want to deploy PHP-USDC curve, the following should be inside the .env along with other env vars:
+```
+TOKEN_ADDR_PHP=0x0
+TOKENS_PHP_DECIMALS=18
+LPT_SYMBOL="HLP"
+LPT_NAME="HLP-SPHP-USDC"
+TOKEN_NAME="Synthetic PHP"
+TOKEN_SYMBOL="SPHP"
+CURVE_WEIGHTS="50/50"
+ASSIMILATOR_PAIRS=SPHP_USDC
+```
+
+4. Deploy the base assimilator
+```
+> yarn deploy:<network>:assimilators
+```
+
+5. Deploy the curve
+```
+> yarn deploy:kovan:3
 ```
 
 # Router API
