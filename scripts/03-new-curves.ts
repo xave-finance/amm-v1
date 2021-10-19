@@ -7,6 +7,7 @@ import { formatUnits } from "ethers/lib/utils";
 const TOKEN_SYMBOL = process.env.TOKEN_SYMBOL;
 const TOKEN_NAME = process.env.TOKEN_NAME;
 const CURVE_WEIGHTS = process.env.CURVE_WEIGHTS;
+const LPT_NAME = process.env.LPT_NAME;
 
 async function main() {
   console.time('Deployment Time');
@@ -16,7 +17,7 @@ async function main() {
   console.log(chalk.blueBright(`Deployer balance: ${formatUnits(balance)} ETH`));
 
   try {
-    await curveConfig(TOKEN_SYMBOL, TOKEN_NAME, CURVE_WEIGHTS);
+    await curveConfig(TOKEN_SYMBOL, TOKEN_NAME, CURVE_WEIGHTS, LPT_NAME);
   } catch (error) {
     console.log(`Error: ${error}`);
   }
