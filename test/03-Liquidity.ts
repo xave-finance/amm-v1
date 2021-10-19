@@ -150,8 +150,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Quote: ", formatUnits(depositPreview.quote, TOKENS.USDC.decimals));
-
           // User input should be gte the estimate quote
           expect(parseUnits(deposit.toString()).gte(depositPreview.quote))
 
@@ -189,8 +187,6 @@ describe("Curve Contract", () => {
             TOKENS[tokenQuote].decimals,
             curve
           );
-
-          console.log("Estimate Base: ", formatUnits(depositPreview.base, TOKENS[tokenQuote].decimals));
 
           // User input should be gte the estimate base
           expect(parseUnits(deposit.toString()).gte(depositPreview.base))
@@ -232,7 +228,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Quote: ", formatUnits(depositPreviewGivenQuote.quote, TOKENS.USDC.decimals));
           // User input should be gte the estimate quote
           expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenQuote.quote))
 
@@ -247,7 +242,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Base: ", formatUnits(depositPreviewGivenBase.base, TOKENS[tokenQuote].decimals));
           // User input should be gte the estimate base
           expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenBase.base))
         });
@@ -295,8 +289,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Quote: ", formatUnits(depositPreview.quote, TOKENS.USDC.decimals));
-
           // User input should be gte the estimate quote
           expect(parseUnits(deposit.toString()).gte(depositPreview.quote))
 
@@ -334,8 +326,6 @@ describe("Curve Contract", () => {
             TOKENS[tokenQuote].decimals,
             curve
           );
-
-          console.log("Estimate Base: ", formatUnits(depositPreview.base, TOKENS[tokenQuote].decimals));
 
           // User input should be gte the estimate base
           expect(parseUnits(deposit.toString()).gte(depositPreview.base))
@@ -377,7 +367,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Quote: ", formatUnits(depositPreviewGivenQuote.quote, TOKENS.USDC.decimals));
           // User input should be gte the estimate quote
           expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenQuote.quote))
 
@@ -392,7 +381,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Base: ", formatUnits(depositPreviewGivenBase.base, TOKENS[tokenQuote].decimals));
           // User input should be gte the estimate base
           expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenBase.base))
         });
@@ -440,8 +428,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Quote: ", formatUnits(depositPreview.quote, TOKENS.USDC.decimals));
-
           // User input should be gte the estimate quote
           expect(parseUnits(deposit.toString()).gte(depositPreview.quote))
 
@@ -479,8 +465,6 @@ describe("Curve Contract", () => {
             TOKENS[tokenQuote].decimals,
             curve
           );
-
-          console.log("Estimate Base: ", formatUnits(depositPreview.base, TOKENS[tokenQuote].decimals));
 
           // User input should be gte the estimate base
           expect(parseUnits(deposit.toString()).gte(depositPreview.base))
@@ -522,7 +506,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Quote: ", formatUnits(depositPreviewGivenQuote.quote, TOKENS.USDC.decimals));
           // User input should be gte the estimate quote
           expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenQuote.quote))
 
@@ -537,7 +520,6 @@ describe("Curve Contract", () => {
             curve
           );
 
-          console.log("Estimate Base: ", formatUnits(depositPreviewGivenBase.base, TOKENS[tokenQuote].decimals));
           // User input should be gte the estimate base
           expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenBase.base))
         });
