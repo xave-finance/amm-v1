@@ -1,17 +1,20 @@
 import hre, { network } from "hardhat";
 const { ethers } = hre;
 import { parseUnits } from "@ethersproject/units";
+import { formatUnits } from "ethers/lib/utils";
 import path from "path";
 import mkdirp from "mkdirp";
 import fs from "fs";
 import { BigNumberish } from "ethers";
 import { ERC20 } from "../typechain/ERC20";
 import { CurveFactory, Curve } from "../typechain";
-import { deployContract } from "./common";
+import { deployContract, getFastGasPrice } from "./common";
 
 const NETWORK = hre.network.name;
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const TOKEN = {};
+const LPT_SYMBOL = process.env.LPT_SYMBOL;
+const LPT_NAME = process.env.LPT_NAME;
 const envList = process.env;
 
 // Initialize token addresses from .env
@@ -214,9 +217,13 @@ const createCurve = async function ({
   baseAssimilator: string;
   quoteAssimilator: string;
 }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
+  const gasPrice = await getFastGasPrice();
+
+  console.log(`Deploying curve ${LPT_NAME} with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
+
   const tx = await curveFactory.newCurve(
-    name,
-    symbol,
+    LPT_NAME,
+    LPT_SYMBOL,
     base,
     quote,
     baseWeight,
@@ -224,7 +231,7 @@ const createCurve = async function ({
     baseAssimilator,
     quoteAssimilator,
     {
-      gasLimit: 12000000,
+      gasPrice
     },
   );
   await tx.wait();
@@ -248,8 +255,18 @@ const createCurve = async function ({
   console.log(`Curve ${symbol} Address: `, curve.address)
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
-  const turnOffWhitelisting = await curve.turnOffWhitelisting();
+  // Turn off whitelisting
+  const gasPrice2 = await getFastGasPrice();
+  console.log(`Curve#turnOffWhitelisting with gasPrice ${formatUnits(gasPrice2, 9)} gwei`);
+  const turnOffWhitelisting = await curve.turnOffWhitelisting({ gasPrice: gasPrice2 });
   console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
+
+  // Set Cap
+  const gasPrice3 = await getFastGasPrice();
+  console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice3, 9)} gwei`);
+  const cap = parseUnits("500000");
+  const setCap = await curve.setCap(cap, { gasPrice: gasPrice3 });
+  console.log('Curve#setCap TX Hash: ', setCap.hash)
 
   return {
     curve,
@@ -292,7 +309,11 @@ const createCurveAndSetParams = async function ({
     quoteAssimilator,
   });
   // Set parameters/dimensions here
-  const tx = await curve.setParams(...params, { gasLimit: 12000000 });
+  const gasPrice = await getFastGasPrice();
+
+  console.log(`Curve#setParams with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
+
+  const tx = await curve.setParams(...params, { gasPrice });
   console.log('Curve#setParams TX Hash: ', tx.hash)
   await tx.wait();
   return {
