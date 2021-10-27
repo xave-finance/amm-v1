@@ -88,9 +88,8 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
       const tokenName = tokenNameArr[index];
       const fullFileName = fileObj[tokenSymbol];
       const fileName = fileObj[tokenSymbol].split('.json')[0];
-      const quotedFilename = 'USDCToUsdAssimilator';
-      const baseCurveAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
-      const quotedCurveAddr = require(configImporterNew(`assimilators/${quotedFilename}.json`))[quotedFilename];
+      const baseAssimilatorAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`));
       const lptName = lptNamesArr[index];
 
       const curveFactory = (await ethers.getContractAt(
@@ -107,8 +106,8 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
         quote: TOKEN[QUOTED_TOKEN],
         baseWeight: parseUnits(baseWeight),
         quoteWeight: parseUnits(quoteWeight),
-        baseAssimilator: baseCurveAddr,
-        quoteAssimilator: quotedCurveAddr,
+        baseAssimilator: baseAssimilatorAddr,
+        quoteAssimilator: quoteAssimilatorAddr,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
     }
