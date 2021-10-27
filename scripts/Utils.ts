@@ -261,12 +261,6 @@ const createCurve = async function ({
   console.log(`Curve ${symbol} Address: `, curve.address)
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
-  // Turn off whitelisting
-  const gasPrice2 = await getFastGasPrice();
-  console.log(`Curve#turnOffWhitelisting with gasPrice ${formatUnits(gasPrice2, 9)} gwei`);
-  const turnOffWhitelisting = await curve.turnOffWhitelisting({ gasPrice: gasPrice2 });
-  console.log('Curve#turnOffWhitelisting TX Hash: ', turnOffWhitelisting.hash)
-
   // Set Cap
   const gasPrice3 = await getFastGasPrice();
   console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice3, 9)} gwei`);
