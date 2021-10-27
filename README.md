@@ -219,6 +219,8 @@ TOKEN_SYMBOL="SPHP"
 CURVE_WEIGHTS="50/50"
 ASSIMILATOR_PAIRS=SPHP_USDC
 ```
+Note:
+LPT_NAME, TOKEN_NAME, TOKEN_SYMBOL, CURVE_WEIGHTS and ASSIMILATOR_PAIRS can be multiple values separated by comma
 
 4. Deploy the base assimilator
 ```

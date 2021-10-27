@@ -14,7 +14,6 @@ const NETWORK = hre.network.name;
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const TOKEN = {};
 const LPT_SYMBOL = process.env.LPT_SYMBOL;
-const LPT_NAME = process.env.LPT_NAME;
 const envList = process.env;
 
 // Initialize token addresses from .env
