@@ -159,11 +159,6 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 > yarn deploy:local:1
 ```
 2. Deploy assimilators
-    
-    - Deploy USDC assimilator (`ASSIMILATORS` env var)
-    ```
-    > yarn deploy:local:2
-    ```
     - Deploy other assimilators (`ASSIMILATOR_PAIRS` env var)
     ```
     > yarn deploy:local:assimilators
@@ -196,7 +191,6 @@ Verify script for public networks (kovan for example)
 2. Run the deployment scripts
 ```
 yarn deploy:kovan:1
-yarn deploy:kovan:2
 yarn deploy:kovan:assimilators
 yarn deploy:kovan:3
 yarn deploy:kovan:4
