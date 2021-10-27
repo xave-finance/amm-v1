@@ -318,77 +318,6 @@ describe("Curve Contract", () => {
         expect(e.toString()).to.include("Curve/amount-too-large");
       };
     });
-
-    it.skip("Should be able to white list deposit if under cap", async () => {
-      const NAME = "CAD Coin";
-      const SYMBOL = "CADC";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.CADC.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: cadcToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const userAddress = "0x1407C9d09d1603A9A5b806A0C00f4D3734df15E0";
-      const user = await unlockAccountAndGetSigner(userAddress);
-      const userProof = {
-        index: 28,
-        amount: "0x01",
-        proof: [
-          "0x06c2671dbde443244feb8752d425a7650bed5af1383a0a121d54efd6a78a521f",
-          "0x4ebddc87e24770dece2462ce30fffdc4da32c5563b0fdf3dd385307e2c694fe1",
-          "0xca83c9a54c59c94b8b9bfbd9b58aa056a136058596b5e6bcb1989761920a2cad",
-          "0x9676136c72ff4bf6148b9ce0cb49b7aab69ba1fe742b2f202ee7c664413de070",
-          "0x291a036fdbf1876b96d9cc0138227ba144941ea8dcef8a2b817a0a21aedb01c7",
-          "0xb63b8842ea1e9e4219e797fef7266f9466147413e0f5e90f80e6cd89def28b5d",
-          "0x7d98a4db6824fa949e214d5eae8d2f26a02e9d510cc29a0dbf61843f4913cb98",
-          "0x4c931488ffcbe48e2790c170e3d163d96bc94f9b02b84f5cd5a6558d75c8bf0f",
-          "0x6fc939303414c593ab76806b3df8ad39854cf220c30a0c48747a81c3e9ffcf2a",
-        ],
-      };
-
-      await curve.setCap(parseUnits("10000"));
-      const _curve = await curve.curve();
-      expect(_curve.cap).to.eq(parseUnits("10000"));
-
-      const liquidity = await curve.liquidity();
-      expect(liquidity.total_).to.eq(0);
-
-      // Approve Deposit
-      await multiMintAndApprove([
-        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
-        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
-      ]);
-
-      await curve.turnOffWhitelisting();
-
-      //try {
-      await curve
-        .connect(user)
-        .depositWithWhitelist(
-          userProof.index,
-          userAddress,
-          userProof.amount,
-          userProof.proof,
-          10,
-          await getFutureTime()
-        );
-
-      await curve.deposit(parseUnits("100"), await getFutureTime());
-      //   throw new Error("newCurve should throw error");
-      // } catch (e) {
-      //   expect(e.toString()).to.include("Curve/amount-too-large");
-      // }
-
-      const lpAmountAfter = await curve.balanceOf(user1Address);
-      expect(lpAmountAfter).to.be.equal(0);
-    });
   });
 
   describe("Curve/Pair Creation", async () => {
@@ -683,95 +612,6 @@ describe("Curve Contract", () => {
     })
   });
 
-  describe("Turn Off Whitelisting", async () => {
-    it("CADC:USDC", async () => {
-      const NAME = "CAD Coin";
-      const SYMBOL = "CADC";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.CADC.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: cadcToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const txR = await curve.turnOffWhitelisting();
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
-
-    it("EURS:USDC", async () => {
-      const NAME = "EURS Statis";
-      const SYMBOL = "EURS";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.EURS.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: eursToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const txR = await curve.turnOffWhitelisting();
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
-
-    it("XSGD:USDC", async () => {
-      const NAME = "XSGD";
-      const SYMBOL = "XSGD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.XSGD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: xsgdToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const txR = await curve.turnOffWhitelisting();
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
-  });
-
   describe("Emergency Withdraw", async () => {
     it("CADC:USDC", async () => {
       const NAME = "CAD Coin";
@@ -789,17 +629,12 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
       expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
 
       // Approve Deposit
       await multiMintAndApprove([
@@ -847,17 +682,12 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
       expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
 
       // Approve Deposit
       await multiMintAndApprove([
@@ -905,17 +735,12 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
       expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
 
       // Approve Deposit
       await multiMintAndApprove([
@@ -965,17 +790,12 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
       expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
 
       // Curve is not frozen by default
       expect(await curve.frozen()).to.be.false;
@@ -1047,17 +867,12 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
       expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
 
       // Curve is not frozen by default
       expect(await curve.frozen()).to.be.false;
@@ -1129,17 +944,12 @@ describe("Curve Contract", () => {
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
-      const txR = await curve.turnOffWhitelisting();
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
       expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
 
       // Curve is not frozen by default
       expect(await curve.frozen()).to.be.false;

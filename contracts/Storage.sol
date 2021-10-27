@@ -63,8 +63,5 @@ contract Storage {
     // Curve operational state
     bool public frozen = false;
     bool public emergency = false;
-    bool public whitelistingStage = true;
     bool internal notEntered = true;
-
-    mapping(address => uint256) public whitelistedDeposited;
 }

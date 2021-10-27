@@ -6,7 +6,7 @@ export const TOKENS = {
   },
   EURS: {
     address: "0xdB25f211AB05b1c97D595516F45794528a807ad8",
-    owner: "0x2ebbbc541e8f8f24386fa319c79ceda0579f1efb",
+    owner: "0x1bee4f735062cd00841d6997964f187f5f5f5ac9",
     decimals: 2,
   },
   CADC: {
