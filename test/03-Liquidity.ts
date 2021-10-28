@@ -133,14 +133,18 @@ describe("Curve Contract", () => {
 
       // Approve Deposit
       await multiMintAndApprove([
-        [TOKENS[tokenQuote].address, user1, parseUnits("900000000", TOKENS[tokenQuote].decimals), curve.address],
-        [TOKENS.USDC.address, user1, parseUnits("900000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS[tokenQuote].address, user1, parseUnits("90000000000", TOKENS[tokenQuote].decimals), curve.address],
+        [TOKENS.USDC.address, user1, parseUnits("90000000000", TOKENS.USDC.decimals), curve.address],
       ]);
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+          // Specific for EURS only
+          // 22k 
+          deposit = deposit === 1 ? 11000 : deposit;
+
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -149,6 +153,8 @@ describe("Curve Contract", () => {
             TOKENS.USDC.decimals,
             curve
           );
+
+          deposit = 1;
 
           // User input should be gte the estimate quote
           expect(parseUnits(deposit.toString()).gte(depositPreview.quote))
@@ -170,7 +176,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
@@ -208,7 +214,7 @@ describe("Curve Contract", () => {
     });
 
     describe("pool deposit with unbalanced ratio", () => {
-      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
         it(`swapping amount: ${amt}`, async () => {
@@ -278,8 +284,12 @@ describe("Curve Contract", () => {
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+          // Specific for EURS only
+          // 22k 
+          deposit = deposit === 1 ? 11000 : deposit;
+
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -288,6 +298,8 @@ describe("Curve Contract", () => {
             TOKENS.USDC.decimals,
             curve
           );
+
+          deposit = 1;
 
           // User input should be gte the estimate quote
           expect(parseUnits(deposit.toString()).gte(depositPreview.quote))
@@ -309,7 +321,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await eursToUsdAssimilator.getRate(), 8));
@@ -347,7 +359,7 @@ describe("Curve Contract", () => {
     });
 
     describe("pool deposit with unbalanced ratio", () => {
-      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
         it(`swapping amount: ${amt}`, async () => {
@@ -417,7 +429,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -448,7 +460,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await cadcToUsdAssimilator.getRate(), 8));
@@ -486,7 +498,7 @@ describe("Curve Contract", () => {
     });
 
     describe("pool deposit with unbalanced ratio", () => {
-      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
         it(`swapping amount: ${amt}`, async () => {
