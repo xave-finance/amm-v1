@@ -23,14 +23,6 @@ for (var key in envList) {
   }
 }
 
-const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
-}
-
 export const configFileHelper = async (output, directory) => {
   for (var key in output) {
     let data = {};
@@ -50,7 +42,7 @@ export const configFileHelper = async (output, directory) => {
   }
 }
 
-export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames) => {
+export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames, dimensions) => {
   const { CONTRACTS } = require(path.resolve(__dirname, `./config/contracts`));
   const CORE_ADDRESSES = {
     curveFactory: CONTRACTS.factory
@@ -88,7 +80,7 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
       const fullFileName = fileObj[tokenSymbol];
       const fileName = fileObj[tokenSymbol].split('.json')[0];
       const baseAssimilatorAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
-      const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`));
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`)).address;
       const lptName = lptNamesArr[index];
 
       const curveFactory = (await ethers.getContractAt(
@@ -107,10 +99,43 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
         quoteWeight: parseUnits(quoteWeight),
         baseAssimilator: baseAssimilatorAddr,
         quoteAssimilator: quoteAssimilatorAddr,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        params: [
+          parseUnits(dimensions[tokenSymbol].alpha),
+          parseUnits(dimensions[tokenSymbol].beta),
+          parseUnits(dimensions[tokenSymbol].max),
+          parseUnits(dimensions[tokenSymbol].epsilon),
+          parseUnits(dimensions[tokenSymbol].lambda)
+        ],
       });
     }
   }
+}
+
+export const curveHelper = async (fileName) => {
+  let tokenSymbols: String = "";
+  let tokenNames: String = "";
+  let weights: String = "";
+  let lptName: String = "";
+  let dimensions: Object = {};
+
+  for (let index = 0; index < fileName.length; index++) {
+    const row = fileName[index];
+    const params = require(path.resolve(__dirname, `./halo/curve/${NETWORK}/${row}.json`));
+
+    tokenSymbols += `${params.token_symbol},`;
+    tokenNames += `${params.token_name},`;
+    weights += `${params.weights},`;
+    lptName += `${params.lpt_name},`;
+    dimensions[params.token_symbol] = params.dimensions;
+  }
+
+  await curveConfig(
+    tokenSymbols.slice(0, -1),
+    tokenNames.slice(0, -1),
+    weights.slice(0, -1),
+    lptName.slice(0, -1),
+    dimensions
+  );
 }
 
 export const deployedLogs = async (filename, output) => {
