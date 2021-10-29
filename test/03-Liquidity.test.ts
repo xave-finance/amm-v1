@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ethers } from "hardhat";
 import { Signer, Contract, ContractFactory, BigNumber, BigNumberish } from "ethers";
 import chai, { expect } from "chai";
@@ -7,15 +6,13 @@ import chaiBigNumber from "chai-bignumber";
 import { CurveFactory } from "../typechain/CurveFactory";
 import { Curve } from "../typechain/Curve";
 import { ERC20 } from "../typechain/ERC20";
-import { Router } from "../typechain/Router";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
-import { assert } from "console";
 
 import { TOKENS } from "./Constants";
 
-import { getFutureTime, unlockAccountAndGetSigner, previewDepositGivenBase, previewDepositGivenQuote, adjustViewDeposit } from "./Utils";
-import { formatUnits, formatEther } from "ethers/lib/utils";
+import { getFutureTime, previewDepositGivenBase, previewDepositGivenQuote, adjustViewDeposit } from "./Utils";
+import { formatUnits } from "ethers/lib/utils";
 
 chai.use(chaiBigNumber(BigNumber));
 
@@ -30,8 +27,8 @@ const DIMENSION = {
 }
 
 describe("Curve Contract", () => {
-  let [user1, user2]: Signer[] = [];
-  let [user1Address, user2Address]: string[] = [];
+  let [user1]: Signer[] = [];
+  let [user1Address]: string[] = [];
 
   let cadcToUsdAssimilator: Contract;
   let usdcToUsdAssimilator: Contract;
@@ -40,22 +37,14 @@ describe("Curve Contract", () => {
   let curve: Curve;
 
   let CurveFactory: ContractFactory;
-  let RouterFactory: ContractFactory;
 
   let curveFactory: CurveFactory;
-  let router: Router;
-
-  let usdc: ERC20;
-  let cadc: ERC20;
-  let eurs: ERC20;
-  let xsgd: ERC20;
   let erc20: ERC20;
   let baseToken: ERC20;
   let quoteToken: ERC20;
   const maxDeposit: number = 90000000;
   const maxSwap: number = 90000000;
 
-  let mintAndApprove: (tokenAddress: string, minter: Signer, amount: BigNumberish, recipient: string) => Promise<void>;
   let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
 
   let createCurveAndSetParams: ({
@@ -85,26 +74,19 @@ describe("Curve Contract", () => {
 
   before(async function () {
     ({
-      users: [user1, user2],
-      userAddresses: [user1Address, user2Address],
+      users: [user1],
+      userAddresses: [user1Address],
       cadcToUsdAssimilator,
       usdcToUsdAssimilator,
       eursToUsdAssimilator,
       xsgdToUsdAssimilator,
       CurveFactory,
-      RouterFactory,
-      usdc,
-      cadc,
-      eurs,
-      xsgd,
       erc20
     } = await scaffoldTest());
 
-
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
-    router = (await RouterFactory.deploy(curveFactory.address)) as Router;
 
-    ({ createCurveAndSetParams, mintAndApprove, multiMintAndApprove } = await scaffoldHelpers({
+    ({ createCurveAndSetParams, multiMintAndApprove } = await scaffoldHelpers({
       curveFactory,
       erc20,
     }));
@@ -133,13 +115,13 @@ describe("Curve Contract", () => {
 
       // Approve Deposit
       await multiMintAndApprove([
-        [TOKENS[tokenQuote].address, user1, parseUnits("900000000", TOKENS[tokenQuote].decimals), curve.address],
-        [TOKENS.USDC.address, user1, parseUnits("900000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS[tokenQuote].address, user1, parseUnits("90000000000", TOKENS[tokenQuote].decimals), curve.address],
+        [TOKENS.USDC.address, user1, parseUnits("90000000000", TOKENS.USDC.decimals), curve.address],
       ]);
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -170,7 +152,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
@@ -208,7 +190,7 @@ describe("Curve Contract", () => {
     });
 
     describe("pool deposit with unbalanced ratio", () => {
-      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
         it(`swapping amount: ${amt}`, async () => {
@@ -275,10 +257,15 @@ describe("Curve Contract", () => {
         [TOKENS[tokenQuote].address, user1, parseUnits("900000000000", TOKENS[tokenQuote].decimals), curve.address],
         [TOKENS.USDC.address, user1, parseUnits("900000000000", TOKENS.USDC.decimals), curve.address],
       ]);
+
+      // Initial deposit
+      // Specific for EURS only, 22k in numeraire
+      const deposit = 22000;
+      await curve.deposit(parseUnits(deposit.toString()), await getFutureTime());
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -309,7 +296,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await eursToUsdAssimilator.getRate(), 8));
@@ -347,7 +334,7 @@ describe("Curve Contract", () => {
     });
 
     describe("pool deposit with unbalanced ratio", () => {
-      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
         it(`swapping amount: ${amt}`, async () => {
@@ -417,7 +404,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -448,7 +435,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 10) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await cadcToUsdAssimilator.getRate(), 8));
@@ -486,7 +473,7 @@ describe("Curve Contract", () => {
     });
 
     describe("pool deposit with unbalanced ratio", () => {
-      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 10) {
+      for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
         it(`swapping amount: ${amt}`, async () => {
