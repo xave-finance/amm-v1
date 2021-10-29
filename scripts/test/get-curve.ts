@@ -11,7 +11,6 @@ async function main() {
   const users = await getAccounts();
   const user1 = users[0];
   const curveFactoryAddr = "0xc33745C6cD00C4097faE924CB7e2594FfF4b7d7E";
-
   const curveFactory = (await ethers.getContractAt("CurveFactory", curveFactoryAddr)) as CurveFactory;
 
   try {

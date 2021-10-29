@@ -8,9 +8,10 @@ import EURSABI from "./abi/EURSABI.json";
 import FiatTokenV1ABI from "./abi/FiatTokenV1ABI.json";
 import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
 import { Result } from "ethers/lib/utils";
+import { Curve } from "../typechain/Curve";
 
 const { provider } = ethers;
-const { parseUnits } = ethers.utils;
+const { parseUnits, parseEther, formatUnits, formatEther } = ethers.utils;
 
 const sendETH = async (address, amount = 0.1) => {
   const signer = await provider.getSigner(0);
@@ -209,7 +210,7 @@ export const expectEventIn = (txRecp: ContractReceipt, eventName: string, eventA
 
 export const expectRevert = async (promise: Promise<unknown>, expectedError: string): Promise<void> => {
   // eslint-disable-next-line
-  promise.catch(() => {}); // Catch all exceptions
+  promise.catch(() => { }); // Catch all exceptions
 
   try {
     await promise;
@@ -228,3 +229,70 @@ export const expectRevert = async (promise: Promise<unknown>, expectedError: str
 
   expect.fail("Expected an exception but none was received");
 };
+
+export const previewDepositGivenBase = async (baseAmount: number, baseRate: number, key: string, baseWeight: number, curve: Curve) => {
+  const baseNumeraire = baseAmount * baseRate
+  const multiplier = key !== "XSGD" ? 1 : baseWeight > 0 ? 1 / baseWeight : 2
+  const totalNumeraire = baseNumeraire * multiplier;
+  const estimate = await curve.viewDeposit(parseUnits((totalNumeraire).toString()));
+
+  let depositPreview = {
+    deposit: totalNumeraire,
+    lpToken: estimate[0],
+    base: estimate[1][0],
+    quote: estimate[1][1],
+  }
+
+  return depositPreview;
+}
+
+export const previewDepositGivenQuote = async (quoteAmount: number, key: string, curve: Curve) => {
+  const quoteNumeraire = quoteAmount;
+  const multiplier = key !== "XSGD" ? 1 : 2;
+  const totalNumeraire = quoteNumeraire * multiplier;
+  const estimate = await curve.viewDeposit(parseUnits((totalNumeraire).toString()));
+
+  let depositPreview = {
+    deposit: totalNumeraire,
+    lpToken: estimate[0],
+    base: estimate[1][0],
+    quote: estimate[1][1],
+  }
+
+  return depositPreview;
+}
+
+export const errorRateHelper = async (inputAmount: number, estimatedAmount: number, totalNumeraire: number, curve: Curve) => {
+  const rateOfError = inputAmount / estimatedAmount
+  const adjustedNumeraire = totalNumeraire * rateOfError
+  const estimate = await curve.viewDeposit(parseEther(`${adjustedNumeraire}`));
+
+  return {
+    deposit: adjustedNumeraire,
+    lpToken: estimate[0],
+    base: estimate[1][0],
+    quote: estimate[1][1],
+  }
+}
+
+export const adjustViewDeposit = async (inputType: string, depositPreview, inputAmount: number, decimal: number, curve: Curve) => {
+  const THRESHOLD = 0.00001;
+  const estimateAmt = inputType === "quote" ? depositPreview.quote : depositPreview.base;
+  let estimatedVal = parseFloat(formatUnits(estimateAmt, decimal));
+
+  if (estimatedVal < inputAmount) {
+    while (estimatedVal - inputAmount < -THRESHOLD) {
+      depositPreview = await errorRateHelper(inputAmount, estimatedVal, depositPreview.deposit, curve)
+      const newEstimatedVal = parseFloat(formatUnits(inputType === "quote" ? depositPreview.quote : depositPreview.base, decimal));
+      estimatedVal = newEstimatedVal;
+    }
+  } else {
+    while (estimatedVal - inputAmount > THRESHOLD) {
+      depositPreview = await errorRateHelper(inputAmount, estimatedVal, depositPreview.deposit, curve)
+      const newEstimatedVal = parseFloat(formatUnits(inputType === "quote" ? depositPreview.quote : depositPreview.base, decimal));
+      estimatedVal = newEstimatedVal;
+    }
+  }
+
+  return depositPreview;
+}
