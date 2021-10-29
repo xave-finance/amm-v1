@@ -31,6 +31,7 @@ library CurveMath {
     using ABDKMath64x64 for uint256;
 
     // This is used to prevent stack too deep errors
+    // calculate psi (total fees)
     function calculateFee(
         int128 _gLiq,
         int128[] memory _bals,
@@ -50,14 +51,23 @@ library CurveMath {
         int128 _delta,
         int128[] memory _weights
     ) internal pure returns (int128 psi_) {
-        uint256 _length = _bals.length;
+        uint256 _length = _bals.length; // get length of array, in this case 2 (2 reserve tokens)
 
         for (uint256 i = 0; i < _length; i++) {
             int128 _ideal = _gLiq.mul(_weights[i]);
             psi_ += calculateMicroFee(_bals[i], _ideal, _beta, _delta);
+            /**
+            syntax notes:
+            // psi = psi + calculateMicroFee is equivalent to;
+            // psi += calculateMicroFee (shortcut notation)
+             */
+            // 
         }
     }
 
+    /**
+    define the fee margin, M.i, and the intermediate fee, m.i and finally f.i
+    */
     function calculateMicroFee(
         int128 _bal,
         int128 _ideal,
@@ -67,7 +77,7 @@ library CurveMath {
         if (_bal < _ideal) {
             int128 _threshold = _ideal.mul(ONE - _beta);
 
-            if (_bal < _threshold) {
+            if (_bal < _threshold) { // Li - Xi condition
                 int128 _feeMargin = _threshold - _bal;
 
                 fee_ = _feeMargin.div(_ideal);
@@ -76,20 +86,20 @@ library CurveMath {
                 if (fee_ > MAX) fee_ = MAX;
 
                 fee_ = fee_.mul(_feeMargin);
-            } else fee_ = 0;
+            } else fee_ = 0; // 0 condition
         } else {
             int128 _threshold = _ideal.mul(ONE + _beta);
 
-            if (_bal > _threshold) {
-                int128 _feeMargin = _bal - _threshold;
+            if (_bal > _threshold) { // Xi - Vi condition
+                int128 _feeMargin = _bal - _threshold; 
 
-                fee_ = _feeMargin.div(_ideal);
-                fee_ = fee_.mul(_delta);
+                fee_ = _feeMargin.div(_ideal); // Mi/Ii
+                fee_ = fee_.mul(_delta); // mi = ∆ · Mi/Ii
 
-                if (fee_ > MAX) fee_ = MAX;
+                if (fee_ > MAX) fee_ = MAX; // min(mi,γ)
 
-                fee_ = fee_.mul(_feeMargin);
-            } else fee_ = 0;
+                fee_ = fee_.mul(_feeMargin); // fi =Mi ·min(mi,γ)
+            } else fee_ = 0; // 0 condition
         }
     }
 
@@ -110,18 +120,40 @@ library CurveMath {
         int128 _omega = calculateFee(_oGLiq, _oBals, curve, _weights);
         int128 _psi;
 
+        /**
+        is this 32x loop executing "If the algorithm converges, i.e. yk = yk−1, then we will have found the correct value." from whitepaper?
+        is this where "Si,j (x, T ⟩, x) = x − ρ (F (x + x′ ) − F (x))" happens?
+         */
         for (uint256 i = 0; i < 32; i++) {
             _psi = calculateFee(_nGLiq, _nBals, curve, _weights);
 
             int128 prevAmount;
             {
                 prevAmount = outputAmt_;
+                            // if _omega < _psi then do part before `:` if _omega >= _psi then do the part after `:`
                 outputAmt_ = _omega < _psi ? -(_inputAmt + _omega - _psi) : -(_inputAmt + _lambda.mul(_omega - _psi));
+                /**
+                syntax note:
+                if _omega < _psi
+                    // do something
+                else
+                    // do something else
+
+                is equal to ;
+
+                _omega < _psi ? do something : do something else
+                 */
             }
 
+            /**
+            this means if trader is swapping 0...?
+            maybe this means that if nothing happened after swap equation, that is related to the halt boundary...?
+             */
             if (outputAmt_ / 1e13 == prevAmount / 1e13) {
+                // why + outputAmt_?
                 _nGLiq = _oGLiq + _inputAmt + outputAmt_;
 
+                // is _outputIndex referring to target token?
                 _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
 
                 enforceHalts(curve, _oGLiq, _nGLiq, _oBals, _nBals, _weights);

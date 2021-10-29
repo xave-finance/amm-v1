@@ -55,10 +55,20 @@ library Swaps {
         (int128 _amt, int128 _oGLiq, int128 _nGLiq, int128[] memory _oBals, int128[] memory _nBals) =
             getOriginSwapData(curve, _o.ix, _t.ix, _o.addr, _originAmount);
 
+        /**
+        does all the tricky math
+        _amt is now in numeraire 
+        */
         _amt = CurveMath.calculateTrade(curve, _oGLiq, _nGLiq, _oBals, _nBals, _amt, _t.ix);
 
+        // subtract epsilon fee and leave it in the pool to be claimed proportionately by LPs
+        // epsilon currently configured to be 0.0005 or 5 basis points
         _amt = _amt.us_mul(ONE - curve.epsilon);
 
+        /**
+        swap is now done
+        convert _amt (numeraire) to target currency equivalent to give back to user
+         */
         tAmt_ = Assimilators.outputNumeraire(_t.addr, _recipient, _amt);
 
         emit Trade(msg.sender, _origin, _target, _originAmount, tAmt_);
@@ -172,6 +182,9 @@ library Swaps {
         oAmt_ = Assimilators.viewRawAmount(_o.addr, _amt);
     }
 
+    /**
+    "predicting" what the liquidity and reserve amounts in numeraire will be after swapping
+     */
     function getOriginSwapData(
         Storage.Curve storage curve,
         uint256 _inputIx,
@@ -188,14 +201,15 @@ library Swaps {
             int128[] memory
         )
     {
-        uint256 _length = curve.assets.length;
+        uint256 _length = curve.assets.length; // get number of assets (in our case 2)
 
-        int128[] memory oBals_ = new int128[](_length);
-        int128[] memory nBals_ = new int128[](_length);
-        Storage.Assimilator[] memory _reserves = curve.assets;
+        int128[] memory oBals_ = new int128[](_length); // prepare a new array
+        int128[] memory nBals_ = new int128[](_length); // prepare a new array
+        Storage.Assimilator[] memory _reserves = curve.assets; // copy the assets array contents into _reserves
 
-        for (uint256 i = 0; i < _length; i++) {
-            if (i != _inputIx) nBals_[i] = oBals_[i] = Assimilators.viewNumeraireBalance(_reserves[i].addr);
+        // converts token reserve amount into USD numeraire amount (ex; 1 SGD =~ 0.74 USD)
+        for (uint256 i = 0; i < _length; i++) { // loop = # of reserves / assets
+            if (i != _inputIx) nBals_[i] = oBals_[i] = Assimilators.viewNumeraireBalance(_reserves[i].addr); 
             else {
                 int128 _bal;
                 (amt_, _bal) = Assimilators.intakeRawAndGetBalance(_assim, _amt);
@@ -208,6 +222,7 @@ library Swaps {
             nGLiq_ += nBals_[i];
         }
 
+        // shouldnt this be oGLiq...? but code works so prob not
         nGLiq_ = nGLiq_.sub(amt_);
         nBals_[_outputIx] = ABDKMath64x64.sub(nBals_[_outputIx], amt_);
 
@@ -277,6 +292,7 @@ library Swaps {
         uint256 _length = curve.assets.length;
         int128[] memory nBals_ = new int128[](_length);
         int128[] memory oBals_ = new int128[](_length);
+        // getOriginSwapData() does this `Storage.Assimilator[] memory _reserves = curve.assets;`
 
         for (uint256 i = 0; i < _length; i++) {
             if (i != _inputIx) nBals_[i] = oBals_[i] = Assimilators.viewNumeraireBalance(curve.assets[i].addr);
@@ -285,7 +301,7 @@ library Swaps {
                 (amt_, _bal) = Assimilators.viewNumeraireAmountAndBalance(_assim, _amt);
 
                 oBals_[i] = _bal;
-                nBals_[i] = _bal.add(amt_);
+                nBals_[i] = _bal.add(amt_); // why add amt_ here instead of oBals_ like in getOriginSwapData()?
             }
 
             oGLiq_ += oBals_[i];
