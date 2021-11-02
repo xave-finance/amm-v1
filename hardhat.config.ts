@@ -9,7 +9,6 @@ const ALCHEMY_PROJECT_ID = process.env.ALCHEMY_PROJECT_ID;
 const alchemyEndpoint = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
 const MNEMONIC = process.env.MNEMONIC;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-// const BLOCK_NO = parseInt(process.env.BLOCK_NO);
 import { CONFIG } from "./test/Config";
 const LOCALHOST = "http://127.0.0.1:8545";
 
