@@ -65,28 +65,82 @@ Withdrawing and depositing related operations will respect the existing LP ratio
 You can download the `.env` from the password manager
 
 `.env` file variables
+
+#### For Unit Test
 ```
-RPC_URL=
+# Tests only need these three variables
+INFURA_PROJECT_ID=
+ALCHEMY_PROJECT_ID=
 MNEMONIC=
+
+# Deployment
+ENV=
 ETHERSCAN_API_KEY=
 
-ORACLES_CADC_USD=0xa34317DB73e77d453b1B8d04550c44D10e981C8e
-ORACLES_EURS_USD=0xb49f677943BC038e9857d61E7d053CaA2C1734C1
-ORACLES_USDC_USD=0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6
-ORACLES_XSGD_USD=0xe25277fF4bbF9081C75Ab0EB13B4A13a721f3E13
 
-TOKEN_USDC=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-TOKEN_EURS=0xdB25f211AB05b1c97D595516F45794528a807ad8
-TOKEN_CADC=0xcaDC0acd4B445166f12d2C07EAc6E2544FbE2Eef
-TOKEN_XSGD=0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96
+# ---- ORACLES
+ORACLES_USDC_USD=
+ORACLES_USDT_USD=
 
-GOVERNANCE_ADDRESS=0x27E843260c71443b4CC8cB6bF226C3f77b9695AF
+ORACLES_CAD_USD=
+ORACLES_AUD_USD=
+ORACLES_GBP_USD=
 
-DIMENSION_ALPHA=0.8
-DIMENSION_BETA=0.5
-DIMENSION_MAX=0.15
-DIMENSION_EPSILON=0.0005
-DIMENSION_LAMBDA=0.3
+ORACLES_SGD_USD=
+ORACLES_EUR_USD=
+
+ORACLES_TRYB_USD=
+ORACLES_PHP_USD=
+
+ORACLES_CHF_USD=
+# ---- ORACLES
+
+
+# ---- TOKEN ADDRESSES
+TOKEN_ADDR_USDC=
+TOKEN_ADDR_USDT=
+
+TOKEN_ADDR_TCAD=
+TOKEN_ADDR_TAUD=
+TOKEN_ADDR_TGBP=
+
+TOKEN_ADDR_XSGD=
+TOKEN_ADDR_EURS=
+TOKEN_ADDR_CADC=
+
+TOKEN_ADDR_TRYB=
+TOKEN_ADDR_PHP=
+
+TOKEN_ADDR_JCHF=
+# ---- TOKEN ADDRESSES
+
+
+# ---- TOKEN DECIMALS
+TOKENS_USDC_DECIMALS=6
+TOKENS_USDT_DECIMALS=6
+
+TOKENS_TCAD_DECIMALS=18
+TOKENS_TAUD_DECIMALS=18
+TOKENS_TGBP_DECIMALS=18
+
+TOKENS_XSGD_DECIMALS=6
+TOKENS_EURS_DECIMALS=2
+TOKENS_CADC_DECIMALS=18
+
+TOKEN_TRYB_DECIMALS=6
+TOKEN_PHP_DECIMALS=18
+
+TOKEN_JCHF_DECIMALS=18
+# ---- TOKEN DECIMALS
+
+
+# ---- AMM Contracts
+CORE_CONTRACTS=Curves,Orchestrator,ProportionalLiquidity,Swaps,ViewLiquidity,Zap
+
+# Assimilator and curve params
+ASSIMILATOR_PAIRS=EURS_USDC,JCHF_USDC,PHP_USDC,TAUD_USDC,TCAD_USDC,TGBP_USDC,TRYB_USDC,XSGD_USDC
+LPT_SYMBOL=HLP
+# ---- AMM Contracts
 
 CONFIRM_ALL=y
 ```
@@ -126,16 +180,18 @@ These are the Chainlink's oracle addresses for currency pairs, this is used to g
 
 Token addresses for assimilators. You can find these addresses in contracts under `/contracts/assimilators` directory
 
+**ASSIMILATOR_PAIRS**
+*e.g EURS_USDC,JCHF_USDC
+
+Used for creating new assimilator and curves, can be single value or comma separated if multiple
+
+**LPT_SYMBOL**
+Liquidity Provider Token symbold that will be displayed when a curve is created
+
 **GOVERNANCE_ADDRESS**
 
 Used to transfer ownership of a curve/pool/
 
-
-**DIMENSION_[value]**
-
-*e.g DIMENSION_ALPHA, DIMENSION_BETA*
-
-See **Curve Parameter Terminology** above
 
 **CONFIRM_ALL**
 
@@ -150,7 +206,6 @@ Example.
 ### Local deployment
 0. Update .env for the assimilators that you wish to deploy
 ```
-ASSIMILATORS=UsdcToUsdAssimilator
 ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 ```
 
@@ -159,22 +214,14 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 > yarn deploy:local:1
 ```
 2. Deploy assimilators
-    
-    - Deploy USDC assimilator (`ASSIMILATORS` env var)
-    ```
-    > yarn deploy:local:2
-    ```
-    - Deploy other assimilators (`ASSIMILATOR_PAIRS` env var)
+    - Note, usdc assimilator doesn't need to be deployed again and again, upon curve deloyment, script is just referencing to usdc assimialtor config in `dfx-protocol-clone/scripts/config/usdcassimilator`
+    - Deploy assimilators (`ASSIMILATOR_PAIRS` env var)
     ```
     > yarn deploy:local:assimilators
     ```
 3. Create new curve and set dimensions
 ```
 > yarn deploy:local:3
-```
-4. Deploy zap contracts
-```
-> yarn deploy:local:4
 ```
 
 Deploy everything in one command
@@ -196,10 +243,8 @@ Verify script for public networks (kovan for example)
 2. Run the deployment scripts
 ```
 yarn deploy:kovan:1
-yarn deploy:kovan:2
 yarn deploy:kovan:assimilators
 yarn deploy:kovan:3
-yarn deploy:kovan:4
 yarn deploy:kovan:verify // (optional)
 ```
 
@@ -214,17 +259,11 @@ yarn deploy:kovan:verify // (optional)
 
 2. Create a new json config for the curve's base assimilator. This file will be placed in `scripts/halo/assimilatorConfigs/<network>`. **IMPORTANT:** this change needs to be merged via a PR so it can be reviewed by another peer.
 
-3. Update .env for the assimilator and curve you wish to deploy. As an example, if you want to deploy PHP-USDC curve, the following should be inside the .env along with other env vars:
-```
-TOKEN_ADDR_PHP=0x0
-TOKENS_PHP_DECIMALS=18
-LPT_SYMBOL="HLP"
-LPT_NAME="HLP-SPHP-USDC"
-TOKEN_NAME="Synthetic PHP"
-TOKEN_SYMBOL="SPHP"
-CURVE_WEIGHTS="50/50"
-ASSIMILATOR_PAIRS=SPHP_USDC
-```
+3. Update .env for the assimilator and curve you wish to deploy.
+
+    - For assimilator config, please refer to `dfx-protocol-clone6/scripts/halo/assimilatorConfigs/[network]/[currency]_USDC.json`
+    - For curve config, please refer to `dfx-protocol-clone6/scripts/halo/curve/[network]/[currency]_USDC.json`
+    - Assimilator and curve configs must have the same file name
 
 4. Deploy the base assimilator
 ```

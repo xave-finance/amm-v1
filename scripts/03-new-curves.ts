@@ -1,17 +1,10 @@
-import path from "path";
-import hre from "hardhat";
-import { curveConfig, curveHelper } from "./Utils";
-import { getAccounts } from "./common";
-import chalk from "chalk";
-import { formatUnits } from "ethers/lib/utils";
+import { curveHelper } from "./Utils";
 
-const NETWORK = hre.network.name;
-
-const CURVE_PAIRS = process.env.CURVE_PAIRS;
+const ASSIMILATOR_PAIRS = process.env.ASSIMILATOR_PAIRS;
 
 async function main() {
   console.time('Deployment Time');
-  const curves = CURVE_PAIRS.indexOf(",") > -1 ? CURVE_PAIRS.split(",") : [CURVE_PAIRS];
+  const curves = ASSIMILATOR_PAIRS.indexOf(",") > -1 ? ASSIMILATOR_PAIRS.split(",") : [ASSIMILATOR_PAIRS];
 
   try {
     await curveHelper(curves);
