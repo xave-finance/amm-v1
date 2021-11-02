@@ -19,14 +19,15 @@ const TOKEN_EURS = process.env.TOKEN_ADDR_EURS;
 const TOKENS_USDC_DECIMALS = process.env.TOKENS_USDC_DECIMALS;
 const TOKENS_XSGD_DECIMALS = process.env.TOKENS_XSGD_DECIMALS;
 const TOKENS_TCAD_DECIMALS = process.env.TOKENS_TCAD_DECIMALS;
+const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 
 async function main() {
   console.time('Deployment Time');
   const users = await getAccounts();
   const user1 = users[0];
-  const TOKEN = 'TCAD';
-  const TOKEN_ADDR = TOKEN_TCAD;
-  const TOKEN_DECIMALS = TOKENS_TCAD_DECIMALS;
+  const TOKEN = 'EURS';
+  const BASE_TOKEN_ADDR = TOKEN_EURS;
+  const TOKEN_DECIMALS = TOKENS_EURS_DECIMALS;
   const curves = await curveAddresses();
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
@@ -59,17 +60,12 @@ async function main() {
   };
 
   await multiMintAndApprove([
-    [TOKEN_USDC, user1, parseUnits("10000", TOKENS_USDC_DECIMALS), curves[TOKEN]],
-    [TOKEN_ADDR, user1, parseUnits("10000", TOKEN_DECIMALS), curves[TOKEN]],
+    [TOKEN_USDC, user1, parseUnits("110000", TOKENS_USDC_DECIMALS), curves[TOKEN]],
+    [BASE_TOKEN_ADDR, user1, parseUnits("110000", TOKEN_DECIMALS), curves[TOKEN]],
   ]);
 
-  const amt = parseUnits("9000");
+  const amt = parseUnits("2");
   const curve = (await ethers.getContractAt("Curve", curves[TOKEN])) as Curve;
-
-  const tcad = (await ethers.getContractAt("ERC20", TOKEN_ADDR)) as ERC20;
-  const tcadAllowanceBefore = await tcad.allowance(user1.address, curves[TOKEN]);
-
-  console.log('TCAD Allowance Before: ', formatUnits(tcadAllowanceBefore, TOKEN_DECIMALS));
 
   try {
     // Supply liquidity to the pools

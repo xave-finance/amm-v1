@@ -9,8 +9,10 @@ const ALCHEMY_PROJECT_ID = process.env.ALCHEMY_PROJECT_ID;
 const alchemyEndpoint = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
 const MNEMONIC = process.env.MNEMONIC;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-const BLOCK_NO = parseInt(process.env.BLOCK_NO);
+// const BLOCK_NO = parseInt(process.env.BLOCK_NO);
+import { CONFIG } from "./test/Config";
 const LOCALHOST = "http://127.0.0.1:8545";
+
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -34,7 +36,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: alchemyEndpoint ? alchemyEndpoint : LOCALHOST,
-        blockNumber: BLOCK_NO
+        blockNumber: CONFIG.BLOCK_NO
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true
