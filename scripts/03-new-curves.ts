@@ -1,12 +1,9 @@
-import hre from "hardhat";
-import { curveConfig } from "./Utils";
-import { getAccounts } from "./common";
-import chalk from "chalk";
+import { curveHelper } from "./Utils";
 import { formatUnits } from "ethers/lib/utils";
+import chalk from "chalk";
+import { getAccounts } from "./common";
 
-const TOKEN_SYMBOL = process.env.TOKEN_SYMBOL;
-const TOKEN_NAME = process.env.TOKEN_NAME;
-const CURVE_WEIGHTS = process.env.CURVE_WEIGHTS;
+const ASSIMILATOR_PAIRS = process.env.ASSIMILATOR_PAIRS;
 
 async function main() {
   console.time('Deployment Time');
@@ -14,9 +11,10 @@ async function main() {
   const user1 = users[0];
   const balance = await user1.getBalance();
   console.log(chalk.blueBright(`Deployer balance: ${formatUnits(balance)} ETH`));
+  const curves = ASSIMILATOR_PAIRS.indexOf(",") > -1 ? ASSIMILATOR_PAIRS.split(",") : [ASSIMILATOR_PAIRS];
 
   try {
-    await curveConfig(TOKEN_SYMBOL, TOKEN_NAME, CURVE_WEIGHTS);
+    await curveHelper(curves);
   } catch (error) {
     console.log(`Error: ${error}`);
   }

@@ -13,17 +13,18 @@ import { scaffoldTest, scaffoldHelpers } from "./Setup";
 import { assert } from "console";
 
 import { TOKENS } from "./Constants";
+import { CONFIG } from "./Config";
 
 chai.use(chaiBigNumber(BigNumber));
 
 const { parseUnits } = ethers.utils;
 
 const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
 
 describe("Deployment", () => {

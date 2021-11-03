@@ -16,6 +16,7 @@ import { TOKENS } from "./Constants";
 
 import { getFutureTime, unlockAccountAndGetSigner } from "./Utils";
 import { formatUnits } from "ethers/lib/utils";
+import { CONFIG } from "./Config";
 
 chai.use(chaiBigNumber(BigNumber));
 
@@ -27,11 +28,11 @@ const TOKENS_EURS_DECIMALS = process.env.TOKENS_EURS_DECIMALS;
 const TOKENS_XSGD_DECIMALS = process.env.TOKENS_XSGD_DECIMALS;
 
 const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
 
 describe("Curve Contract", () => {

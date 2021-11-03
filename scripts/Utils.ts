@@ -14,7 +14,6 @@ const NETWORK = hre.network.name;
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const TOKEN = {};
 const LPT_SYMBOL = process.env.LPT_SYMBOL;
-const LPT_NAME = process.env.LPT_NAME;
 const envList = process.env;
 
 // Initialize token addresses from .env
@@ -22,14 +21,6 @@ for (var key in envList) {
   if (key.includes('TOKEN_ADDR')) {
     TOKEN[key] = envList[key];
   }
-}
-
-const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
 }
 
 export const configFileHelper = async (output, directory) => {
@@ -51,7 +42,7 @@ export const configFileHelper = async (output, directory) => {
   }
 }
 
-export const curveConfig = async (tokenSymbol, tokenName, curveWeights) => {
+export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames, dimensions) => {
   const { CONTRACTS } = require(path.resolve(__dirname, `./config/contracts`));
   const CORE_ADDRESSES = {
     curveFactory: CONTRACTS.factory
@@ -64,15 +55,18 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights) => {
   let tokenSymbolArr;
   let tokenNameArr;
   let curveWeightsArr;
+  let lptNamesArr;
 
   if (tokenSymbol.indexOf(',') > -1) {
     tokenSymbolArr = tokenSymbol.split(',');
     tokenNameArr = tokenName.split(',');
     curveWeightsArr = curveWeights.split(',');
+    lptNamesArr = lptNames.split(',');
   } else {
     tokenSymbolArr = [tokenSymbol];
     tokenNameArr = [tokenName];
     curveWeightsArr = [curveWeights];
+    lptNamesArr = [lptNames];
   }
 
   for (let index = 0; index < tokenSymbolArr.length; index++) {
@@ -85,9 +79,9 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights) => {
       const tokenName = tokenNameArr[index];
       const fullFileName = fileObj[tokenSymbol];
       const fileName = fileObj[tokenSymbol].split('.json')[0];
-      const quotedFilename = 'USDCToUsdAssimilator';
-      const baseCurveAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
-      const quotedCurveAddr = require(configImporterNew(`assimilators/${quotedFilename}.json`))[quotedFilename];
+      const baseAssimilatorAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`)).address;
+      const lptName = lptNamesArr[index];
 
       const curveFactory = (await ethers.getContractAt(
         "CurveFactory",
@@ -96,18 +90,52 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights) => {
 
       const { curve } = await createCurveAndSetParams({
         curveFactory,
+        lptName,
         name: tokenName,
         symbol: tokenSymbol,
         base: TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
         quote: TOKEN[QUOTED_TOKEN],
         baseWeight: parseUnits(baseWeight),
         quoteWeight: parseUnits(quoteWeight),
-        baseAssimilator: baseCurveAddr,
-        quoteAssimilator: quotedCurveAddr,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        baseAssimilator: baseAssimilatorAddr,
+        quoteAssimilator: quoteAssimilatorAddr,
+        params: [
+          parseUnits(dimensions[tokenSymbol].alpha),
+          parseUnits(dimensions[tokenSymbol].beta),
+          parseUnits(dimensions[tokenSymbol].max),
+          parseUnits(dimensions[tokenSymbol].epsilon),
+          parseUnits(dimensions[tokenSymbol].lambda)
+        ],
       });
     }
   }
+}
+
+export const curveHelper = async (fileName) => {
+  let tokenSymbols: String = "";
+  let tokenNames: String = "";
+  let weights: String = "";
+  let lptName: String = "";
+  let dimensions: Object = {};
+
+  for (let index = 0; index < fileName.length; index++) {
+    const row = fileName[index];
+    const params = require(path.resolve(__dirname, `./halo/curve/${NETWORK}/${row}.json`));
+
+    tokenSymbols += `${params.token_symbol},`;
+    tokenNames += `${params.token_name},`;
+    weights += `${params.weights},`;
+    lptName += `${params.lpt_name},`;
+    dimensions[params.token_symbol] = params.dimensions;
+  }
+
+  await curveConfig(
+    tokenSymbols.slice(0, -1),
+    tokenNames.slice(0, -1),
+    weights.slice(0, -1),
+    lptName.slice(0, -1),
+    dimensions
+  );
 }
 
 export const deployedLogs = async (filename, output) => {
@@ -198,6 +226,7 @@ const toDecimal = (n) => {
 
 const createCurve = async function ({
   curveFactory,
+  lptName,
   name,
   symbol,
   base,
@@ -208,6 +237,7 @@ const createCurve = async function ({
   quoteAssimilator,
 }: {
   curveFactory: CurveFactory;
+  lptName: string;
   name: string;
   symbol: string;
   base: string;
@@ -219,10 +249,10 @@ const createCurve = async function ({
 }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
   const gasPrice = await getFastGasPrice();
 
-  console.log(`Deploying curve ${LPT_NAME} with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
+  console.log(`Deploying curve ${lptName} with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
 
   const tx = await curveFactory.newCurve(
-    LPT_NAME,
+    lptName,
     LPT_SYMBOL,
     base,
     quote,
@@ -270,6 +300,7 @@ const createCurve = async function ({
 
 const createCurveAndSetParams = async function ({
   curveFactory,
+  lptName,
   name,
   symbol,
   base,
@@ -281,6 +312,7 @@ const createCurveAndSetParams = async function ({
   params,
 }: {
   curveFactory: CurveFactory;
+  lptName: string,
   name: string;
   symbol: string;
   base: string;
@@ -293,6 +325,7 @@ const createCurveAndSetParams = async function ({
 }) {
   const { curve, curveLpToken } = await createCurve({
     curveFactory,
+    lptName,
     name,
     symbol,
     base,
