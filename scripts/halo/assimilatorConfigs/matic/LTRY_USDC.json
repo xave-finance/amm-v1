@@ -2,5 +2,5 @@
     "baseDecimals": 6,
     "baseTokenAddress": "0xfAF6556426E5fEde88E5B292f21c6Ce489A58B64",
     "quoteTokenAddress": "0x42ca36D100776d61E0D0444EAAB2F10729bf1f84",
-    "oracleAddress": "0x1f0AC8c7b6F9D6d014124919E5039c1DAB87D199"
+    "oracleAddress": "0xd78325DcA0F90F0FFe53cCeA1B02Bb12E1bf8FdB"
 }
