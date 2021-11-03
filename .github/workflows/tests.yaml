@@ -30,13 +30,3 @@ jobs:
           INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
           ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
           MNEMONIC: ${{ secrets.MNEMONIC }}
-          BLOCK_NO: ${{ secrets.BLOCK_NO }}
-          DIMENSION_ALPHA: ${{ secrets.DIMENSION_ALPHA }}
-          DIMENSION_BETA: ${{ secrets.DIMENSION_BETA }}
-          DIMENSION_MAX: ${{ secrets.DIMENSION_MAX }}
-          DIMENSION_EPSILON: ${{ secrets.DIMENSION_EPSILON }}
-          DIMENSION_LAMBDA: ${{ secrets.DIMENSION_LAMBDA }}
-          TOKENS_USDC_DECIMALS: ${{ secrets.TOKENS_USDC_DECIMALS }}
-          TOKENS_CADC_DECIMALS: ${{ secrets.TOKENS_CADC_DECIMALS }}
-          TOKENS_EURS_DECIMALS: ${{ secrets.TOKENS_EURS_DECIMALS }}
-          TOKENS_XSGD_DECIMALS: ${{ secrets.TOKENS_XSGD_DECIMALS }}

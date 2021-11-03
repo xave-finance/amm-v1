@@ -10,6 +10,7 @@ import { ERC20 } from "../typechain/ERC20";
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
 
 import { TOKENS } from "./Constants";
+import { CONFIG } from "./Config";
 
 import { getFutureTime, previewDepositGivenBase, previewDepositGivenQuote, adjustViewDeposit } from "./Utils";
 import { formatUnits } from "ethers/lib/utils";
@@ -19,11 +20,11 @@ chai.use(chaiBigNumber(BigNumber));
 const { parseUnits } = ethers.utils;
 
 const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
 
 describe("Curve Contract", () => {
@@ -121,7 +122,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -152,7 +153,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
@@ -265,7 +266,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -296,7 +297,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await eursToUsdAssimilator.getRate(), 8));
@@ -404,7 +405,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given quote as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
         it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
@@ -435,7 +436,7 @@ describe("Curve Contract", () => {
     });
 
     describe("given base as input", () => {
-      for (let deposit = 1; deposit <= maxDeposit; deposit *= 1.1) {
+      for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
         it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await cadcToUsdAssimilator.getRate(), 8));

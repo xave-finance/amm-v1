@@ -5,16 +5,17 @@ const { ethers } = hre;
 import { Curve } from "../../typechain";
 
 import { curveImporter } from "../Utils";
+import { CONFIG } from "../../test/Config"
 
 const eursCurveAddr = require(curveImporter('curve_EURS_deployed')).curveAddress
 const CONTRACT_CURVE_EURS_ADDR = eursCurveAddr;;
 
 const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
 
 async function main() {
