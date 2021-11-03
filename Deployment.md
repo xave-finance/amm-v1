@@ -189,7 +189,7 @@ yarn deploy:kovan:verify // (optional)
 
 ### Adding a new curve
 
-1. Verify that you have `factory_deployed.json` and `assimilators/USDCToUSDAssimilator.json` inside `scripts/config/<network>` diretory. These files are generated from previous deploy.
+1. Verify that you have `factory_deployed.json` and `./scripts/config/usdcassimilator/[network].jsonn` inside `scripts/config/<network>` diretory. These files are generated from previous deploy.
 
     Please refer to these confluence pages for the deployed addresses per network: 
 
