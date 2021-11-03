@@ -143,6 +143,7 @@ Example.
 ### Localhost full deployment
 0. Update .env for the assimilators that you wish to deploy
 ```
+ASSIMILATORS=UsdcToUsdAssimilator
 ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 ```
 
@@ -151,7 +152,8 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 > yarn deploy:local:1
 ```
 2. Deploy assimilators
-    - Deploy USDC assimilator (`ASSIMILATORS` env var), you will need to add the new deployed address in `./scripts/config/usdcassimilator/localhost.json`
+    - Deploy USDC assimilator (`ASSIMILATORS` env var)
+    - After deployment, you need to add the newly deployed USDC assimilator address in `./scripts/config/usdcassimilator/localhost.json`
     ```
     > yarn deploy:local:2
     ```
@@ -179,7 +181,8 @@ Verify script for public networks (kovan for example)
 ### Kovan deployment
 
 0. Update .env for the assimilators & curves that you wish to deploy
-1. Run the deployment scripts, non localhost deployment will automatically get the usdc assimilator address from `./scripts/config/usdcassimilator/[network].json`
+1. Update USDC address to kovan address in Zap.sol
+2. Run the deployment scripts, non localhost deployment will automatically get the usdc assimilator address from `./scripts/config/usdcassimilator/[network].json`
 ```
 yarn deploy:kovan:1
 yarn deploy:kovan:assimilators
@@ -189,27 +192,29 @@ yarn deploy:kovan:verify // (optional)
 
 ### Adding a new curve
 
-1. Verify that you have `factory_deployed.json` and `./scripts/config/usdcassimilator/[network].jsonn` inside `scripts/config/<network>` diretory. These files are generated from previous deploy.
+1. Verify that you have `factory_deployed.json` and `./scripts/config/usdcassimilator/[network].json` inside `scripts/config/<network>` diretory. These files are generated from previous deploy.
 
     Please refer to these confluence pages for the deployed addresses per network: 
 
     - https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/137330714/Rewards+AMM+mapping
     - https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/101023769/Deployed+Contracts
 
-2. Create a new json config for the curve's base assimilator. This file will be placed in `scripts/halo/assimilatorConfigs/<network>`. **IMPORTANT:** this change needs to be merged via a PR so it can be reviewed by another peer.
-
-3. Update .env for the assimilator and curve you wish to deploy.
+2. Create a new json config for the curve's base assimilator. This file will be placed in `scripts/halo/assimilatorConfigs/<network>`. **IMPORTANT:** this change needs to be merged via a PR so it can be reviewed by another peer. Update .env for the assimilator and curve you wish to deploy.
 
     - For assimilator config, please refer to `dfx-protocol-clone6/scripts/halo/assimilatorConfigs/[network]/[currency]_USDC.json`
     - For curve config, please refer to `dfx-protocol-clone6/scripts/halo/curve/[network]/[currency]_USDC.json`
     - Assimilator and curve configs must have the same file name
+Ex.
+```
+ASSIMILATOR_PAIRS=SPHP_USDC
+```
 
-4. Deploy the base assimilator
+3. Deploy the base assimilator(s)
 ```
 > yarn deploy:<network>:assimilators
 ```
 
-5. Deploy the curve
+4. Deploy the curve
 ```
 > yarn deploy:kovan:3
 ```
