@@ -151,7 +151,7 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 > yarn deploy:local:1
 ```
 2. Deploy assimilators
-    - Deploy USDC assimilator (`ASSIMILATORS` env var)
+    - Deploy USDC assimilator (`ASSIMILATORS` env var), you will need to add the new deployed address in `./scripts/config/usdcassimilator/localhost.json`
     ```
     > yarn deploy:local:2
     ```
@@ -164,7 +164,7 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 ```
 > yarn deploy:local:3
 ```
-    - Note, if you deploy a USDC assimilator, you will need to add it in `./scripts/config/usdcassimilator/localhost.json`
+
 
 Deploy everything in one command
 ```
@@ -179,10 +179,7 @@ Verify script for public networks (kovan for example)
 ### Kovan deployment
 
 0. Update .env for the assimilators & curves that you wish to deploy
-
-1. Update oracle and usdc address of `contracts/assimilators/UsdcToUsdAssimilator.sol`
-
-2. Run the deployment scripts
+1. Run the deployment scripts, non localhost deployment will automatically get the usdc assimilator address from `./scripts/config/usdcassimilator/`
 ```
 yarn deploy:kovan:1
 yarn deploy:kovan:assimilators
