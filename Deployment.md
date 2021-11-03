@@ -140,7 +140,7 @@ Example.
 
 ## Quickstart
 
-### Local deployment
+### Localhost full deployment
 0. Update .env for the assimilators that you wish to deploy
 ```
 ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
@@ -179,7 +179,7 @@ Verify script for public networks (kovan for example)
 ### Kovan deployment
 
 0. Update .env for the assimilators & curves that you wish to deploy
-1. Run the deployment scripts, non localhost deployment will automatically get the usdc assimilator address from `./scripts/config/usdcassimilator/`
+1. Run the deployment scripts, non localhost deployment will automatically get the usdc assimilator address from `./scripts/config/usdcassimilator/[network].json`
 ```
 yarn deploy:kovan:1
 yarn deploy:kovan:assimilators
