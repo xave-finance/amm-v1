@@ -1,9 +1,16 @@
 import { curveHelper } from "./Utils";
+import { formatUnits } from "ethers/lib/utils";
+import chalk from "chalk";
+import { getAccounts } from "./common";
 
 const ASSIMILATOR_PAIRS = process.env.ASSIMILATOR_PAIRS;
 
 async function main() {
   console.time('Deployment Time');
+  const users = await getAccounts();
+  const user1 = users[0];
+  const balance = await user1.getBalance();
+  console.log(chalk.blueBright(`Deployer balance: ${formatUnits(balance)} ETH`));
   const curves = ASSIMILATOR_PAIRS.indexOf(",") > -1 ? ASSIMILATOR_PAIRS.split(",") : [ASSIMILATOR_PAIRS];
 
   try {

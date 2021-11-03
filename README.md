@@ -127,8 +127,8 @@ TOKENS_XSGD_DECIMALS=6
 TOKENS_EURS_DECIMALS=2
 TOKENS_CADC_DECIMALS=18
 
-TOKEN_TRYB_DECIMALS=6
-TOKEN_PHP_DECIMALS=18
+TOKENS_TRYB_DECIMALS=6
+TOKENS_PHP_DECIMALS=18
 
 TOKEN_JCHF_DECIMALS=18
 # ---- TOKEN DECIMALS
@@ -214,8 +214,12 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 > yarn deploy:local:1
 ```
 2. Deploy assimilators
-    - Note, usdc assimilator doesn't need to be deployed again and again, upon curve deloyment, script is just referencing to usdc assimialtor config in `dfx-protocol-clone/scripts/config/usdcassimilator`
-    - Deploy assimilators (`ASSIMILATOR_PAIRS` env var)
+    - Deploy USDC assimilator (`ASSIMILATORS` env var)
+    ```
+    > yarn deploy:local:2
+    ```
+
+    - Deploy other assimilators (`ASSIMILATOR_PAIRS` env var)
     ```
     > yarn deploy:local:assimilators
     ```
@@ -223,6 +227,7 @@ ASSIMILATOR_PAIRS=EURS_USDC,XSGD_USDC,CADC_USDC
 ```
 > yarn deploy:local:3
 ```
+    - Note, if you deploy a USDC assimilator, you will need to add it in `./scripts/config/usdcassimilator/localhost.json`
 
 Deploy everything in one command
 ```
