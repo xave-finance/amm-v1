@@ -50,7 +50,7 @@ describe("Curve Contract", () => {
   let erc20: ERC20;
   let baseToken: ERC20;
   let quoteToken: ERC20;
-  const maxDeposit: number = 90000000;
+  let maxDeposit: number = 90000000;
   let maxSwap: number = 90000000;
 
   let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
@@ -304,5 +304,60 @@ describe("Curve Contract", () => {
       }
     });
 
+    describe("pool withdraw", () => {
+      for (let withdraw = 1; withdraw <= maxDeposit; withdraw *= 5) {
+        const amt = parseUnits(withdraw.toString(), TOKENS.USDC.decimals);
+
+        it.only(`withdraw amount: ${withdraw}`, async () => {
+          try {
+            let swapAmt = withdraw;
+            await curve.connect(user1).withdraw(parseUnits(withdraw.toString()), await getFutureTime());
+
+            const liquidity = await curve.liquidity();
+            const ratio = await weightBase(liquidity);
+
+            // Estimate deposit given quote
+            const depositPreviewGivenQuote = await adjustViewDeposit(
+              "quote",
+              await previewDepositGivenQuote(swapAmt, tokenQuote, curve),
+              swapAmt,
+              TOKENS.USDC.decimals,
+              curve
+            );
+
+            // User input should be gte the estimate quote
+            expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenQuote.quote))
+
+            // Preview given base
+            const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
+            // Estimate deposit given base
+            const depositPreviewGivenBase = await adjustViewDeposit(
+              "base",
+              await previewDepositGivenBase(swapAmt, rateBase, tokenQuote, ratio, curve),
+              swapAmt,
+              TOKENS[tokenQuote].decimals,
+              curve
+            );
+
+            // User input should be gte the estimate base
+            expect(parseUnits(swapAmt.toString()).gte(depositPreviewGivenBase.base))
+
+            const lpAmount = await curveLpToken.balanceOf(user1Address);
+            const [baseAmt, quoteAmt] = await curve.connect(user1).viewWithdraw(lpAmount);
+            expect(quoteAmt.lte(lpAmount)).to.be.true;
+
+            const targetAmountInQuote = await curve
+              .viewOriginSwap(baseToken.address, TOKENS.USDC.address, amt);
+            expect(targetAmountInQuote.gt(0)).to.be.true;
+
+            const originAmount = await curve
+              .viewOriginSwap(baseToken.address, TOKENS.USDC.address, amt);
+            expect(originAmount.gt(0)).to.be.true;
+          } catch (e) {
+            expect(e.toString()).to.include("insufficient balance");
+          }
+        });
+      }
+    });
   });
 });
