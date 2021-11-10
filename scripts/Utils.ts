@@ -7,7 +7,7 @@ import mkdirp from "mkdirp";
 import fs from "fs";
 import { BigNumberish } from "ethers";
 import { ERC20 } from "../typechain/ERC20";
-import { CurveFactory, Curve } from "../typechain";
+import { CurveFactory, Curve, Router } from "../typechain";
 import { deployContract, getFastGasPrice } from "./common";
 
 const NETWORK = hre.network.name;
@@ -79,7 +79,7 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
       const tokenName = tokenNameArr[index];
       const fullFileName = fileObj[tokenSymbol];
       const fileName = fileObj[tokenSymbol].split('.json')[0];
-      const baseAssimilatorAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
+      const baseAssimilatorAddr = require(configImporter(`assimilators/${fullFileName}`))[fileName];
       const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`)).address;
       const lptName = lptNamesArr[index];
 
@@ -149,11 +149,7 @@ export const deployedLogs = async (filename, output) => {
   fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 };
 
-export const configImporter = (filename) => {
-  return path.resolve(__dirname, `./config/${NETWORK}/${filename}.json`);
-}
-
-export const configImporterNew = (route) => {
+export const configImporter = (route) => {
   return path.resolve(__dirname, `./config/${NETWORK}/${route}`);
 }
 
@@ -199,7 +195,7 @@ export const curveAddresses = async () => {
   const fileObj = await listFiles('curves', 'Curves.json');
 
   Object.keys(fileObj).map(key => {
-    let curveAddr = require(configImporterNew(`curves/${fileObj[key]}`))
+    let curveAddr = require(configImporter(`curves/${fileObj[key]}`))
     curves[key] = curveAddr[Object.keys(curveAddr)[0]];
   });
 

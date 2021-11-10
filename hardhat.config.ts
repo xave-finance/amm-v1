@@ -12,6 +12,19 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 import { CONFIG } from "./test/Config";
 const LOCALHOST = "http://127.0.0.1:8545";
 
+let RPC_URL;
+let BLOCK_NO;
+
+if (process.env.NETWORK === 'mainnet') {
+  RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
+  BLOCK_NO = 13453242;
+} else if (process.env.NETWORK === 'matic') {
+  RPC_URL = `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROJECT_ID}`;
+  BLOCK_NO = 20997348;
+} else if (process.env.NETWORK === 'kovan') {
+  RPC_URL = `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
+  BLOCK_NO = 20992220;
+}
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
@@ -34,8 +47,8 @@ const config: HardhatUserConfig = {
       },
       forking: {
         enabled: true,
-        url: alchemyEndpoint ? alchemyEndpoint : LOCALHOST,
-        blockNumber: CONFIG.BLOCK_NO
+        url: RPC_URL,
+        blockNumber: BLOCK_NO
       },
       blockGasLimit: 20000000,
       allowUnlimitedContractSize: true

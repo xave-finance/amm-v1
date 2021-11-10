@@ -69,12 +69,14 @@ describe("Factory", function () {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
-      cadcToUsdAssimilator,
       usdcToUsdAssimilator,
+
+      // cadcToUsdAssimilator,
+
       CurveFactory,
       RouterFactory,
       usdc,
-      cadc,
+      // cadc,
       erc20,
     } = await scaffoldTest());
   });

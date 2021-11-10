@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import path from "path";
 import { ethers } from "hardhat";
 import { Signer, Contract, ContractFactory, BigNumber, BigNumberish } from "ethers";
 import chai, { expect } from "chai";
@@ -11,9 +12,8 @@ import { Router } from "../typechain/Router";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
 import { assert } from "console";
-
-import { TOKENS } from "./Constants";
 import { CONFIG } from "./Config";
+const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 
 chai.use(chaiBigNumber(BigNumber));
 
@@ -84,14 +84,17 @@ describe("Deployment", () => {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
-      cadcToUsdAssimilator,
+
       usdcToUsdAssimilator,
-      eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+
+      // cadcToUsdAssimilator,
+      // eursToUsdAssimilator
+
       CurveFactory,
       RouterFactory,
       usdc,
-      cadc,
+      // cadc,
       erc20,
       curvesLib,
       orchestratorLib,
@@ -113,44 +116,43 @@ describe("Deployment", () => {
   });
 
   describe("Core Contracts", async () => {
-    it("Curves", () => { assert(ethers.utils.isAddress(curvesLib.address)); })
-    it("Orchestrator", () => { assert(ethers.utils.isAddress(orchestratorLib.address)); })
-    it("ProportionalLiquidity", () => { assert(ethers.utils.isAddress(proportionalLiquidityLib.address)); })
-    it("Swaps", () => { assert(ethers.utils.isAddress(swapsLib.address)); })
-    it("ViewLiquidity", () => { assert(ethers.utils.isAddress(viewLiquidityLib.address)); })
-    it("CurveFactory", () => { assert(ethers.utils.isAddress(curveFactoryContract.address)); })
-    it("Router", () => { assert(ethers.utils.isAddress(routerContract.address)); })
+    it.only("Curves", () => { assert(ethers.utils.isAddress(curvesLib.address)); })
+    it.only("Orchestrator", () => { assert(ethers.utils.isAddress(orchestratorLib.address)); })
+    it.only("ProportionalLiquidity", () => { assert(ethers.utils.isAddress(proportionalLiquidityLib.address)); })
+    it.only("Swaps", () => { assert(ethers.utils.isAddress(swapsLib.address)); })
+    it.only("ViewLiquidity", () => { assert(ethers.utils.isAddress(viewLiquidityLib.address)); })
+    it.only("CurveFactory", () => { assert(ethers.utils.isAddress(curveFactoryContract.address)); })
+    it.only("Router", () => { assert(ethers.utils.isAddress(routerContract.address)); })
   });
 
   describe("Assimilators", async () => {
-    it("CadcToUsdAssimilator", () => { assert(ethers.utils.isAddress(cadcToUsdAssimilator.address)); })
-    it("UsdcToUsdAssimilator", () => { assert(ethers.utils.isAddress(usdcToUsdAssimilator.address)); })
-    it("EursToUsdAssimilator", () => { assert(ethers.utils.isAddress(eursToUsdAssimilator.address)); })
-    it("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(xsgdToUsdAssimilator.address)); })
+    it.only("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(xsgdToUsdAssimilator.address)); })
   })
 
   describe("Curve/Pair Contract", async () => {
-    const NAME = "CAD Coin";
-    const SYMBOL = "CADC";
+    const NAME = "XSGD";
+    const SYMBOL = "XSGD";
 
-    it("CADC:USDC", async () => {
+    it.only("XSGD:USDC", async () => {
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
+
       const { curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
-        base: TOKENS.CADC.address,
+        base: TOKENS.XSGD.address,
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
-        baseAssimilator: cadcToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
       const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
 
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
       expect(curveAddrA).to.be.equal(curveAddrB);
     })
   })

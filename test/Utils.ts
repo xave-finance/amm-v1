@@ -134,7 +134,7 @@ export const getLatestBlockTime = async (): Promise<number> => {
 
 export const getFutureTime = async (): Promise<number> => {
   const t = await getLatestBlockTime();
-  return t + 60;
+  return t + (60 * 10);
 };
 
 export const getCurveAddressFromTxRecp = (txRecp: ContractReceipt): string => {
@@ -295,4 +295,11 @@ export const adjustViewDeposit = async (inputType: string, depositPreview, input
   }
 
   return depositPreview;
+}
+
+export const weightBase = async (liquidity: any) => {
+  const liquidityTotal = parseFloat(formatUnits(liquidity.total_));
+  const numeraireBase = parseFloat(formatUnits(liquidity.individual_[0]));
+
+  return numeraireBase / liquidityTotal;
 }
