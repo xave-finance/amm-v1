@@ -6,25 +6,22 @@ import "@nomiclabs/hardhat-etherscan";
 
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const ALCHEMY_PROJECT_ID = process.env.ALCHEMY_PROJECT_ID;
-const alchemyEndpoint = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
 const MNEMONIC = process.env.MNEMONIC;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-import { CONFIG } from "./test/Config";
-const LOCALHOST = "http://127.0.0.1:8545";
 
-let RPC_URL;
-let BLOCK_NO;
+let RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
+let BLOCK_NO = 13453242;
 
-if (process.env.NETWORK === 'mainnet') {
-  RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 13453242;
-} else if (process.env.NETWORK === 'matic') {
-  RPC_URL = `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 20997348;
-} else if (process.env.NETWORK === 'kovan') {
-  RPC_URL = `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 20992220;
-}
+// if (process.env.NETWORK === 'mainnet') {
+//   RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
+//   BLOCK_NO = 13453242;
+// } else if (process.env.NETWORK === 'matic') {
+//   RPC_URL = `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROJECT_ID}`;
+//   BLOCK_NO = 20997348;
+// } else if (process.env.NETWORK === 'kovan') {
+//   RPC_URL = `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
+//   BLOCK_NO = 20992220;
+// }
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
