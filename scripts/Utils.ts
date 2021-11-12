@@ -77,8 +77,8 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
       const baseWeight = toDecimal(weightArr[0]).toString();
       const quoteWeight = toDecimal(weightArr[1]).toString();
       const tokenName = tokenNameArr[index];
-      const fullFileName = fileObj[tokenSymbol];
-      const fileName = fileObj[tokenSymbol].split('.json')[0];
+      const fullFileName = fileObj[tokenSymbol.toUpperCase()];
+      const fileName = fileObj[tokenSymbol.toUpperCase()].split('.json')[0];
       const baseAssimilatorAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
       const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`)).address;
       const lptName = lptNamesArr[index];
@@ -93,7 +93,7 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
         lptName,
         name: tokenName,
         symbol: tokenSymbol,
-        base: TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+        base: TOKEN[`TOKEN_ADDR_${tokenSymbol.toUpperCase()}`],
         quote: TOKEN[QUOTED_TOKEN],
         baseWeight: parseUnits(baseWeight),
         quoteWeight: parseUnits(quoteWeight),
@@ -264,6 +264,7 @@ const createCurve = async function ({
       gasPrice
     },
   );
+
   await tx.wait();
 
   console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
