@@ -223,6 +223,3 @@ ASSIMILATOR_PAIRS=SPHP_USDC
 ```
 > yarn deploy:kovan:3
 ```
-
-#### Note on Set Cap
-This is optional, we can run this on defender after curve deployment

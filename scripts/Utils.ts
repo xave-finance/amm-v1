@@ -261,6 +261,7 @@ const createCurve = async function ({
     baseAssimilator,
     quoteAssimilator,
     {
+      gasLimit: 3000000,
       gasPrice
     },
   );
@@ -285,6 +286,13 @@ const createCurve = async function ({
   console.log(`curveAddress ${symbol}: `, curveAddress)
   console.log(`Curve ${symbol} Address: `, curve.address)
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
+
+  // Set Cap
+  const gasPrice2 = await getFastGasPrice();
+  console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice2, 9)} gwei`);
+  const cap = parseUnits("500000");
+  const setCap = await curve.setCap(cap, { gasLimit: 3000000, gasPrice: gasPrice2 });
+  console.log('Curve#setCap TX Hash: ', setCap.hash)
 
   return {
     curve,
@@ -334,7 +342,7 @@ const createCurveAndSetParams = async function ({
 
   console.log(`Curve#setParams with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
 
-  const tx = await curve.setParams(...params, { gasPrice });
+  const tx = await curve.setParams(...params, { gasLimit: 3000000, gasPrice });
   console.log('Curve#setParams TX Hash: ', tx.hash)
   await tx.wait();
   return {

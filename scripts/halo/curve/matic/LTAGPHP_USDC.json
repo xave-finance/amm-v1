@@ -1,8 +1,8 @@
 {
-    "token_name": "handlePHP",
-    "token_symbol": "fxPHP",
+    "token_name": "LolliDAO Philippines Peso (Tagcash)",
+    "token_symbol": "ltagPHP",
     "weights": "50/50",
-    "lpt_name": "HLP-fxPHP-USDC",
+    "lpt_name": "HLP-ltagPHP-USDC",
     "dimensions": {
         "alpha": "0.8",
         "beta": "0.4",
