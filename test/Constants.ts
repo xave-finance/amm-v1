@@ -39,3 +39,5 @@ export const ORACLES = {
     decimals: 8,
   },
 };
+
+export const HALODAO_DEPLOYER_2 = "0x235a2ac113014f9dcb8aba6577f20290832ddefd";
