@@ -288,10 +288,10 @@ const createCurve = async function ({
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
   // Set Cap
-  const gasPrice2 = await getFastGasPrice();
-  console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice2, 9)} gwei`);
+  const gasPrice1 = await getFastGasPrice();
+  console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice1, 9)} gwei`);
   const cap = parseUnits("500000");
-  const setCap = await curve.setCap(cap, { gasLimit: 3000000, gasPrice: gasPrice2 });
+  const setCap = await curve.setCap(cap, { gasLimit: 3000000, gasPrice: gasPrice1 });
   console.log('Curve#setCap TX Hash: ', setCap.hash)
 
   return {
