@@ -1,0 +1,13 @@
+{
+    "token_name": "handlePHP",
+    "token_symbol": "fxPHP",
+    "weights": "50/50",
+    "lpt_name": "HLP-fxPHP-USDC",
+    "dimensions": {
+        "alpha": "0.8",
+        "beta": "0.4",
+        "max": "0.3125",
+        "epsilon": "0.0005",
+        "lambda": "0.3"
+    }
+}
