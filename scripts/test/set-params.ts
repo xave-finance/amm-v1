@@ -3,13 +3,14 @@ import { parseUnits } from "@ethersproject/units";
 import { Curve } from "../../typechain/Curve";
 import { getAccounts, getFastGasPrice } from "../common";
 import { curveAddresses } from "../Utils";
+import { CONFIG } from "../../test/Config"
 
 const DIMENSION = {
-  alpha: parseUnits(process.env.DIMENSION_ALPHA),
-  beta: parseUnits(process.env.DIMENSION_BETA),
-  max: parseUnits(process.env.DIMENSION_MAX),
-  epsilon: parseUnits(process.env.DIMENSION_EPSILON),
-  lambda: parseUnits(process.env.DIMENSION_LAMBDA)
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
 
 async function main() {

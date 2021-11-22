@@ -1,0 +1,6 @@
+{
+    "baseDecimals": 18,
+    "baseTokenAddress": "0x6459e4d690AF945c370191e518d3b447f99a7150",
+    "quoteTokenAddress": "0x42ca36D100776d61E0D0444EAAB2F10729bf1f84",
+    "oracleAddress": "0x218231089Bebb2A31970c3b77E96eCfb3BA006D1"
+}

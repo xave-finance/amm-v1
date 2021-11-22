@@ -93,20 +93,6 @@ describe("Curve Mainnet Sanity Checks", function () {
 
     await curve
       .connect(user)
-      .depositWithWhitelist(
-        userProof.index,
-        userAddress,
-        userProof.amount,
-        userProof.proof,
-        parseUnits("9999"),
-        await getFutureTime(),
-        {
-          gasPrice: 0,
-        },
-      );
-
-    await curve
-      .connect(user)
       .originSwap(base, quote, parseUnits("1", baseDecimals), 0, await getFutureTime(), { gasPrice: 0 });
     await curve
       .connect(user)

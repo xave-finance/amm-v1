@@ -8,6 +8,10 @@ import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { mintCADC, mintEURS, mintUSDC, mintXSGD } from "./Utils";
 
+import EURS_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/EURS_USDC.json";
+import XSGD_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/XSGD_USDC.json";
+import CADC_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/CADC_USDC.json";
+
 export const ALPHA = parseUnits("0.5");
 export const BETA = parseUnits("0.35");
 export const MAX = parseUnits("0.15");
@@ -31,15 +35,28 @@ export const scaffoldTest = async () => {
   const swapsLib = await SwapsLib.deploy();
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
 
-  const CadcToUsdAssimilator = await ethers.getContractFactory("CadcToUsdAssimilator");
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const EursToUsdAssimilator = await ethers.getContractFactory("EursToUsdAssimilator");
-  const XsgdToUsdAssimilator = await ethers.getContractFactory("XsgdToUsdAssimilator");
-
-  const cadcToUsdAssimilator = await CadcToUsdAssimilator.deploy();
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy();
-  const eursToUsdAssimilator = await EursToUsdAssimilator.deploy();
-  const xsgdToUsdAssimilator = await XsgdToUsdAssimilator.deploy();
+
+  const BaseToUsdAssimilator = await ethers.getContractFactory("BaseToUsdAssimilator");
+  const eursToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    parseUnits("1", EURS_USDC_ASSIM.baseDecimals),
+    EURS_USDC_ASSIM.baseTokenAddress,
+    EURS_USDC_ASSIM.quoteTokenAddress,
+    EURS_USDC_ASSIM.oracleAddress,
+  );
+  const xsgdToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    parseUnits("1", XSGD_USDC_ASSIM.baseDecimals),
+    XSGD_USDC_ASSIM.baseTokenAddress,
+    XSGD_USDC_ASSIM.quoteTokenAddress,
+    XSGD_USDC_ASSIM.oracleAddress,
+  );
+  const cadcToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    parseUnits("1", CADC_USDC_ASSIM.baseDecimals),
+    CADC_USDC_ASSIM.baseTokenAddress,
+    CADC_USDC_ASSIM.quoteTokenAddress,
+    CADC_USDC_ASSIM.oracleAddress,
+  );
 
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
   const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
@@ -78,7 +95,7 @@ export const scaffoldTest = async () => {
     orchestratorLib,
     proportionalLiquidityLib,
     swapsLib,
-    viewLiquidityLib
+    viewLiquidityLib,
   };
 };
 
@@ -94,7 +111,6 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     baseAssimilator,
     quoteAssimilator,
     params,
-    yesWhitelisting,
   }: {
     name: string;
     symbol: string;
@@ -105,7 +121,6 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     baseAssimilator: string;
     quoteAssimilator: string;
     params?: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-    yesWhitelisting?: boolean;
   }): Promise<{ curve: Curve; curveLpToken: ERC20 }> {
     await curveFactory.newCurve(name, symbol, base, quote, baseWeight, quoteWeight, baseAssimilator, quoteAssimilator);
 
@@ -115,10 +130,6 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     );
     const curveLpToken = (await ethers.getContractAt("ERC20", curveAddress)) as ERC20;
     const curve = (await ethers.getContractAt("Curve", curveAddress)) as Curve;
-
-    if (!yesWhitelisting) {
-      await curve.turnOffWhitelisting();
-    }
 
     // Set params for the curve
     if (params) {
@@ -142,8 +153,7 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     quoteWeight,
     baseAssimilator,
     quoteAssimilator,
-    params,
-    yesWhitelisting,
+    params
   }: {
     name: string;
     symbol: string;
@@ -154,7 +164,6 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     baseAssimilator: string;
     quoteAssimilator: string;
     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-    yesWhitelisting?: boolean;
   }) {
     const { curve, curveLpToken } = await createCurve({
       name,
@@ -164,8 +173,7 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
       baseWeight,
       quoteWeight,
       baseAssimilator,
-      quoteAssimilator,
-      yesWhitelisting,
+      quoteAssimilator
     });
 
     const tx = await curve.setParams(...params);
