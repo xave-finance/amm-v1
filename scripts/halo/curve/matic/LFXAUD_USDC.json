@@ -1,0 +1,13 @@
+{
+    "token_name": "LolliDAO AUD",
+    "token_symbol": "lfxAUD",
+    "weights": "50/50",
+    "lpt_name": "HLP-lfxAUD-USDC",
+    "dimensions": {
+        "alpha": "0.8",
+        "beta": "0.48",
+        "max": "0.175",
+        "epsilon": "0.0005",
+        "lambda": "0.3"
+    }
+}

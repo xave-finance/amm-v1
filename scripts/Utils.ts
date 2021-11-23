@@ -77,8 +77,8 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
       const baseWeight = toDecimal(weightArr[0]).toString();
       const quoteWeight = toDecimal(weightArr[1]).toString();
       const tokenName = tokenNameArr[index];
-      const fullFileName = fileObj[tokenSymbol];
-      const fileName = fileObj[tokenSymbol].split('.json')[0];
+      const fullFileName = fileObj[tokenSymbol.toUpperCase()];
+      const fileName = fileObj[tokenSymbol.toUpperCase()].split('.json')[0];
       const baseAssimilatorAddr = require(configImporter(`assimilators/${fullFileName}`))[fileName];
       const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`)).address;
       const lptName = lptNamesArr[index];
@@ -93,7 +93,7 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
         lptName,
         name: tokenName,
         symbol: tokenSymbol,
-        base: TOKEN[`TOKEN_ADDR_${tokenSymbol}`],
+        base: TOKEN[`TOKEN_ADDR_${tokenSymbol.toUpperCase()}`],
         quote: TOKEN[QUOTED_TOKEN],
         baseWeight: parseUnits(baseWeight),
         quoteWeight: parseUnits(quoteWeight),
@@ -257,9 +257,11 @@ const createCurve = async function ({
     baseAssimilator,
     quoteAssimilator,
     {
+      gasLimit: 3000000,
       gasPrice
     },
   );
+
   await tx.wait();
 
   console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
@@ -282,10 +284,10 @@ const createCurve = async function ({
   console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
 
   // Set Cap
-  const gasPrice3 = await getFastGasPrice();
-  console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice3, 9)} gwei`);
+  const gasPrice1 = await getFastGasPrice();
+  console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice1, 9)} gwei`);
   const cap = parseUnits("500000");
-  const setCap = await curve.setCap(cap, { gasPrice: gasPrice3 });
+  const setCap = await curve.setCap(cap, { gasLimit: 3000000, gasPrice: gasPrice1 });
   console.log('Curve#setCap TX Hash: ', setCap.hash)
 
   return {
@@ -336,7 +338,7 @@ const createCurveAndSetParams = async function ({
 
   console.log(`Curve#setParams with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
 
-  const tx = await curve.setParams(...params, { gasPrice });
+  const tx = await curve.setParams(...params, { gasLimit: 3000000, gasPrice });
   console.log('Curve#setParams TX Hash: ', tx.hash)
   await tx.wait();
   return {

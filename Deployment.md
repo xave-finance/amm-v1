@@ -183,8 +183,13 @@ Verify script for public networks (kovan for example)
 0. Update .env for the assimilators & curves that you wish to deploy
 1. Update USDC address to kovan address in Zap.sol
 2. Run the deployment scripts, non localhost deployment will automatically get the usdc assimilator address from `./scripts/config/usdcassimilator/[network].json`
+
+Note:
+
+If new USDCToUsdAssimilator has been deployed by running `yarn deploy:kovan:2`, then you need to update the USDCToUsdAssimilator address in `./scripts/config/usdcassimilator/[network].json`
 ```
 yarn deploy:kovan:1
+yarn deploy:kovan:2  // (optional)
 yarn deploy:kovan:assimilators
 yarn deploy:kovan:3
 yarn deploy:kovan:verify // (optional)
