@@ -88,15 +88,18 @@ describe("Curve Contract", () => {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
-      cadcToUsdAssimilator,
+
       usdcToUsdAssimilator,
-      eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+
+      // cadcToUsdAssimilator,
+      // eursToUsdAssimilator,
+
       CurveFactory,
       RouterFactory,
       usdc,
-      cadc,
-      eurs,
+      // cadc,
+      // eurs,
       xsgd,
       erc20
     } = await scaffoldTest());

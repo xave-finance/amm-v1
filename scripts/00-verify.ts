@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 import { parseUnits } from "@ethersproject/units";
 import { CONTRACTS } from "./config/contracts";
-import { configImporterNew } from "./Utils";
+import { configImporter } from "./Utils";
 
 const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
 const ASSIMILATORS = process.env.ASSIMILATORS;
@@ -44,7 +44,7 @@ const assimilatorsVerify = async () => {
     try {
       const token = assimilators[index].split('ToUsdAssimilator')[0].toUpperCase();
       const fileName = `${token}ToUsdAssimilator`;
-      const curveAddr = require(configImporterNew(`assimilators/${fileName}.json`))[fileName];
+      const curveAddr = require(configImporter(`assimilators/${fileName}.json`))[fileName];
 
       await hre.run('verify:verify', {
         address: curveAddr
@@ -94,11 +94,11 @@ const curvesVerify = async () => {
 
         const fileName = `${tokenSymbol}Curves`;
         const fullFileName = `${fileName}.json`;
-        const curveAddr = require(configImporterNew(`curves/${fullFileName}`))[fileName];
+        const curveAddr = require(configImporter(`curves/${fullFileName}`))[fileName];
         const token = assimilators[index].split('ToUsdAssimilator')[0].toUpperCase();
         const assimfileName = `${token}ToUsdAssimilator`;
-        const assimAddr = require(configImporterNew(`assimilators/${assimfileName}.json`))[assimfileName];
-        const quotedAssimAddr = require(configImporterNew(`assimilators/USDCToUsdAssimilator.json`))['USDCToUsdAssimilator'];
+        const assimAddr = require(configImporter(`assimilators/${assimfileName}.json`))[assimfileName];
+        const quotedAssimAddr = require(configImporter(`assimilators/USDCToUsdAssimilator.json`))['USDCToUsdAssimilator'];
 
         await hre.run('verify:verify', {
           address: curveAddr,

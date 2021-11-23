@@ -77,10 +77,13 @@ describe("Curve Contract", () => {
     ({
       users: [user1],
       userAddresses: [user1Address],
-      cadcToUsdAssimilator,
+
       usdcToUsdAssimilator,
-      eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+
+      // cadcToUsdAssimilator,
+      // eursToUsdAssimilator,
+
       CurveFactory,
       erc20
     } = await scaffoldTest());
