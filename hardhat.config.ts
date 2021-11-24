@@ -21,6 +21,9 @@ if (process.env.NETWORK === 'mainnet') {
 } else if (process.env.NETWORK === 'kovan') {
   RPC_URL = `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
   BLOCK_NO = 20992220;
+} else {
+  RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
+  BLOCK_NO = 13453242;
 }
 
 // You need to export an object to set up your config

@@ -145,10 +145,10 @@ describe("Deployment", () => {
   })
 
   describe("Curve/Pair Contract", async () => {
-    const NAME = "XSGD";
-    const SYMBOL = "XSGD";
-
     it.only("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
       const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
 
       const { curve } = await createCurveAndSetParams({
@@ -165,6 +165,136 @@ describe("Deployment", () => {
 
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("TCAD:USDC", async () => {
+      const NAME = "TCAD";
+      const SYMBOL = "TCAD";
+
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TCAD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TCAD.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("TAUD:USDC", async () => {
+      const NAME = "TAUD";
+      const SYMBOL = "TAUD";
+
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TAUD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TAUD.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("TGBP:USDC", async () => {
+      const NAME = "TGBP";
+      const SYMBOL = "TGBP";
+
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TGBP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TGBP.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("FXPHP:USDC", async () => {
+      const NAME = "FXPHP";
+      const SYMBOL = "FXPHP";
+
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.FXPHP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.FXPHP.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("TAGPHP:USDC", async () => {
+      const NAME = "TAGPHP";
+      const SYMBOL = "TAGPHP";
+
+      const quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`)).address;
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TAGPHP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: xsgdToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TAGPHP.address, TOKENS.USDC.address);
 
       expect(ethers.utils.isAddress(curveAddrA)).true;
       expect(ethers.utils.isAddress(curveAddrB)).true;
