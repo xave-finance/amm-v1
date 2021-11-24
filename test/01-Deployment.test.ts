@@ -35,6 +35,11 @@ describe("Deployment", () => {
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
+  let tcadToUsdAssimilator: Contract;
+  let taudToUsdAssimilator: Contract;
+  let tgbpToUsdAssimilator: Contract;
+  let fxphpToUsdAssimilator: Contract;
+  let tagphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
   let RouterFactory: ContractFactory;
@@ -87,6 +92,11 @@ describe("Deployment", () => {
 
       usdcToUsdAssimilator,
       xsgdToUsdAssimilator,
+      tcadToUsdAssimilator,
+      taudToUsdAssimilator,
+      tgbpToUsdAssimilator,
+      fxphpToUsdAssimilator,
+      tagphpToUsdAssimilator,
 
       // cadcToUsdAssimilator,
       // eursToUsdAssimilator
@@ -127,6 +137,11 @@ describe("Deployment", () => {
 
   describe("Assimilators", async () => {
     it.only("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(xsgdToUsdAssimilator.address)); })
+    it.only("TcadToUsdAssimilator", () => { assert(ethers.utils.isAddress(tcadToUsdAssimilator.address)); })
+    it.only("TaudToUsdAssimilator", () => { assert(ethers.utils.isAddress(taudToUsdAssimilator.address)); })
+    it.only("TgbpToUsdAssimilator", () => { assert(ethers.utils.isAddress(tgbpToUsdAssimilator.address)); })
+    it.only("FxphpToUsdAssimilator", () => { assert(ethers.utils.isAddress(fxphpToUsdAssimilator.address)); })
+    it.only("TagphpToUsdAssimilator", () => { assert(ethers.utils.isAddress(tagphpToUsdAssimilator.address)); })
   })
 
   describe("Curve/Pair Contract", async () => {
