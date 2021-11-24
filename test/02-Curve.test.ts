@@ -425,7 +425,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TCAD'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -449,7 +449,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TAUD'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -473,7 +473,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TGBP'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -497,7 +497,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['FXPHP'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -521,7 +521,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TAGPHP'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -547,7 +547,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['XSGD'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -560,7 +560,7 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['XSGD'].address,
-          quoteAssimilator: usdcToUsdAssimilator.address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
         throw new Error("newCurve should throw error");
@@ -581,7 +581,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TCAD'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -594,7 +594,7 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['TCAD'].address,
-          quoteAssimilator: usdcToUsdAssimilator.address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
         throw new Error("newCurve should throw error");
@@ -615,7 +615,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TAUD'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -628,7 +628,7 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['TAUD'].address,
-          quoteAssimilator: usdcToUsdAssimilator.address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
         throw new Error("newCurve should throw error");
@@ -649,7 +649,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TGBP'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -662,7 +662,7 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['TGBP'].address,
-          quoteAssimilator: usdcToUsdAssimilator.address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
         throw new Error("newCurve should throw error");
@@ -683,7 +683,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['FXPHP'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -696,7 +696,7 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['FXPHP'].address,
-          quoteAssimilator: usdcToUsdAssimilator.address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
         throw new Error("newCurve should throw error");
@@ -717,7 +717,7 @@ describe("Curve Contract", () => {
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
         baseAssimilator: assimilator['TAGPHP'].address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -730,7 +730,7 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['TAGPHP'].address,
-          quoteAssimilator: usdcToUsdAssimilator.address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
         throw new Error("newCurve should throw error");
@@ -741,7 +741,7 @@ describe("Curve Contract", () => {
   });
 
   describe("Set Dimensions", async () => {
-    it("XSGD:USDC", async () => {
+    it.only("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
@@ -752,8 +752,8 @@ describe("Curve Contract", () => {
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
-        baseAssimilator: xsgdToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        baseAssimilator: assimilator['XSGD'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
@@ -778,10 +778,201 @@ describe("Curve Contract", () => {
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
     })
+
+    it.only("TCAD:USDC", async () => {
+      const NAME = "TCAD";
+      const SYMBOL = "TCAD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TCAD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['TCAD'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TCAD.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it.only("TAUD:USDC", async () => {
+      const NAME = "TAUD";
+      const SYMBOL = "TAUD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TAUD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['TAUD'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TAUD.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it.only("TGBP:USDC", async () => {
+      const NAME = "TGBP";
+      const SYMBOL = "TGBP";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TGBP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['TGBP'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TGBP.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it.only("FXPHP:USDC", async () => {
+      const NAME = "FXPHP";
+      const SYMBOL = "FXPHP";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.FXPHP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['FXPHP'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.FXPHP.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it.only("TAGPHP:USDC", async () => {
+      const NAME = "TAGPHP";
+      const SYMBOL = "TAGPHP";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.TAGPHP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['TAGPHP'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.TAGPHP.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
   });
 
+  // TODO: impersonate accounts
   describe("Emergency Withdraw", async () => {
-    it("XSGD:USDC", async () => {
+    it.only("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
@@ -792,7 +983,7 @@ describe("Curve Contract", () => {
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
-        baseAssimilator: xsgdToUsdAssimilator.address,
+        baseAssimilator: assimilator['XSGD'].address,
         quoteAssimilator: usdcToUsdAssimilator.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
@@ -835,6 +1026,7 @@ describe("Curve Contract", () => {
     })
   });
 
+  // TODO: impersonate accounts
   describe("Freeze and Unfreeze Curve", async () => {
     it("XSGD:USDC", async () => {
       const NAME = "XSGD";
@@ -847,7 +1039,7 @@ describe("Curve Contract", () => {
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
-        baseAssimilator: xsgdToUsdAssimilator.address,
+        baseAssimilator: assimilator['XSGD'].address,
         quoteAssimilator: usdcToUsdAssimilator.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
