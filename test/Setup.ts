@@ -88,9 +88,12 @@ export const scaffoldTest = async () => {
   );
 
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  // const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
-  // const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
   const xsgd = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
+  const tcad = (await ethers.getContractAt("ERC20", TOKENS.TCAD.address)) as ERC20;
+  const taud = (await ethers.getContractAt("ERC20", TOKENS.TAUD.address)) as ERC20;
+  const tgbp = (await ethers.getContractAt("ERC20", TOKENS.TGBP.address)) as ERC20;
+  const fxphp = (await ethers.getContractAt("ERC20", TOKENS.FXPHP.address)) as ERC20;
+  const tagphp = (await ethers.getContractAt("ERC20", TOKENS.TAGPHP.address)) as ERC20;
 
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
@@ -117,13 +120,14 @@ export const scaffoldTest = async () => {
     fxphpToUsdAssimilator,
     tagphpToUsdAssimilator,
 
-    // cadcToUsdAssimilator,
-    // eursToUsdAssimilator,
-
     usdc,
-    // cadc,
-    // eurs,
     xsgd,
+    tcad,
+    taud,
+    tgbp,
+    fxphp,
+    tagphp,
+
     erc20,
     CurveFactory,
     RouterFactory,

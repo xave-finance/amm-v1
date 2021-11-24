@@ -4,6 +4,8 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 
+import { CONFIG } from "./test/Config";
+
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const ALCHEMY_PROJECT_ID = process.env.ALCHEMY_PROJECT_ID;
 const MNEMONIC = process.env.MNEMONIC;
@@ -14,16 +16,16 @@ let BLOCK_NO;
 
 if (process.env.NETWORK === 'mainnet') {
   RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 13453242;
+  BLOCK_NO = CONFIG.BLOCK_NO;
 } else if (process.env.NETWORK === 'matic') {
   RPC_URL = `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 20997348;
+  BLOCK_NO = CONFIG.BLOCK_NO;
 } else if (process.env.NETWORK === 'kovan') {
   RPC_URL = `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 20992220;
+  BLOCK_NO = CONFIG.BLOCK_NO;
 } else {
   RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = 13453242;
+  BLOCK_NO = CONFIG.BLOCK_NO;
 }
 
 // You need to export an object to set up your config
