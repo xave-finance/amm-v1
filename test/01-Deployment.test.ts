@@ -33,15 +33,10 @@ describe("Deployment", () => {
   let assimilator = {};
   let quoteAssimilatorAddr;
 
-  let cadcToUsdAssimilator: Contract;
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
-  let tcadToUsdAssimilator: Contract;
-  let taudToUsdAssimilator: Contract;
-  let tgbpToUsdAssimilator: Contract;
   let fxphpToUsdAssimilator: Contract;
-  let tagphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
   let RouterFactory: ContractFactory;
@@ -53,7 +48,6 @@ describe("Deployment", () => {
   let routerContract: Contract;
 
   let usdc: ERC20;
-  let cadc: ERC20;
   let erc20: ERC20;
 
   let curvesLib: Contract;
@@ -93,12 +87,9 @@ describe("Deployment", () => {
       userAddresses: [user1Address, user2Address],
 
       usdcToUsdAssimilator,
+      eursToUsdAssimilator,
       xsgdToUsdAssimilator,
-      tcadToUsdAssimilator,
-      taudToUsdAssimilator,
-      tgbpToUsdAssimilator,
       fxphpToUsdAssimilator,
-      tagphpToUsdAssimilator,
 
       CurveFactory,
       RouterFactory,
@@ -112,12 +103,9 @@ describe("Deployment", () => {
     } = await scaffoldTest());
 
     assimilator = {
+      'EURS': eursToUsdAssimilator,
       'XSGD': xsgdToUsdAssimilator,
-      'TCAD': tcadToUsdAssimilator,
-      'TAUD': taudToUsdAssimilator,
-      'TGBP': tgbpToUsdAssimilator,
-      'FXPHP': fxphpToUsdAssimilator,
-      'TAGPHP': tagphpToUsdAssimilator
+      'FXPHP': fxphpToUsdAssimilator
     };
 
     curveFactoryContract = await CurveFactory.deploy();
@@ -145,15 +133,36 @@ describe("Deployment", () => {
   });
 
   describe("Assimilators", async () => {
+    it("EursToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['EURS'].address)); })
     it("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['XSGD'].address)); })
-    it("TcadToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['TCAD'].address)); })
-    it("TaudToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['TAUD'].address)); })
-    it("TgbpToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['TGBP'].address)); })
     it("FxphpToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['FXPHP'].address)); })
-    it("TagphpToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['TAGPHP'].address)); })
   })
 
   describe("Curve/Pair Contract", async () => {
+    it("EURS:USDC", async () => {
+      const NAME = "EURS";
+      const SYMBOL = "EURS";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['EURS'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
     it("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
@@ -178,78 +187,6 @@ describe("Deployment", () => {
       expect(curveAddrA).to.be.equal(curveAddrB);
     })
 
-    it("TCAD:USDC", async () => {
-      const NAME = "TCAD";
-      const SYMBOL = "TCAD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TCAD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TCAD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TCAD.address, TOKENS.USDC.address);
-
-      expect(ethers.utils.isAddress(curveAddrA)).true;
-      expect(ethers.utils.isAddress(curveAddrB)).true;
-      expect(curveAddrA).to.be.equal(curveAddrB);
-    })
-
-    it("TAUD:USDC", async () => {
-      const NAME = "TAUD";
-      const SYMBOL = "TAUD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAUD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAUD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TAUD.address, TOKENS.USDC.address);
-
-      expect(ethers.utils.isAddress(curveAddrA)).true;
-      expect(ethers.utils.isAddress(curveAddrB)).true;
-      expect(curveAddrA).to.be.equal(curveAddrB);
-    })
-
-    it("TGBP:USDC", async () => {
-      const NAME = "TGBP";
-      const SYMBOL = "TGBP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TGBP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TGBP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TGBP.address, TOKENS.USDC.address);
-
-      expect(ethers.utils.isAddress(curveAddrA)).true;
-      expect(ethers.utils.isAddress(curveAddrB)).true;
-      expect(curveAddrA).to.be.equal(curveAddrB);
-    })
-
     it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
@@ -268,30 +205,6 @@ describe("Deployment", () => {
 
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.FXPHP.address, TOKENS.USDC.address);
-
-      expect(ethers.utils.isAddress(curveAddrA)).true;
-      expect(ethers.utils.isAddress(curveAddrB)).true;
-      expect(curveAddrA).to.be.equal(curveAddrB);
-    })
-
-    it("TAGPHP:USDC", async () => {
-      const NAME = "TAGPHP";
-      const SYMBOL = "TAGPHP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAGPHP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAGPHP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TAGPHP.address, TOKENS.USDC.address);
 
       expect(ethers.utils.isAddress(curveAddrA)).true;
       expect(ethers.utils.isAddress(curveAddrB)).true;

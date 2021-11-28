@@ -102,33 +102,21 @@ describe("Curve Contract", () => {
 
       usdcToUsdAssimilator,
       xsgdToUsdAssimilator,
-      tcadToUsdAssimilator,
-      taudToUsdAssimilator,
-      tgbpToUsdAssimilator,
       fxphpToUsdAssimilator,
-      tagphpToUsdAssimilator,
 
       CurveFactory,
       RouterFactory,
 
       usdc,
       xsgd,
-      tcad,
-      taud,
-      tgbp,
       fxphp,
-      tagphp,
 
       erc20
     } = await scaffoldTest());
 
     assimilator = {
       'XSGD': xsgdToUsdAssimilator,
-      'TCAD': tcadToUsdAssimilator,
-      'TAUD': taudToUsdAssimilator,
-      'TGBP': tgbpToUsdAssimilator,
       'FXPHP': fxphpToUsdAssimilator,
-      'TAGPHP': tagphpToUsdAssimilator
     };
 
     curveFactory = (await CurveFactory.deploy()) as CurveFactory;
@@ -179,18 +167,18 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(parseUnits("100"));
     });
 
-    it("TCAD:USDC - Should still deposit if under cap", async () => {
-      const NAME = "TCAD";
-      const SYMBOL = "TCAD";
+    it("FXPHP:USDC - Should still deposit if under cap", async () => {
+      const NAME = "FXPHP";
+      const SYMBOL = "FXPHP";
 
       const { curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
-        base: TOKENS.TCAD.address,
+        base: TOKENS.FXPHP.address,
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
-        baseAssimilator: tcadToUsdAssimilator.address,
+        baseAssimilator: fxphpToUsdAssimilator.address,
         quoteAssimilator: usdcToUsdAssimilator.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
@@ -204,8 +192,8 @@ describe("Curve Contract", () => {
 
       // Approve Deposit
       await multiMintAndApprove([
-        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS_USDC_DECIMALS), curve.address],
-        [TOKENS.TCAD.address, user1, parseUnits("10000000", TOKENS_CADC_DECIMALS), curve.address],
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.FXPHP.address, user1, parseUnits("10000000", TOKENS.FXPHP.decimals), curve.address],
       ]);
 
       await curve.deposit(parseUnits("100"), await getFutureTime());
@@ -389,7 +377,7 @@ describe("Curve Contract", () => {
   });
 
   describe("Curve/Pair Creation", async () => {
-    it.only("XSGD:USDC", async () => {
+    it("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
@@ -413,79 +401,7 @@ describe("Curve Contract", () => {
       expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
     })
 
-    it.only("TCAD:USDC", async () => {
-      const NAME = "TCAD";
-      const SYMBOL = "TCAD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TCAD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TCAD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddress = await curveFactory.curves(
-        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [TOKENS.TCAD.address, TOKENS.USDC.address])),
-      );
-
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
-    })
-
-    it.only("TAUD:USDC", async () => {
-      const NAME = "TAUD";
-      const SYMBOL = "TAUD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAUD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAUD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddress = await curveFactory.curves(
-        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [TOKENS.TAUD.address, TOKENS.USDC.address])),
-      );
-
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
-    })
-
-    it.only("TGBP:USDC", async () => {
-      const NAME = "TGBP";
-      const SYMBOL = "TGBP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TGBP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TGBP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddress = await curveFactory.curves(
-        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [TOKENS.TGBP.address, TOKENS.USDC.address])),
-      );
-
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
-    })
-
-    it.only("FXPHP:USDC", async () => {
+    it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
 
@@ -508,34 +424,10 @@ describe("Curve Contract", () => {
       assert(ethers.utils.isAddress(curve.address));
       expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
     })
-
-    it.only("TAGPHP:USDC", async () => {
-      const NAME = "TAGPHP";
-      const SYMBOL = "TAGPHP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAGPHP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAGPHP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const curveAddress = await curveFactory.curves(
-        ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [TOKENS.TAGPHP.address, TOKENS.USDC.address])),
-      );
-
-      assert(ethers.utils.isAddress(curve.address));
-      expect(curve.address.toLowerCase()).to.be.eq(curveAddress.toLowerCase());
-    })
   })
 
   describe("No duplicate pairs", async () => {
-    it.only("XSGD:USDC", async () => {
+    it("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
@@ -569,109 +461,7 @@ describe("Curve Contract", () => {
       }
     })
 
-    it.only("TCAD:USDC", async () => {
-      const NAME = "TCAD";
-      const SYMBOL = "TCAD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TCAD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TCAD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      try {
-        await createCurveAndSetParams({
-          name: NAME,
-          symbol: SYMBOL,
-          base: TOKENS.TCAD.address,
-          quote: TOKENS.USDC.address,
-          baseWeight: parseUnits("0.4"),
-          quoteWeight: parseUnits("0.6"),
-          baseAssimilator: assimilator['TCAD'].address,
-          quoteAssimilator: quoteAssimilatorAddr.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-        });
-        throw new Error("newCurve should throw error");
-      } catch (e) {
-        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
-      }
-    })
-
-    it.only("TAUD:USDC", async () => {
-      const NAME = "TAUD";
-      const SYMBOL = "TAUD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAUD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAUD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      try {
-        await createCurveAndSetParams({
-          name: NAME,
-          symbol: SYMBOL,
-          base: TOKENS.TAUD.address,
-          quote: TOKENS.USDC.address,
-          baseWeight: parseUnits("0.4"),
-          quoteWeight: parseUnits("0.6"),
-          baseAssimilator: assimilator['TAUD'].address,
-          quoteAssimilator: quoteAssimilatorAddr.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-        });
-        throw new Error("newCurve should throw error");
-      } catch (e) {
-        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
-      }
-    })
-
-    it.only("TGBP:USDC", async () => {
-      const NAME = "TGBP";
-      const SYMBOL = "TGBP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TGBP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TGBP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      try {
-        await createCurveAndSetParams({
-          name: NAME,
-          symbol: SYMBOL,
-          base: TOKENS.TGBP.address,
-          quote: TOKENS.USDC.address,
-          baseWeight: parseUnits("0.4"),
-          quoteWeight: parseUnits("0.6"),
-          baseAssimilator: assimilator['TGBP'].address,
-          quoteAssimilator: quoteAssimilatorAddr.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-        });
-        throw new Error("newCurve should throw error");
-      } catch (e) {
-        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
-      }
-    })
-
-    it.only("FXPHP:USDC", async () => {
+    it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
 
@@ -704,44 +494,10 @@ describe("Curve Contract", () => {
         expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
       }
     })
-
-    it.only("TAGPHP:USDC", async () => {
-      const NAME = "TAGPHP";
-      const SYMBOL = "TAGPHP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAGPHP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAGPHP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      try {
-        await createCurveAndSetParams({
-          name: NAME,
-          symbol: SYMBOL,
-          base: TOKENS.TAGPHP.address,
-          quote: TOKENS.USDC.address,
-          baseWeight: parseUnits("0.4"),
-          quoteWeight: parseUnits("0.6"),
-          baseAssimilator: assimilator['TAGPHP'].address,
-          quoteAssimilator: quoteAssimilatorAddr.address,
-          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-        });
-        throw new Error("newCurve should throw error");
-      } catch (e) {
-        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
-      }
-    })
   });
 
   describe("Set Dimensions", async () => {
-    it.only("XSGD:USDC", async () => {
+    it("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
@@ -779,121 +535,7 @@ describe("Curve Contract", () => {
       expect(txR.blockNumber).to.not.be.null;
     })
 
-    it.only("TCAD:USDC", async () => {
-      const NAME = "TCAD";
-      const SYMBOL = "TCAD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TCAD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TCAD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const tx = await curve.setParams(
-        DIMENSION.alpha,
-        DIMENSION.beta,
-        DIMENSION.max,
-        DIMENSION.epsilon,
-        DIMENSION.lambda
-      );
-
-      await tx.wait();
-      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TCAD.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
-
-    it.only("TAUD:USDC", async () => {
-      const NAME = "TAUD";
-      const SYMBOL = "TAUD";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAUD.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAUD'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const tx = await curve.setParams(
-        DIMENSION.alpha,
-        DIMENSION.beta,
-        DIMENSION.max,
-        DIMENSION.epsilon,
-        DIMENSION.lambda
-      );
-
-      await tx.wait();
-      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TAUD.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
-
-    it.only("TGBP:USDC", async () => {
-      const NAME = "TGBP";
-      const SYMBOL = "TGBP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TGBP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TGBP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const tx = await curve.setParams(
-        DIMENSION.alpha,
-        DIMENSION.beta,
-        DIMENSION.max,
-        DIMENSION.epsilon,
-        DIMENSION.lambda
-      );
-
-      await tx.wait();
-      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TGBP.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
-
-    it.only("FXPHP:USDC", async () => {
+    it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
 
@@ -930,49 +572,11 @@ describe("Curve Contract", () => {
       expect(txR.blockNumber).to.not.equal(undefined);
       expect(txR.blockNumber).to.not.be.null;
     })
-
-    it.only("TAGPHP:USDC", async () => {
-      const NAME = "TAGPHP";
-      const SYMBOL = "TAGPHP";
-
-      const { curve } = await createCurveAndSetParams({
-        name: NAME,
-        symbol: SYMBOL,
-        base: TOKENS.TAGPHP.address,
-        quote: TOKENS.USDC.address,
-        baseWeight: parseUnits("0.4"),
-        quoteWeight: parseUnits("0.6"),
-        baseAssimilator: assimilator['TAGPHP'].address,
-        quoteAssimilator: quoteAssimilatorAddr.address,
-        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-      });
-
-      const tx = await curve.setParams(
-        DIMENSION.alpha,
-        DIMENSION.beta,
-        DIMENSION.max,
-        DIMENSION.epsilon,
-        DIMENSION.lambda
-      );
-
-      await tx.wait();
-      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
-      const curveAddrA = curve.address;
-      const curveAddrB = await curveFactory.getCurve(TOKENS.TAGPHP.address, TOKENS.USDC.address);
-
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
-      expect(curveAddrA).to.be.equal(curveAddrB);
-
-      expect(txR.blockNumber).to.not.equal("");
-      expect(txR.blockNumber).to.not.equal(undefined);
-      expect(txR.blockNumber).to.not.be.null;
-    })
   });
 
   // TODO: impersonate accounts
   describe("Emergency Withdraw", async () => {
-    it.only("XSGD:USDC", async () => {
+    it("XSGD:USDC", async () => {
       const NAME = "XSGD";
       const SYMBOL = "XSGD";
 
