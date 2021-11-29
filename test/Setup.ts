@@ -8,7 +8,7 @@ import { getAccounts, deployContract } from "../scripts/common";
 import { ERC20, Curve, CurveFactory } from "../typechain";
 import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { mintCADC, mintEURS, mintUSDC, mintXSGD, mintTCAD, mintFXPHP, mintTAGPHP } from "./Utils";
+import { mintEURS, mintUSDC, mintXSGD, mintFXPHP } from "./Utils";
 
 const EURS_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/EURS_USDC.json`);
 const XSGD_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/XSGD_USDC.json`);
@@ -65,6 +65,7 @@ export const scaffoldTest = async () => {
   );
 
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
+  const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
   const xsgd = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
   const fxphp = (await ethers.getContractAt("ERC20", TOKENS.FXPHP.address)) as ERC20;
 
@@ -92,6 +93,7 @@ export const scaffoldTest = async () => {
     fxphpToUsdAssimilator,
 
     usdc,
+    eurs,
     xsgd,
     fxphp,
 
