@@ -142,7 +142,7 @@ describe("Curve Contract", () => {
 
     describe("given quote as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -173,7 +173,7 @@ describe("Curve Contract", () => {
 
     describe("given base as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated base similar to input base: ${deposit}`, async () => {
+        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await eursToUsdAssimilator.getRate(), 8));
           const liquidity = await curve.liquidity();
@@ -213,7 +213,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-        it.only(`swapping amount: ${amt}`, async () => {
+        it(`swapping amount: ${amt}`, async () => {
           await curve
             .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
           const liquidity = await curve.liquidity();
@@ -281,7 +281,7 @@ describe("Curve Contract", () => {
 
     describe("given quote as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -312,7 +312,7 @@ describe("Curve Contract", () => {
 
     describe("given base as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated base similar to input base: ${deposit}`, async () => {
+        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
           const liquidity = await curve.liquidity();
@@ -352,7 +352,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-        it.only(`swapping amount: ${amt}`, async () => {
+        it(`swapping amount: ${amt}`, async () => {
           await curve
             .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
           const liquidity = await curve.liquidity();
@@ -420,7 +420,7 @@ describe("Curve Contract", () => {
 
     describe("given quote as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -451,7 +451,7 @@ describe("Curve Contract", () => {
 
     describe("given base as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated base similar to input base: ${deposit}`, async () => {
+        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await xsgdToUsdAssimilator.getRate(), 8));
           const liquidity = await curve.liquidity();
@@ -491,7 +491,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-        it.only(`swapping amount: ${amt}`, async () => {
+        it(`swapping amount: ${amt}`, async () => {
           await curve
             .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
           const liquidity = await curve.liquidity();
