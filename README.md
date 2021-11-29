@@ -1,4 +1,4 @@
-# HaloDAO AMM v1.1.1
+# HaloDAO AMM v1
 
 A decentralized foreign exchange protocol optimized for stablecoins.
 
