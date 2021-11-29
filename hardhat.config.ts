@@ -79,11 +79,12 @@ const config: HardhatUserConfig = {
       gasPrice: 8000000000,
     },
     arbitrumTestnet: {
-      url: "https://rinkeby.arbitrum.io/rpc",
+      url: `https://arbitrum-rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       chainId: 421611,
       accounts: {
         mnemonic: MNEMONIC,
       },
+      blockGasLimit: 20000000,
     },
   },
   etherscan: {
