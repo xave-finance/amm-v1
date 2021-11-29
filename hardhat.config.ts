@@ -12,7 +12,6 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 import { CONFIG } from "./test/Config";
 const LOCALHOST = "http://127.0.0.1:8545";
 
-
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn moreww
 const config: HardhatUserConfig = {
@@ -35,53 +34,60 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: alchemyEndpoint ? alchemyEndpoint : LOCALHOST,
-        blockNumber: CONFIG.BLOCK_NO
+        blockNumber: CONFIG.BLOCK_NO,
       },
       blockGasLimit: 20000000,
-      allowUnlimitedContractSize: true
+      allowUnlimitedContractSize: true,
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: {
-        mnemonic: MNEMONIC
+        mnemonic: MNEMONIC,
       },
-      blockGasLimit: 20000000
+      blockGasLimit: 20000000,
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: {
-        mnemonic: MNEMONIC
+        mnemonic: MNEMONIC,
       },
-      blockGasLimit: 20000000
+      blockGasLimit: 20000000,
     },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
       chainId: 1,
       accounts: {
-        mnemonic: MNEMONIC
+        mnemonic: MNEMONIC,
       },
-      blockGasLimit: 20000000
+      blockGasLimit: 20000000,
     },
     maticTestnet: {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
       chainId: 80001,
       accounts: {
-        mnemonic: MNEMONIC
-      }
+        mnemonic: MNEMONIC,
+      },
     },
     matic: {
       url: `https://polygon-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
       chainId: 137,
       accounts: {
-        mnemonic: MNEMONIC
+        mnemonic: MNEMONIC,
       },
       // Issue for polygon
       // https://github.com/nomiclabs/hardhat/issues/1828
-      gasPrice: 8000000000
+      gasPrice: 8000000000,
+    },
+    arbitrumTestnet: {
+      url: "https://rinkeby.arbitrum.io/rpc",
+      chainId: 421611,
+      accounts: {
+        mnemonic: MNEMONIC,
+      },
     },
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY
+    apiKey: ETHERSCAN_API_KEY,
   },
   mocha: {
     timeout: 1200000,
