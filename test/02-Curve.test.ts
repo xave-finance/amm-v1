@@ -15,7 +15,7 @@ import { assert } from "console";
 
 const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 
-import { getFutureTime, unlockAccountAndGetSigner } from "./Utils";
+import { getFutureTime } from "./Utils";
 import { formatUnits } from "ethers/lib/utils";
 import { CONFIG } from "./Config";
 

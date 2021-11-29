@@ -11,7 +11,7 @@ export const TOKENS = {
   },
   TCAD: {
     address: "0x00000100F2A2bd000715001920eB70D229700085",
-    masterMinter: "",
+    masterMinter: "0x00005cad001e0900002979f7314d00fc480a29bd",
     decimals: 18
   },
   TAUD: {
@@ -26,14 +26,16 @@ export const TOKENS = {
   },
   FXPHP: {
     address: "0x3d147cd9ac957b2a5f968de9d1c6b9d0872286a0",
-    masterMinter: "",
+    masterMinter: "0x420220B72bbd307db8615e7aa0eAdCA399cf2FC0",
     decimals: 18
   },
   TAGPHP: {
     address: "0x7A87104dfeA51853472fFafaD00D43e73284a135",
-    masterMinter: "",
+    masterMinter: "0xa1b458f88CA51100891db70FF95cd58D359D5072",
     decimals: 18
   },
+
+
   EURS: {
     address: "0xdB25f211AB05b1c97D595516F45794528a807ad8",
     owner: "0x1bee4f735062cd00841d6997964f187f5f5f5ac9",
