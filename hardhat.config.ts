@@ -84,7 +84,6 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: MNEMONIC,
       },
-      blockGasLimit: 20000000,
     },
   },
   etherscan: {

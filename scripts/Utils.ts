@@ -11,14 +11,14 @@ import { CurveFactory, Curve } from "../typechain";
 import { deployContract, getFastGasPrice } from "./common";
 
 const NETWORK = hre.network.name;
-const QUOTED_TOKEN = 'TOKEN_ADDR_USDC';
+const QUOTED_TOKEN = "TOKEN_ADDR_USDC";
 const TOKEN = {};
 const LPT_SYMBOL = process.env.LPT_SYMBOL;
 const envList = process.env;
 
 // Initialize token addresses from .env
 for (var key in envList) {
-  if (key.includes('TOKEN_ADDR')) {
+  if (key.includes("TOKEN_ADDR")) {
     TOKEN[key] = envList[key];
   }
 }
@@ -26,8 +26,8 @@ for (var key in envList) {
 export const configFileHelper = async (output, directory) => {
   for (var key in output) {
     let data = {};
-    const token = key.split('ToUsdAssimilator')[0].toUpperCase();
-    const fileName = directory === 'assimilators' ? `${token}ToUsdAssimilator` : `${token}Curves`;
+    const token = key.split("ToUsdAssimilator")[0].toUpperCase();
+    const fileName = directory === "assimilators" ? `${token}ToUsdAssimilator` : `${token}Curves`;
     data[fileName] = output[key];
 
     // Deployed contracts log
@@ -40,28 +40,28 @@ export const configFileHelper = async (output, directory) => {
     const outputConfigPath = `/${outputConfigDir}/${fileName}.json`;
     fs.writeFileSync(outputConfigPath, JSON.stringify(data, null, 4));
   }
-}
+};
 
 export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames, dimensions) => {
   const { CONTRACTS } = require(path.resolve(__dirname, `./config/contracts`));
   const CORE_ADDRESSES = {
-    curveFactory: CONTRACTS.factory
-  }
+    curveFactory: CONTRACTS.factory,
+  };
 
   // List all json files under assimilators config
   const files = fs.readdirSync(path.join(__dirname, `./config/${NETWORK}/assimilators`));
-  let fileObj = await listFiles('assimilators', 'ToUsdAssimilator.json');
+  let fileObj = await listFiles("assimilators", "ToUsdAssimilator.json");
 
   let tokenSymbolArr;
   let tokenNameArr;
   let curveWeightsArr;
   let lptNamesArr;
 
-  if (tokenSymbol.indexOf(',') > -1) {
-    tokenSymbolArr = tokenSymbol.split(',');
-    tokenNameArr = tokenName.split(',');
-    curveWeightsArr = curveWeights.split(',');
-    lptNamesArr = lptNames.split(',');
+  if (tokenSymbol.indexOf(",") > -1) {
+    tokenSymbolArr = tokenSymbol.split(",");
+    tokenNameArr = tokenName.split(",");
+    curveWeightsArr = curveWeights.split(",");
+    lptNamesArr = lptNames.split(",");
   } else {
     tokenSymbolArr = [tokenSymbol];
     tokenNameArr = [tokenName];
@@ -72,21 +72,18 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
   for (let index = 0; index < tokenSymbolArr.length; index++) {
     const tokenSymbol = tokenSymbolArr[index];
 
-    if (tokenSymbol !== 'USDC') {
-      const weightArr = curveWeightsArr[index].split('/');
+    if (tokenSymbol !== "USDC") {
+      const weightArr = curveWeightsArr[index].split("/");
       const baseWeight = toDecimal(weightArr[0]).toString();
       const quoteWeight = toDecimal(weightArr[1]).toString();
       const tokenName = tokenNameArr[index];
       const fullFileName = fileObj[tokenSymbol.toUpperCase()];
-      const fileName = fileObj[tokenSymbol.toUpperCase()].split('.json')[0];
+      const fileName = fileObj[tokenSymbol.toUpperCase()].split(".json")[0];
       const baseAssimilatorAddr = require(configImporterNew(`assimilators/${fullFileName}`))[fileName];
       const quoteAssimilatorAddr = require(path.resolve(__dirname, `./config/usdcassimilator/${NETWORK}.json`)).address;
       const lptName = lptNamesArr[index];
 
-      const curveFactory = (await ethers.getContractAt(
-        "CurveFactory",
-        CORE_ADDRESSES.curveFactory,
-      )) as CurveFactory;
+      const curveFactory = (await ethers.getContractAt("CurveFactory", CORE_ADDRESSES.curveFactory)) as CurveFactory;
 
       const { curve } = await createCurveAndSetParams({
         curveFactory,
@@ -104,14 +101,14 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
           parseUnits(dimensions[tokenSymbol].beta),
           parseUnits(dimensions[tokenSymbol].max),
           parseUnits(dimensions[tokenSymbol].epsilon),
-          parseUnits(dimensions[tokenSymbol].lambda)
+          parseUnits(dimensions[tokenSymbol].lambda),
         ],
       });
     }
   }
-}
+};
 
-export const curveHelper = async (fileName) => {
+export const curveHelper = async fileName => {
   let tokenSymbols: String = "";
   let tokenNames: String = "";
   let weights: String = "";
@@ -134,9 +131,9 @@ export const curveHelper = async (fileName) => {
     tokenNames.slice(0, -1),
     weights.slice(0, -1),
     lptName.slice(0, -1),
-    dimensions
+    dimensions,
   );
-}
+};
 
 export const deployedLogs = async (filename, output) => {
   // Deployed contracts log
@@ -149,13 +146,13 @@ export const deployedLogs = async (filename, output) => {
   fs.writeFileSync(outputConfigPath, JSON.stringify(output, null, 4));
 };
 
-export const configImporter = (filename) => {
+export const configImporter = filename => {
   return path.resolve(__dirname, `./config/${NETWORK}/${filename}.json`);
-}
+};
 
-export const configImporterNew = (route) => {
+export const configImporterNew = route => {
   return path.resolve(__dirname, `./config/${NETWORK}/${route}`);
-}
+};
 
 export const deployerHelper = async (user, contractName) => {
   const contractInstance = await ethers.getContractFactory(contractName);
@@ -166,7 +163,7 @@ export const deployerHelper = async (user, contractName) => {
     factory: contractInstance,
     args: [],
     opts: {
-      gasLimit: 3000000,
+      gasLimit: isArbitrumNetwork() ? 300000000 : 3000000,
     },
   });
 
@@ -175,9 +172,9 @@ export const deployerHelper = async (user, contractName) => {
 
   return {
     key,
-    address: deployed.address
-  }
-}
+    address: deployed.address,
+  };
+};
 
 export const listFiles = async (directory, fileSuffix) => {
   // List all json files under assimilators config
@@ -192,19 +189,19 @@ export const listFiles = async (directory, fileSuffix) => {
   }
 
   return fileObj;
-}
+};
 
 export const curveAddresses = async () => {
   let curves = {};
-  const fileObj = await listFiles('curves', 'Curves.json');
+  const fileObj = await listFiles("curves", "Curves.json");
 
   Object.keys(fileObj).map(key => {
-    let curveAddr = require(configImporterNew(`curves/${fileObj[key]}`))
+    let curveAddr = require(configImporterNew(`curves/${fileObj[key]}`));
     curves[key] = curveAddr[Object.keys(curveAddr)[0]];
   });
 
   return curves;
-}
+};
 
 const logHelper = async (filename, output) => {
   // Deployed contracts log
@@ -216,13 +213,13 @@ const logHelper = async (filename, output) => {
   const timestamp = new Date().getTime().toString();
   const outputLogPath = path.join(`${outputLogDir}/${timestamp}_${filename}.json`);
   fs.writeFileSync(outputLogPath, JSON.stringify(output, null, 4));
-}
+};
 
-const toDecimal = (n) => {
+const toDecimal = n => {
   var l = n.toString().length;
   var v = n / Math.pow(10, l);
   return v;
-}
+};
 
 const createCurve = async function ({
   curveFactory,
@@ -261,14 +258,14 @@ const createCurve = async function ({
     baseAssimilator,
     quoteAssimilator,
     {
-      gasLimit: 3000000,
-      gasPrice
+      gasLimit: isArbitrumNetwork() ? 30000000 : 3000000,
+      gasPrice,
     },
   );
 
   await tx.wait();
 
-  console.log('CurveFactory#newCurve TX Hash: ', tx.hash)
+  console.log("CurveFactory#newCurve TX Hash: ", tx.hash);
 
   // Get curve address
   const curveAddress = await curveFactory.curves(
@@ -281,18 +278,21 @@ const createCurve = async function ({
   output[symbol.toUpperCase()] = curveAddress;
 
   // Deployed contracts log
-  await configFileHelper(output, 'curves');
+  await configFileHelper(output, "curves");
 
-  console.log(`curveAddress ${symbol}: `, curveAddress)
-  console.log(`Curve ${symbol} Address: `, curve.address)
-  console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address)
+  console.log(`curveAddress ${symbol}: `, curveAddress);
+  console.log(`Curve ${symbol} Address: `, curve.address);
+  console.log(`Curve LP Token ${symbol} Address:`, curveLpToken.address);
 
   // Set Cap
   const gasPrice1 = await getFastGasPrice();
   console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice1, 9)} gwei`);
   const cap = parseUnits("500000");
-  const setCap = await curve.setCap(cap, { gasLimit: 3000000, gasPrice: gasPrice1 });
-  console.log('Curve#setCap TX Hash: ', setCap.hash)
+  const setCap = await curve.setCap(cap, {
+    gasLimit: isArbitrumNetwork() ? 30000000 : 3000000,
+    gasPrice: gasPrice1,
+  });
+  console.log("Curve#setCap TX Hash: ", setCap.hash);
 
   return {
     curve,
@@ -314,7 +314,7 @@ const createCurveAndSetParams = async function ({
   params,
 }: {
   curveFactory: CurveFactory;
-  lptName: string,
+  lptName: string;
   name: string;
   symbol: string;
   base: string;
@@ -342,11 +342,18 @@ const createCurveAndSetParams = async function ({
 
   console.log(`Curve#setParams with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
 
-  const tx = await curve.setParams(...params, { gasLimit: 3000000, gasPrice });
-  console.log('Curve#setParams TX Hash: ', tx.hash)
+  const tx = await curve.setParams(...params, {
+    gasLimit: isArbitrumNetwork() ? 30000000 : 3000000,
+    gasPrice,
+  });
+  console.log("Curve#setParams TX Hash: ", tx.hash);
   await tx.wait();
   return {
     curve,
     curveLpToken,
   };
+};
+
+export const isArbitrumNetwork = () => {
+  return hre.network.name.includes("arbitrum");
 };
