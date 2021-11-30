@@ -149,7 +149,7 @@ describe("Curve Contract", () => {
 
     describe("given quote as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -180,7 +180,7 @@ describe("Curve Contract", () => {
 
     describe("given base as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated base similar to input base: ${deposit}`, async () => {
+        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await assimilator[tokenQuote].getRate(), 8));
           const liquidity = await curve.liquidity();
@@ -218,7 +218,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-        it.only(`swapping amount: ${amt}`, async () => {
+        it(`swapping amount: ${amt}`, async () => {
           try {
             await curve
               .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
@@ -279,7 +279,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS.USDC.decimals);
 
-        it.only(`swapping amount back ${amt}`, async () => {
+        it(`swapping amount back ${amt}`, async () => {
           try {
             await curve
               .originSwap(TOKENS.USDC.address, baseToken.address, amt, 0, await getFutureTime());
@@ -341,7 +341,7 @@ describe("Curve Contract", () => {
       for (let withdraw = 1; withdraw <= maxDeposit; withdraw *= 5) {
         const amt = parseUnits(withdraw.toString(), TOKENS.USDC.decimals);
 
-        it.only(`withdraw amount: ${withdraw}`, async () => {
+        it(`withdraw amount: ${withdraw}`, async () => {
           try {
             let swapAmt = withdraw;
             await curve.connect(user1).withdraw(parseUnits(withdraw.toString()), await getFutureTime());
@@ -428,7 +428,7 @@ describe("Curve Contract", () => {
 
     describe("given quote as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -459,7 +459,7 @@ describe("Curve Contract", () => {
 
     describe("given base as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated base similar to input base: ${deposit}`, async () => {
+        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await assimilator[tokenQuote].getRate(), 8));
           const liquidity = await curve.liquidity();
@@ -497,7 +497,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-        it.only(`swapping amount: ${amt}`, async () => {
+        it(`swapping amount: ${amt}`, async () => {
           try {
             await curve
               .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
@@ -558,7 +558,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS.USDC.decimals);
 
-        it.only(`swapping amount back ${amt}`, async () => {
+        it(`swapping amount back ${amt}`, async () => {
           try {
             await curve
               .originSwap(TOKENS.USDC.address, baseToken.address, amt, 0, await getFutureTime());
@@ -620,7 +620,7 @@ describe("Curve Contract", () => {
       for (let withdraw = 1; withdraw <= maxDeposit; withdraw *= 5) {
         const amt = parseUnits(withdraw.toString(), TOKENS.USDC.decimals);
 
-        it.only(`withdraw amount: ${withdraw}`, async () => {
+        it(`withdraw amount: ${withdraw}`, async () => {
           try {
             let swapAmt = withdraw;
             await curve.connect(user1).withdraw(parseUnits(withdraw.toString()), await getFutureTime());
@@ -707,7 +707,7 @@ describe("Curve Contract", () => {
 
     describe("given quote as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
+        it(`it returns estimated quote similar to input quote: ${deposit}`, async () => {
           // Estimate deposit given quote
           const depositPreview = await adjustViewDeposit(
             "quote",
@@ -738,7 +738,7 @@ describe("Curve Contract", () => {
 
     describe("given base as input", () => {
       for (let deposit = 1; deposit <= maxDeposit; deposit *= 5) {
-        it.only(`it returns estimated base similar to input base: ${deposit}`, async () => {
+        it(`it returns estimated base similar to input base: ${deposit}`, async () => {
           // Preview given base
           const rateBase = Number(formatUnits(await assimilator[tokenQuote].getRate(), 8));
           const liquidity = await curve.liquidity();
@@ -776,7 +776,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS[tokenQuote].decimals);
 
-        it.only(`swapping amount: ${amt}`, async () => {
+        it(`swapping amount: ${amt}`, async () => {
           try {
             await curve
               .originSwap(baseToken.address, TOKENS.USDC.address, amt, 0, await getFutureTime());
@@ -837,7 +837,7 @@ describe("Curve Contract", () => {
       for (let swapAmt = 1; swapAmt < maxSwap; swapAmt *= 5) {
         const amt = parseUnits(swapAmt.toString(), TOKENS.USDC.decimals);
 
-        it.only(`swapping amount back ${amt}`, async () => {
+        it(`swapping amount back ${amt}`, async () => {
           try {
             await curve
               .originSwap(TOKENS.USDC.address, baseToken.address, amt, 0, await getFutureTime());
@@ -899,7 +899,7 @@ describe("Curve Contract", () => {
       for (let withdraw = 1; withdraw <= maxDeposit; withdraw *= 5) {
         const amt = parseUnits(withdraw.toString(), TOKENS.USDC.decimals);
 
-        it.only(`withdraw amount: ${withdraw}`, async () => {
+        it(`withdraw amount: ${withdraw}`, async () => {
           try {
             let swapAmt = withdraw;
             await curve.connect(user1).withdraw(parseUnits(withdraw.toString()), await getFutureTime());
