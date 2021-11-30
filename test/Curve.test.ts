@@ -1020,7 +1020,7 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only("FXPHP/USDC 50/50 - " + i.toString(), async function () {
+        it("FXPHP/USDC 50/50 - " + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,

@@ -40,6 +40,7 @@ describe("Curve Contract", () => {
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
+  let cadcToUsdAssimilator: Contract;
   let fxphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
@@ -51,6 +52,7 @@ describe("Curve Contract", () => {
   let usdc: ERC20;
   let eurs: ERC20;
   let xsgd: ERC20;
+  let cadc: ERC20;
   let fxphp: ERC20;
 
   let erc20: ERC20;
@@ -91,6 +93,7 @@ describe("Curve Contract", () => {
       usdcToUsdAssimilator,
       eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+      cadcToUsdAssimilator,
       fxphpToUsdAssimilator,
 
       CurveFactory,
@@ -107,6 +110,7 @@ describe("Curve Contract", () => {
     assimilator = {
       'EURS': eursToUsdAssimilator,
       'XSGD': xsgdToUsdAssimilator,
+      'CADC': cadcToUsdAssimilator,
       'FXPHP': fxphpToUsdAssimilator,
     };
 
@@ -184,6 +188,41 @@ describe("Curve Contract", () => {
       await multiMintAndApprove([
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
         [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS.XSGD.decimals), curve.address],
+      ]);
+
+      await curve.deposit(parseUnits("100"), await getFutureTime());
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(lpAmountAfter).to.be.equal(parseUnits("100"));
+    });
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      await curve.setCap(parseUnits("10000"));
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(parseUnits("10000"));
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
       ]);
 
       await curve.deposit(parseUnits("100"), await getFutureTime());
@@ -295,6 +334,39 @@ describe("Curve Contract", () => {
       expect(result[0]).to.be.equal(parseUnits("100"));
     });
 
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      await curve.setCap(parseUnits("10000"));
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(parseUnits("10000"));
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
+      ]);
+
+      const result = await curve.viewDeposit(parseUnits("100"));
+      expect(result[0]).to.be.equal(parseUnits("100"));
+    });
+
     it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
@@ -398,6 +470,40 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(parseUnits("100"));
     });
 
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(0);
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
+      ]);
+
+      await curve.deposit(parseUnits("100"), await getFutureTime());
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(lpAmountAfter).to.be.equal(parseUnits("100"));
+    });
+
     it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
@@ -486,6 +592,35 @@ describe("Curve Contract", () => {
       await multiMintAndApprove([
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
         [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS.XSGD.decimals), curve.address],
+      ]);
+
+      const result = await curve.viewDeposit(parseUnits("100"));
+      expect(result[0]).to.be.equal(parseUnits("100"));
+    });
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
       ]);
 
       const result = await curve.viewDeposit(parseUnits("100"));
@@ -590,6 +725,46 @@ describe("Curve Contract", () => {
       await multiMintAndApprove([
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
         [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS.XSGD.decimals), curve.address],
+      ]);
+
+      try {
+        await curve.deposit(parseUnits("10001"), await getFutureTime());
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/amount-too-large");
+      }
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(lpAmountAfter).to.be.equal(0);
+    });
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      await curve.setCap(parseUnits("10000"));
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(parseUnits("10000"));
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
       ]);
 
       try {
@@ -719,6 +894,43 @@ describe("Curve Contract", () => {
       };
     });
 
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      await curve.setCap(parseUnits("10000"));
+      const _curve = await curve.curve();
+      expect(_curve.cap).to.eq(parseUnits("10000"));
+
+      const liquidity = await curve.liquidity();
+      expect(liquidity.total_).to.eq(0);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
+      ]);
+
+      try {
+        await curve.viewDeposit(parseUnits("10001"));
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/amount-too-large");
+      };
+    });
+
     it("FXPHP:USDC", async () => {
       const NAME = "FXPHP";
       const SYMBOL = "FXPHP";
@@ -817,6 +1029,40 @@ describe("Curve Contract", () => {
           baseWeight: parseUnits("0.4"),
           quoteWeight: parseUnits("0.6"),
           baseAssimilator: assimilator['XSGD'].address,
+          quoteAssimilator: quoteAssimilatorAddr.address,
+          params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+        });
+        throw new Error("newCurve should throw error");
+      } catch (e) {
+        expect(e.toString()).to.include("CurveFactory/currency-pair-already-exist");
+      }
+    })
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      try {
+        await createCurveAndSetParams({
+          name: NAME,
+          symbol: SYMBOL,
+          base: TOKENS.CADC.address,
+          quote: TOKENS.USDC.address,
+          baseWeight: parseUnits("0.4"),
+          quoteWeight: parseUnits("0.6"),
+          baseAssimilator: assimilator['CADC'].address,
           quoteAssimilator: quoteAssimilatorAddr.address,
           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
         });
@@ -928,6 +1174,44 @@ describe("Curve Contract", () => {
       const txR = await ethers.provider.getTransactionReceipt(tx.hash);
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      expect(txR.blockNumber).to.not.equal("");
+      expect(txR.blockNumber).to.not.equal(undefined);
+      expect(txR.blockNumber).to.not.be.null;
+    })
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const tx = await curve.setParams(
+        DIMENSION.alpha,
+        DIMENSION.beta,
+        DIMENSION.max,
+        DIMENSION.epsilon,
+        DIMENSION.lambda
+      );
+
+      await tx.wait();
+      const txR = await ethers.provider.getTransactionReceipt(tx.hash);
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       assert(ethers.utils.isAddress(curveAddrA));
       assert(ethers.utils.isAddress(curveAddrB));
@@ -1058,6 +1342,59 @@ describe("Curve Contract", () => {
       await multiMintAndApprove([
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
         [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS.XSGD.decimals), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+        .then(x => x.wait());
+
+      const lpAmountBefore = await curve.balanceOf(user1Address);
+
+      expect(formatUnits(lpAmountBefore)).to.be.equal(formatUnits(amt));
+
+      // Enable emergency withdraw
+      expect(await curve.emergency()).to.be.equal(false);
+      await curve.setEmergency(true);
+      expect(await curve.emergency()).to.be.equal(true);
+
+      // Withdraw everything
+      await curve
+        .emergencyWithdraw(lpAmountBefore, await getFutureTime(), { gasPrice: 0 })
+        .then(x => x.wait());
+
+      const lpAmountAfter = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountAfter)).to.be.equal(formatUnits(parseUnits("0")));
+    })
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
       ]);
 
       // Deposit
@@ -1280,6 +1617,83 @@ describe("Curve Contract", () => {
       await multiMintAndApprove([
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
         [TOKENS.XSGD.address, user1, parseUnits("10000000", TOKENS.XSGD.decimals), curve.address],
+      ]);
+
+      // Deposit
+      const amt = parseUnits("1000000");
+      await curve
+        .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+        .then(x => x.wait());
+
+      // Balance is now equal to amt
+      const lpAmountB = await curve.balanceOf(user1Address);
+      expect(formatUnits(lpAmountB)).to.be.equal(formatUnits(amt));
+    })
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
+
+      assert(ethers.utils.isAddress(curveAddrA));
+      assert(ethers.utils.isAddress(curveAddrB));
+      expect(curveAddrA).to.be.equal(curveAddrB);
+
+      // Curve is not frozen by default
+      expect(await curve.frozen()).to.be.false;
+      // Freeze Curve
+      await curve
+        .setFrozen(true)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.true;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
+      ]);
+
+      try {
+        // Deposit
+        const amt = parseUnits("1000000");
+
+        // Deposit should not go through
+        await curve
+          .deposit(amt, await getFutureTime(), { gasPrice: 0 })
+          .then(x => x.wait());
+        throw new Error("Curve is frozen");
+      } catch (e) {
+        expect(e.toString()).to.include("Curve/frozen-only-allowing-proportional-withdraw");
+      }
+
+      const lpAmountA = await curve.balanceOf(user1Address);
+      // Balance is still zero
+      expect(formatUnits(lpAmountA)).to.be.equal(formatUnits(parseUnits("0")));
+
+      // Unfreeze Curve
+      await curve
+        .setFrozen(false)
+        .then(x => x.wait());
+      expect(await curve.frozen()).to.be.false;
+
+      // Approve Deposit
+      await multiMintAndApprove([
+        [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curve.address],
+        [TOKENS.CADC.address, user1, parseUnits("10000000", TOKENS.CADC.decimals), curve.address],
       ]);
 
       // Deposit

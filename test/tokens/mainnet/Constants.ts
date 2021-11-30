@@ -14,6 +14,11 @@ export const TOKENS = {
     masterMinter: "0x8c3b0cAeC968b2e640D96Ff0B4c929D233B25982",
     decimals: 6,
   },
+  CADC: {
+    address: "0xcadc0acd4b445166f12d2c07eac6e2544fbe2eef",
+    owner: "0xa0f5c8e8bcbdf066643c2ea8484cba7a3aff01f9",
+    decimals: 18,
+  },
   FXPHP: {
     address: "0x3d147cd9ac957b2a5f968de9d1c6b9d0872286a0",
     masterMinter: "0x420220B72bbd307db8615e7aa0eAdCA399cf2FC0",
@@ -32,6 +37,10 @@ export const ORACLES = {
   },
   XSGD: {
     address: "0xe25277fF4bbF9081C75Ab0EB13B4A13a721f3E13",
+    decimals: 8,
+  },
+  CADC: {
+    address: "0xa34317DB73e77d453b1B8d04550c44D10e981C8e",
     decimals: 8,
   },
   FXPHP: {

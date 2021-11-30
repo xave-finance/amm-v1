@@ -36,6 +36,7 @@ describe("Deployment", () => {
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
+  let cadcToUsdAssimilator: Contract;
   let fxphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
@@ -89,6 +90,7 @@ describe("Deployment", () => {
       usdcToUsdAssimilator,
       eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+      cadcToUsdAssimilator,
       fxphpToUsdAssimilator,
 
       CurveFactory,
@@ -105,6 +107,7 @@ describe("Deployment", () => {
     assimilator = {
       'EURS': eursToUsdAssimilator,
       'XSGD': xsgdToUsdAssimilator,
+      'CADC': cadcToUsdAssimilator,
       'FXPHP': fxphpToUsdAssimilator
     };
 
@@ -135,6 +138,7 @@ describe("Deployment", () => {
   describe("Assimilators", async () => {
     it("EursToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['EURS'].address)); })
     it("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['XSGD'].address)); })
+    it("CadcToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['CADC'].address)); })
     it("FxphpToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['FXPHP'].address)); })
   })
 
@@ -181,6 +185,30 @@ describe("Deployment", () => {
 
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.CADC.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
       expect(ethers.utils.isAddress(curveAddrA)).true;
       expect(ethers.utils.isAddress(curveAddrB)).true;

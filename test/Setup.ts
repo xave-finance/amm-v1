@@ -8,10 +8,11 @@ import { getAccounts, deployContract } from "../scripts/common";
 import { ERC20, Curve, CurveFactory } from "../typechain";
 import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { mintEURS, mintUSDC, mintXSGD, mintFXPHP } from "./Utils";
+import { mintEURS, mintUSDC, mintXSGD, mintCADC, mintFXPHP } from "./Utils";
 
 const EURS_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/EURS_USDC.json`);
 const XSGD_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/XSGD_USDC.json`);
+const CADC_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/CADC_USDC.json`);
 const FXPHP_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/FXPHP_USDC.json`);
 
 const DIMENSION = {
@@ -57,6 +58,13 @@ export const scaffoldTest = async () => {
     XSGD_USDC_ASSIM.oracleAddress,
   );
 
+  const cadcToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    parseUnits("1", CADC_USDC_ASSIM.baseDecimals),
+    CADC_USDC_ASSIM.baseTokenAddress,
+    CADC_USDC_ASSIM.quoteTokenAddress,
+    CADC_USDC_ASSIM.oracleAddress,
+  );
+
   const fxphpToUsdAssimilator = await BaseToUsdAssimilator.deploy(
     parseUnits("1", FXPHP_USDC_ASSIM.baseDecimals),
     FXPHP_USDC_ASSIM.baseTokenAddress,
@@ -67,6 +75,7 @@ export const scaffoldTest = async () => {
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
   const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
   const xsgd = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
+  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
   const fxphp = (await ethers.getContractAt("ERC20", TOKENS.FXPHP.address)) as ERC20;
 
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
@@ -90,11 +99,13 @@ export const scaffoldTest = async () => {
     usdcToUsdAssimilator,
     eursToUsdAssimilator,
     xsgdToUsdAssimilator,
+    cadcToUsdAssimilator,
     fxphpToUsdAssimilator,
 
     usdc,
     eurs,
     xsgd,
+    cadc,
     fxphp,
 
     erc20,
@@ -212,6 +223,10 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
 
     if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
       await mintXSGD(minterAddress, amount);
+    }
+
+    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
+      await mintCADC(minterAddress, amount);
     }
 
     if (tokenAddress.toLowerCase() === TOKENS.FXPHP.address.toLowerCase()) {
