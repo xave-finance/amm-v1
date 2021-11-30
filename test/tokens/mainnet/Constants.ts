@@ -4,53 +4,26 @@ export const TOKENS = {
     owner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
     decimals: 6,
   },
-  XSGD: {
-    address: "0x70e8de73ce538da2beed35d14187f6959a8eca96",
-    masterMinter: "0x8c3b0cAeC968b2e640D96Ff0B4c929D233B25982",
-    decimals: 6,
-  },
-  TCAD: {
-    address: "0x00000100F2A2bd000715001920eB70D229700085",
-    masterMinter: "0x00005cad001e0900002979f7314d00fc480a29bd",
-    decimals: 18
-  },
-  TAUD: {
-    address: "0x00006100F7090010005F1bd7aE6122c3C2CF0090",
-    masterMinter: "",
-    decimals: 18
-  },
-  TGBP: {
-    address: "0x00000000441378008EA67F4284A57932B1c000a5",
-    masterMinter: "",
-    decimals: 18
-  },
-  FXPHP: {
-    address: "0x3d147cd9ac957b2a5f968de9d1c6b9d0872286a0",
-    masterMinter: "0x420220B72bbd307db8615e7aa0eAdCA399cf2FC0",
-    decimals: 18
-  },
-  TAGPHP: {
-    address: "0x7A87104dfeA51853472fFafaD00D43e73284a135",
-    masterMinter: "0xa1b458f88CA51100891db70FF95cd58D359D5072",
-    decimals: 18
-  },
-
-
   EURS: {
     address: "0xdB25f211AB05b1c97D595516F45794528a807ad8",
     owner: "0x1bee4f735062cd00841d6997964f187f5f5f5ac9",
     decimals: 2,
   },
-  CADC: {
-    address: "0xcadc0acd4b445166f12d2c07eac6e2544fbe2eef",
-    owner: "0xa0f5c8e8bcbdf066643c2ea8484cba7a3aff01f9",
-    decimals: 18,
+  XSGD: {
+    address: "0x70e8de73ce538da2beed35d14187f6959a8eca96",
+    masterMinter: "0x8c3b0cAeC968b2e640D96Ff0B4c929D233B25982",
+    decimals: 6,
+  },
+  FXPHP: {
+    address: "0x3d147cd9ac957b2a5f968de9d1c6b9d0872286a0",
+    masterMinter: "0x420220B72bbd307db8615e7aa0eAdCA399cf2FC0",
+    decimals: 18
   }
 };
 
 export const ORACLES = {
-  CADC: {
-    address: "0xa34317DB73e77d453b1B8d04550c44D10e981C8e",
+  USDC: {
+    address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     decimals: 8,
   },
   EURS: {
@@ -61,8 +34,8 @@ export const ORACLES = {
     address: "0xe25277fF4bbF9081C75Ab0EB13B4A13a721f3E13",
     decimals: 8,
   },
-  USDC: {
-    address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  FXPHP: {
+    address: "0x9481e7ad8BE6BbB22A8B9F7B9fB7588d1df65DF6",
     decimals: 8,
-  },
+  }
 };
