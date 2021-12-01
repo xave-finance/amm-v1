@@ -1,13 +1,13 @@
-# DFX Protocol V0.5
+# HaloDAO AMM v1
 
 A decentralized foreign exchange protocol optimized for stablecoins.
 
-[![Discord](https://img.shields.io/discord/786747729376051211.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](http://discord.dfx.finance/)
-[![Twitter Follow](https://img.shields.io/twitter/follow/DFXFinance.svg?label=DFXFinance&style=social)](https://twitter.com/DFXFinance)
+[![Discord](https://img.shields.io/discord/786747729376051211.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discord.com/invite/halodao/)
+[![Twitter Follow](https://img.shields.io/twitter/follow/HaloDAOFinance.svg?label=HaloDAOFinance&style=social)](https://twitter.com/HaloDAOFinance)
 
 ## Overview
 
-DFX v0.5 is a fork of [shellprotocol@48dac1c](https://github.com/cowri/shell-solidity-v1/tree/48dac1c1a18e2da292b0468577b9e6cbdb3786a4), an AMM for baskets of like-valued pairs. An audit of that protocol was previously done by [Consensys Diligence](https://consensys.net/diligence/audits/2020/06/shell-protocol/shell-protocol-audit-2020-06.pdf).
+HaloDAO AMM is a clone of [DFX](https://github.com/dfx-finance/protocol).
 
 There are two major parts to the protocol: **Assimilators** and **Curves** (formerly Shells). Assimilators allow the AMM to handle pairs of different value while also retrieving reported oracle prices for respective currencies. Curves allow the custom parameterization of the bonding curve with dynamic fees, halting bounderies, etc.
 
@@ -62,7 +62,7 @@ Withdrawing and depositing related operations will respect the existing LP ratio
 - [Shell Protocol@48dac1c](https://github.com/cowri/shell-solidity-v1/tree/48dac1c1a18e2da292b0468577b9e6cbdb3786a4)
 
 ## Deployment
-[Deployment Doc](https://github.com/HaloDAO/dfx-protocol-clone/blob/hdev-311-test/Deployment.md)
+[Deployment Doc](https://github.com/HaloDAO/amm-v1/blob/hdev-311-test/Deployment.md)
 
 # Router API
 

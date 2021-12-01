@@ -1,6 +1,6 @@
 {
-  "name": "protocols",
-  "version": "0.0.3a",
+  "name": "amm-v1",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -55,15 +55,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dfx-finance/protocols.git"
+    "url": "git+https://github.com/HaloDAO/amm-v1.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dfx-finance/protocols/issues"
+    "url": "https://halodao.atlassian.net/jira/software/c/projects/HDEV/issues"
   },
-  "homepage": "https://github.com/dfx-finance/protocols#readme",
+  "homepage": "https://github.com/HaloDAO/amm-v1#readme",
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.0.10",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
