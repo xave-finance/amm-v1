@@ -14,15 +14,12 @@ const { ORACLES, TOKENS } = require(path.resolve(__dirname, `tokens/${process.en
 import { getFutureTime, updateOracleAnswer, expectBNAproxEq, expectBNEq, getOracleAnswer } from "./Utils";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
-import { formatUnits, namehash } from "ethers/lib/utils";
+import { formatUnits, formatEther } from "ethers/lib/utils";
 import { format } from "prettier";
 
 chai.use(chaiBigNumber(BigNumber));
 
 const { parseUnits } = ethers.utils;
-
-const NAME = "DFX V1";
-const SYMBOL = "DFX-V1";
 
 import { CONFIG } from "./Config";
 const DIMENSION = {
@@ -32,6 +29,9 @@ const DIMENSION = {
   epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
   lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
+
+const NAME = "DFX V1";
+const SYMBOL = "DFX-V1";
 
 describe("Curve", function () {
   let [user1, user2]: Signer[] = [];
@@ -43,6 +43,7 @@ describe("Curve", function () {
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
+  let cadcToUsdAssimilator: Contract;
   let fxphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
@@ -54,6 +55,7 @@ describe("Curve", function () {
   let usdc: ERC20;
   let eurs: ERC20;
   let xsgd: ERC20;
+  let cadc: ERC20;
   let fxphp: ERC20;
   let erc20: ERC20;
 
@@ -104,6 +106,7 @@ describe("Curve", function () {
       usdcToUsdAssimilator,
       eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+      cadcToUsdAssimilator,
       fxphpToUsdAssimilator,
 
       usdc,
@@ -119,6 +122,7 @@ describe("Curve", function () {
     assimilator = {
       'EURS': eursToUsdAssimilator,
       'XSGD': xsgdToUsdAssimilator,
+      'CADC': cadcToUsdAssimilator,
       'FXPHP': fxphpToUsdAssimilator,
     };
 
@@ -153,9 +157,9 @@ describe("Curve", function () {
       const c: Curve = curve as Curve;
 
       await multiMintAndApprove([
-        [base, user1, parseUnits("1000000000", baseDecimals), c.address],
+        [base, user1, parseUnits("10000000", baseDecimals), c.address],
         [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), c.address],
-        [base, user2, parseUnits("1000000000", baseDecimals), c.address],
+        [base, user2, parseUnits("10000000", baseDecimals), c.address],
         [TOKENS.USDC.address, user2, parseUnits("10000000", TOKENS.USDC.decimals), c.address],
       ]);
       await c.deposit(parseUnits("1000000"), await getFutureTime());
@@ -253,8 +257,8 @@ describe("Curve", function () {
 
       // Mint tokens and approve
       await multiMintAndApprove([
-        [base, user1, parseUnits("1000000000", baseDecimals), curve.address],
-        [quote, user1, parseUnits("1000000000", quoteDecimals), curve.address],
+        [base, user1, parseUnits("10000000", baseDecimals), curve.address],
+        [quote, user1, parseUnits("10000000", quoteDecimals), curve.address],
       ]);
 
       // Proportional Supply
@@ -309,7 +313,8 @@ describe("Curve", function () {
       const targetDeltaQuote = afterQuote.sub(beforeQuote);
 
       // Target swap works as intended
-      // expectBNAproxEq(targetDeltaBase, targetExpectedBase, targetExpectedBase.div(1500));
+      // TODO: NOT WORKING ON FXPHP
+      expectBNAproxEq(targetDeltaBase, targetExpectedBase, targetExpectedBase.div(1500));
       expectBNAproxEq(targetDeltaQuote, targetExpectedQuote, targetExpectedQuote.div(1500));
     };
 
@@ -367,7 +372,7 @@ describe("Curve", function () {
       // Mint tokens and approve
       await multiMintAndApprove([
         [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-        [quote, user1, parseUnits("1000000000", quoteDecimals), curve.address],
+        [quote, user1, parseUnits("10000000", quoteDecimals), curve.address],
       ]);
 
       // Proportional Supply
@@ -540,8 +545,8 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("1000000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("1000000000", quoteDecimals), curve.address],
+          [base, user1, parseUnits("100000000", baseDecimals), curve.address],
+          [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
           [base, user2, parseUnits(amount, baseDecimals), curve.address],
           [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
         ]);
@@ -573,9 +578,11 @@ describe("Curve", function () {
         // with the same amount (say 100), he'll get less as
         // he's depositing 50 QUOTE (USDC), and LESS BASE (non-usdc)
         // Quote amount should remain the same
+
+        const amountA = "1000000";
         await curve
           .connect(user1)
-          .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(20), 0, await getFutureTime());
+          .originSwap(quote, base, parseUnits(amountA, quoteDecimals).div(20), 0, await getFutureTime());
 
         const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await curve.connect(user2).viewDeposit(depositAmount);
 
@@ -590,21 +597,28 @@ describe("Curve", function () {
         // with the same amount (say 100), he'll get MORE
         // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
         // Quote amount should be the same
+
+        const amountB = "1000000";
         await curve
           .connect(user1)
-          .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(10), 0, await getFutureTime());
+          .originSwap(base, quote, parseUnits(amountB, baseDecimals).div(10), 0, await getFutureTime());
 
         const [lpAmountUser3, [baseViewUser3, quoteViewUser3]] = await curve.connect(user2).viewDeposit(depositAmount);
 
-        // TODO: NOT WORKING ON FXPHP
-        // expect(lpAmountUser3.mul(100).div(102).gt(lpAmountUser1)).to.be.true;
         expectBNAproxEq(quoteViewUser3, quoteViewUser1, quoteViewUser2.div(2000));
-        // TODO: NOT WORKING ON FXPHP
-        // expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true;
+
+        const ORACLE_CHECK = Math.trunc(parseInt(formatUnits(ORACLE_RATE, quoteDecimals)));
+        // Test works when oracle value is 10 or more
+        if (ORACLE_CHECK >= 10) {
+          expect(lpAmountUser3.mul(100).div(102).gt(lpAmountUser1)).to.be.true; // TODO: NOT WORKING ON FXPHP
+          expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true; // TODO: NOT WORKING ON FXPHP
+        }
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`EURS/USDC 50/50 - ${i}`, async function () {
+        const NAME = "EURS";
+        const SYMBOL = "EURS";
+        it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
           await viewLPDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -624,7 +638,9 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`XSGD/USDC 50/50 - ${i}`, async function () {
+        const NAME = "XSGD";
+        const SYMBOL = "XSGD";
+        it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
           await viewLPDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -644,7 +660,31 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`FXPHP/USDC 50/50 - ${i}`, async function () {
+        const NAME = "CADC";
+        const SYMBOL = "CADC";
+        it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
+          await viewLPDepositWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.CADC.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.CADC.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['CADC'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.CADC.address,
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "FXPHP";
+        const SYMBOL = "FXPHP";
+        it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
           await viewLPDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -706,8 +746,8 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("10000000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("10000000000", quoteDecimals), curve.address],
+          [base, user1, parseUnits("100000000", baseDecimals), curve.address],
+          [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
           [base, user2, parseUnits(amount, baseDecimals), curve.address],
           [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
         ]);
@@ -743,19 +783,22 @@ describe("Curve", function () {
         // with the same amount (say 100), he'll get MORE
         // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
         // Quote amount should be the same
+        const amountB = symbol !== "FXPHP" ? "1000000" : "100000000";
         await curve
           .connect(user1)
-          .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(10), 0, await getFutureTime());
+          .originSwap(base, quote, parseUnits(amountB, baseDecimals).div(10), 0, await getFutureTime());
 
         const [baseViewUser3, quoteViewUser3] = await curve.connect(user1).viewWithdraw(lpAmount);
 
         // Not "just" gt / lt
-        // expect(quoteViewUser3.mul(104).div(100).lt(quoteViewUser1)).to.be.true;
-        // expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true;
+        expect(quoteViewUser3.mul(104).div(100).lt(quoteViewUser1)).to.be.true;
+        expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true;
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`EURS/USDC 50/50 - ${i}`, async function () {
+        const NAME = "EURS";
+        const SYMBOL = "EURS";
+        it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
           await viewLPWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -774,7 +817,9 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`XSGD/USDC 50/50 - ${i}`, async function () {
+        const NAME = "XSGD";
+        const SYMBOL = "XSGD";
+        it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
           await viewLPWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -793,7 +838,9 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it(`FXPHP/USDC 50/50 - ${i}`, async function () {
+        const NAME = "FXPHP";
+        const SYMBOL = "FXPHP";
+        it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
           await viewLPWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -856,10 +903,10 @@ describe("Curve", function () {
 
         // Mint tokens and approve
         await multiMintAndApprove([
-          [base, user1, parseUnits("10000000000000", baseDecimals), curve.address],
-          [quote, user1, parseUnits("10000000000000", quoteDecimals), curve.address],
-          [base, user2, parseUnits("10000000000000", baseDecimals), curve.address],
-          [quote, user2, parseUnits("10000000000000", quoteDecimals), curve.address],
+          [base, user1, parseUnits("10000000", baseDecimals), curve.address],
+          [quote, user1, parseUnits("10000000", quoteDecimals), curve.address],
+          [base, user2, parseUnits("10000000", baseDecimals), curve.address],
+          [quote, user2, parseUnits("10000000", quoteDecimals), curve.address],
         ]);
 
         // Deposit user 1
@@ -900,8 +947,8 @@ describe("Curve", function () {
 
         // Mint tokens and approve for 2nd deposit
         await multiMintAndApprove([
-          [base, user2, parseUnits("10000000000000", baseDecimals), curve.address],
-          [quote, user2, parseUnits("10000000000000", quoteDecimals), curve.address],
+          [base, user2, parseUnits("10000000", baseDecimals), curve.address],
+          [quote, user2, parseUnits("10000000", quoteDecimals), curve.address],
         ]);
 
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
@@ -1015,6 +1062,26 @@ describe("Curve", function () {
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
             oracle: ORACLES.XSGD.address,
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        it("CADC/USDC 50/50 - " + i.toString(), async function () {
+          await addAndRemoveLiquidityWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.CADC.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.CADC.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['CADC'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.CADC.address,
           });
         });
       }
