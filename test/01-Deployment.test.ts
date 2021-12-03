@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import path from "path";
 import { ethers } from "hardhat";
 import { Signer, Contract, ContractFactory, BigNumber, BigNumberish } from "ethers";
 import chai, { expect } from "chai";
@@ -11,9 +12,8 @@ import { Router } from "../typechain/Router";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
 import { assert } from "console";
-
-import { TOKENS } from "./Constants";
 import { CONFIG } from "./Config";
+const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 
 chai.use(chaiBigNumber(BigNumber));
 
@@ -30,11 +30,14 @@ const DIMENSION = {
 describe("Deployment", () => {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];
+  let assimilator = {};
+  let quoteAssimilatorAddr;
 
-  let cadcToUsdAssimilator: Contract;
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
+  let cadcToUsdAssimilator: Contract;
+  let fxphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
   let RouterFactory: ContractFactory;
@@ -46,7 +49,6 @@ describe("Deployment", () => {
   let routerContract: Contract;
 
   let usdc: ERC20;
-  let cadc: ERC20;
   let erc20: ERC20;
 
   let curvesLib: Contract;
@@ -84,14 +86,16 @@ describe("Deployment", () => {
     ({
       users: [user1, user2],
       userAddresses: [user1Address, user2Address],
-      cadcToUsdAssimilator,
+
       usdcToUsdAssimilator,
       eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+      cadcToUsdAssimilator,
+      fxphpToUsdAssimilator,
+
       CurveFactory,
       RouterFactory,
       usdc,
-      cadc,
       erc20,
       curvesLib,
       orchestratorLib,
@@ -99,6 +103,13 @@ describe("Deployment", () => {
       swapsLib,
       viewLiquidityLib
     } = await scaffoldTest());
+
+    assimilator = {
+      'EURS': eursToUsdAssimilator,
+      'XSGD': xsgdToUsdAssimilator,
+      'CADC': cadcToUsdAssimilator,
+      'FXPHP': fxphpToUsdAssimilator
+    };
 
     curveFactoryContract = await CurveFactory.deploy();
     routerContract = await RouterFactory.deploy(curveFactoryContract.address);
@@ -110,6 +121,8 @@ describe("Deployment", () => {
       curveFactory,
       erc20,
     }));
+
+    quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`));
   });
 
   describe("Core Contracts", async () => {
@@ -123,17 +136,65 @@ describe("Deployment", () => {
   });
 
   describe("Assimilators", async () => {
-    it("CadcToUsdAssimilator", () => { assert(ethers.utils.isAddress(cadcToUsdAssimilator.address)); })
-    it("UsdcToUsdAssimilator", () => { assert(ethers.utils.isAddress(usdcToUsdAssimilator.address)); })
-    it("EursToUsdAssimilator", () => { assert(ethers.utils.isAddress(eursToUsdAssimilator.address)); })
-    it("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(xsgdToUsdAssimilator.address)); })
+    it("EursToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['EURS'].address)); })
+    it("XsgdToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['XSGD'].address)); })
+    it("CadcToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['CADC'].address)); })
+    it("FxphpToUsdAssimilator", () => { assert(ethers.utils.isAddress(assimilator['FXPHP'].address)); })
   })
 
   describe("Curve/Pair Contract", async () => {
-    const NAME = "CAD Coin";
-    const SYMBOL = "CADC";
+    it("EURS:USDC", async () => {
+      const NAME = "EURS";
+      const SYMBOL = "EURS";
 
-    it("CADC:USDC", async () => {
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.EURS.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['EURS'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.EURS.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it("XSGD:USDC", async () => {
+      const NAME = "XSGD";
+      const SYMBOL = "XSGD";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.XSGD.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['XSGD'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.XSGD.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it.only("CADC:USDC", async () => {
+      const NAME = "CADC";
+      const SYMBOL = "CADC";
+
       const { curve } = await createCurveAndSetParams({
         name: NAME,
         symbol: SYMBOL,
@@ -141,16 +202,40 @@ describe("Deployment", () => {
         quote: TOKENS.USDC.address,
         baseWeight: parseUnits("0.4"),
         quoteWeight: parseUnits("0.6"),
-        baseAssimilator: cadcToUsdAssimilator.address,
-        quoteAssimilator: usdcToUsdAssimilator.address,
+        baseAssimilator: assimilator['CADC'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
       });
 
       const curveAddrA = curve.address;
       const curveAddrB = await curveFactory.getCurve(TOKENS.CADC.address, TOKENS.USDC.address);
 
-      assert(ethers.utils.isAddress(curveAddrA));
-      assert(ethers.utils.isAddress(curveAddrB));
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
+      expect(curveAddrA).to.be.equal(curveAddrB);
+    })
+
+    it("FXPHP:USDC", async () => {
+      const NAME = "FXPHP";
+      const SYMBOL = "FXPHP";
+
+      const { curve } = await createCurveAndSetParams({
+        name: NAME,
+        symbol: SYMBOL,
+        base: TOKENS.FXPHP.address,
+        quote: TOKENS.USDC.address,
+        baseWeight: parseUnits("0.4"),
+        quoteWeight: parseUnits("0.6"),
+        baseAssimilator: assimilator['FXPHP'].address,
+        quoteAssimilator: quoteAssimilatorAddr.address,
+        params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+      });
+
+      const curveAddrA = curve.address;
+      const curveAddrB = await curveFactory.getCurve(TOKENS.FXPHP.address, TOKENS.USDC.address);
+
+      expect(ethers.utils.isAddress(curveAddrA)).true;
+      expect(ethers.utils.isAddress(curveAddrB)).true;
       expect(curveAddrA).to.be.equal(curveAddrB);
     })
   })

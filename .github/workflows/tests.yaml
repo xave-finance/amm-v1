@@ -25,7 +25,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - run: yarn install
-      - run: yarn compile && yarn test
+      - run: yarn compile && yarn test:mainnet
+        env:
+          INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
+          ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
+          MNEMONIC: ${{ secrets.MNEMONIC }}
+      - run: yarn test:matic
         env:
           INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
           ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}

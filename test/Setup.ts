@@ -1,22 +1,27 @@
 // Contains a bunch of partial functions to help with scaffolding
-
+import path from "path";
 import { ethers } from "hardhat";
-import { TOKENS } from "./Constants";
+import { CONFIG } from "./Config";
+const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
+import { getAccounts, deployContract } from "../scripts/common";
 
 import { ERC20, Curve, CurveFactory } from "../typechain";
 import { BigNumberish, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { mintCADC, mintEURS, mintUSDC, mintXSGD } from "./Utils";
+import { mintEURS, mintUSDC, mintXSGD, mintCADC, mintFXPHP } from "./Utils";
 
-import EURS_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/EURS_USDC.json";
-import XSGD_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/XSGD_USDC.json";
-import CADC_USDC_ASSIM from "../scripts/halo/assimilatorConfigs/localhost/CADC_USDC.json";
+const EURS_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/EURS_USDC.json`);
+const XSGD_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/XSGD_USDC.json`);
+const CADC_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/CADC_USDC.json`);
+const FXPHP_USDC_ASSIM = require(`../scripts/halo/assimilatorConfigs/${process.env.NETWORK}/FXPHP_USDC.json`);
 
-export const ALPHA = parseUnits("0.5");
-export const BETA = parseUnits("0.35");
-export const MAX = parseUnits("0.15");
-export const EPSILON = parseUnits("0.0004");
-export const LAMBDA = parseUnits("0.3");
+const DIMENSION = {
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
+}
 
 // eslint-disable-next-line
 export const scaffoldTest = async () => {
@@ -37,20 +42,22 @@ export const scaffoldTest = async () => {
 
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
   const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy();
-
   const BaseToUsdAssimilator = await ethers.getContractFactory("BaseToUsdAssimilator");
+
   const eursToUsdAssimilator = await BaseToUsdAssimilator.deploy(
     parseUnits("1", EURS_USDC_ASSIM.baseDecimals),
     EURS_USDC_ASSIM.baseTokenAddress,
     EURS_USDC_ASSIM.quoteTokenAddress,
     EURS_USDC_ASSIM.oracleAddress,
   );
+
   const xsgdToUsdAssimilator = await BaseToUsdAssimilator.deploy(
     parseUnits("1", XSGD_USDC_ASSIM.baseDecimals),
     XSGD_USDC_ASSIM.baseTokenAddress,
     XSGD_USDC_ASSIM.quoteTokenAddress,
     XSGD_USDC_ASSIM.oracleAddress,
   );
+
   const cadcToUsdAssimilator = await BaseToUsdAssimilator.deploy(
     parseUnits("1", CADC_USDC_ASSIM.baseDecimals),
     CADC_USDC_ASSIM.baseTokenAddress,
@@ -58,10 +65,18 @@ export const scaffoldTest = async () => {
     CADC_USDC_ASSIM.oracleAddress,
   );
 
+  const fxphpToUsdAssimilator = await BaseToUsdAssimilator.deploy(
+    parseUnits("1", FXPHP_USDC_ASSIM.baseDecimals),
+    FXPHP_USDC_ASSIM.baseTokenAddress,
+    FXPHP_USDC_ASSIM.quoteTokenAddress,
+    FXPHP_USDC_ASSIM.oracleAddress,
+  );
+
   const usdc = (await ethers.getContractAt("ERC20", TOKENS.USDC.address)) as ERC20;
-  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
   const eurs = (await ethers.getContractAt("ERC20", TOKENS.EURS.address)) as ERC20;
   const xsgd = (await ethers.getContractAt("ERC20", TOKENS.XSGD.address)) as ERC20;
+  const cadc = (await ethers.getContractAt("ERC20", TOKENS.CADC.address)) as ERC20;
+  const fxphp = (await ethers.getContractAt("ERC20", TOKENS.FXPHP.address)) as ERC20;
 
   const erc20 = (await ethers.getContractAt("ERC20", ethers.constants.AddressZero)) as ERC20;
 
@@ -80,14 +95,19 @@ export const scaffoldTest = async () => {
   return {
     users,
     userAddresses,
-    cadcToUsdAssimilator,
+
     usdcToUsdAssimilator,
     eursToUsdAssimilator,
     xsgdToUsdAssimilator,
+    cadcToUsdAssimilator,
+    fxphpToUsdAssimilator,
+
     usdc,
-    cadc,
     eurs,
     xsgd,
+    cadc,
+    fxphp,
+
     erc20,
     CurveFactory,
     RouterFactory,
@@ -135,7 +155,7 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
     if (params) {
       await curve.setParams(...params);
     } else {
-      await curve.setParams(ALPHA, BETA, MAX, EPSILON, LAMBDA);
+      await curve.setParams(DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda);
     }
 
     return {
@@ -197,16 +217,20 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
       await mintUSDC(minterAddress, amount);
     }
 
-    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
-      await mintCADC(minterAddress, amount);
-    }
-
     if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
       await mintEURS(minterAddress, amount);
     }
 
     if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
       await mintXSGD(minterAddress, amount);
+    }
+
+    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
+      await mintCADC(minterAddress, amount);
+    }
+
+    if (tokenAddress.toLowerCase() === TOKENS.FXPHP.address.toLowerCase()) {
+      await mintFXPHP(minterAddress, amount);
     }
 
     await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);

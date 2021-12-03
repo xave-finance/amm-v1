@@ -1,5 +1,7 @@
+import path from "path";
 import { ethers } from "hardhat";
-import { TOKENS } from "./Constants";
+// import { TOKENS } from "./Constants";
+const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 import { BigNumber, BigNumberish, ContractReceipt, Signer } from "ethers";
 import { expect } from "chai";
 
@@ -7,6 +9,9 @@ import EACAggregatorProxyABI from "./abi/EACAggregatorProxy.json";
 import EURSABI from "./abi/EURSABI.json";
 import FiatTokenV1ABI from "./abi/FiatTokenV1ABI.json";
 import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
+import TCADABI from "./abi/TCADABI.json";
+import FXPHPABI from "./abi/FXPHPABI.json";
+import TAGPHPABI from "./abi/TAGPHPABI.json";
 import { Result } from "ethers/lib/utils";
 import { Curve } from "../typechain/Curve";
 
@@ -55,15 +60,6 @@ export const mintFiatTokenV2 = async ({ ownerAddress, tokenAddress, recipient, a
   await FiatTokenV2.connect(minter).mint(recipient, amount);
 };
 
-export const mintCADC = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
-  await mintFiatTokenV2({
-    ownerAddress: TOKENS.CADC.owner,
-    tokenAddress: TOKENS.CADC.address,
-    recipient,
-    amount,
-  });
-};
-
 export const mintUSDC = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
   await mintFiatTokenV2({
     ownerAddress: TOKENS.USDC.owner,
@@ -82,6 +78,50 @@ export const mintXSGD = async (recipient: string, amount: BigNumberish | number)
 
   await XSGD.increaseMinterAllowance(TOKENS.XSGD.masterMinter, amount);
   await XSGD.mint(recipient, amount);
+};
+
+export const mintTCAD = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
+  // Send minter some ETH
+  // await sendETH(TOKENS.TCAD.masterMinter);
+  // console.log("TOKENS.TCAD.masterMinter: ", TOKENS.TCAD.masterMinter);
+
+  // const owner = await unlockAccountAndGetSigner(TOKENS.TCAD.masterMinter);
+
+  const TCAD = new ethers.Contract(TOKENS.TCAD.address, TCADABI);
+  // await TCAD.transferOwnership(owner.address);
+
+  // const signer = await provider.getSigner(0);
+  // console.log("signer[0]: ", signer._address)
+  // await TCAD.mint(recipient, amount);
+};
+
+export const mintFXPHP = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
+  await sendETH(TOKENS.FXPHP.masterMinter);
+
+  const owner = await unlockAccountAndGetSigner(TOKENS.FXPHP.masterMinter);
+  const FXPHP = new ethers.Contract(TOKENS.FXPHP.address, FXPHPABI, owner);
+  await FXPHP.mint(recipient, amount);
+}
+
+export const mintTAGPHP = async (sender: string, recipient: string, amount: BigNumberish | number): Promise<void> => {
+  await sendETH(TOKENS.TAGPHP.masterMinter);
+
+  const owner = await unlockAccountAndGetSigner(TOKENS.TAGPHP.masterMinter);
+  const TAGPHP = new ethers.Contract(TOKENS.TAGPHP.address, TAGPHPABI, owner);
+
+  await TAGPHP.addWhitelistAddress(sender, parseUnits("10000000", 18));
+  await TAGPHP.addWhitelistAddress(recipient, parseUnits("10000000", 18));
+
+  await TAGPHP.mint(sender, amount);
+}
+
+export const mintCADC = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
+  await mintFiatTokenV2({
+    ownerAddress: TOKENS.CADC.owner,
+    tokenAddress: TOKENS.CADC.address,
+    recipient,
+    amount,
+  });
 };
 
 export const mintEURS = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
@@ -134,7 +174,7 @@ export const getLatestBlockTime = async (): Promise<number> => {
 
 export const getFutureTime = async (): Promise<number> => {
   const t = await getLatestBlockTime();
-  return t + 60;
+  return t + (60 * 10);
 };
 
 export const getCurveAddressFromTxRecp = (txRecp: ContractReceipt): string => {
@@ -295,4 +335,11 @@ export const adjustViewDeposit = async (inputType: string, depositPreview, input
   }
 
   return depositPreview;
+}
+
+export const weightBase = async (liquidity: any) => {
+  const liquidityTotal = parseFloat(formatUnits(liquidity.total_));
+  const numeraireBase = parseFloat(formatUnits(liquidity.individual_[0]));
+
+  return numeraireBase / liquidityTotal;
 }

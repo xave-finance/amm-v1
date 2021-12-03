@@ -136,3 +136,4 @@ scripts/deployed_contract_logs/hardhat
 scripts/config/kovan
 scripts/config/localhost
 scripts/config/hardhat
+scripts/config/matic
