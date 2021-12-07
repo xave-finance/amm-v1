@@ -207,7 +207,7 @@ yarn deploy:kovan:verify // (optional)
 2. Create a new json config for the curve's base assimilator. This file will be placed in `scripts/halo/assimilatorConfigs/<network>`. **IMPORTANT:** this change needs to be merged via a PR so it can be reviewed by another peer. Update .env for the assimilator and curve you wish to deploy.
 
     - For assimilator config, please refer to `amm-v1/scripts/halo/assimilatorConfigs/[network]/[currency]_USDC.json`
-    - For curve config, please refer to `amm-v1/scripts/halo/curve/[network]/[currency]_USDC.json`
+    - For curve config, please refer to `amm-v1/scripts/halo/curveConfigs/[network]/[currency]_USDC.json`
     - Assimilator and curve configs must have the same file name
 Ex.
 ```
