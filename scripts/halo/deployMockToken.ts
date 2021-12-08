@@ -13,7 +13,8 @@ async function main() {
     name: "ERC20",
     deployer: user1,
     factory: MockTokenFactory,
-    args: ["Mock XIDR", "XIDR", 6],
+    //args: ["Mock XIDR", "XIDR", 6],
+    args: ["Mock fxPHP", "fxPHP", 18],
   });
 
   await Token.mint(user1.address, parseUnits("1000000000"));
