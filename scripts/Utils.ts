@@ -117,7 +117,7 @@ export const curveHelper = async fileName => {
 
   for (let index = 0; index < fileName.length; index++) {
     const row = fileName[index];
-    const params = require(path.resolve(__dirname, `./halo/curve/${NETWORK}/${row}.json`));
+    const params = require(path.resolve(__dirname, `./halo/curveConfigs/${NETWORK}/${row}.json`));
 
     tokenSymbols += `${params.token_symbol},`;
     tokenNames += `${params.token_name},`;
