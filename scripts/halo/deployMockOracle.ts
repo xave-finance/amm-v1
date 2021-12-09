@@ -10,7 +10,7 @@ async function main() {
   const MockAggregatorFactory = await ethers.getContractFactory("MockAggregator");
 
   const Oracle = await deployContract({
-    name: "Mock XIDR/USD Pricefeed",
+    name: "Mock fxPHP/USD Pricefeed",
     deployer: user1,
     factory: MockAggregatorFactory,
     args: [],
