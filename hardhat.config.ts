@@ -78,6 +78,13 @@ const config: HardhatUserConfig = {
       // https://github.com/nomiclabs/hardhat/issues/1828
       gasPrice: 8000000000,
     },
+    arbitrum: {
+      url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
+      chainId: 42161,
+      accounts: {
+        mnemonic: MNEMONIC,
+      },
+    },
     arbitrumTestnet: {
       url: `https://arbitrum-rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       chainId: 421611,
