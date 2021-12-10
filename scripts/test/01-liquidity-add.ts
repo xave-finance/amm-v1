@@ -41,10 +41,10 @@ async function main() {
   /**
    * Change the 5 const below to test other curves (token pairs)
    */
-  const curveAddress = "0xEe1ab46877d1DeFE18bAfC749F32919dF6928a16";
-  const baseTokenAddress = "0x3849B6005302cACEE4DaF9f8750A719eD9Bb99f8";
-  const quoteTokenAddress = "0x12513dd17Ae75AF37d9eb21124f98b04705Be906";
-  const baseTokenDecimals = 6;
+  const curveAddress = "0xF1f9eE0A8bE74e8EEcf547cc53EaD6093fc7493a";
+  const baseTokenAddress = "0x59847B1314E1A1cad9E0a207F6E53c04F4FAbFBD";
+  const quoteTokenAddress = "0x85B210deD75878CC7824D0cf2AEfd0b42Ee0e265";
+  const baseTokenDecimals = 18;
   const quoteTokenDecimals = 6;
 
   await multiMintAndApprove([

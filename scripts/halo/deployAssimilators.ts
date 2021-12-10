@@ -1,7 +1,7 @@
 import hre from "hardhat";
 const { ethers } = hre;
 import { getAccounts } from "../common";
-import { configFileHelper } from "../Utils";
+import { configFileHelper, isArbitrumNetwork } from "../Utils";
 import { deployContract } from "../common";
 import fs from "fs";
 import path from "path";
@@ -44,9 +44,6 @@ async function main() {
         assimilatorConfigs[index].quoteTokenAddress,
         assimilatorConfigs[index].oracleAddress,
       ],
-      opts: {
-        gasLimit: 3000000,
-      },
     });
 
     const key = pairs[index].split("_")[0] + "ToUsdAssimilator";

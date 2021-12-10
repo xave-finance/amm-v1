@@ -163,7 +163,7 @@ export const deployerHelper = async (user, contractName) => {
     factory: contractInstance,
     args: [],
     opts: {
-      gasLimit: 3000000,
+      gasLimit: isArbitrumNetwork() ? 300000000 : 3000000,
     },
   });
 
@@ -258,7 +258,7 @@ const createCurve = async function ({
     baseAssimilator,
     quoteAssimilator,
     {
-      gasLimit: 3000000,
+      gasLimit: isArbitrumNetwork() ? 30000000 : 3000000,
       gasPrice,
     },
   );
@@ -288,7 +288,10 @@ const createCurve = async function ({
   const gasPrice1 = await getFastGasPrice();
   console.log(`Curve#setCap with gasPrice ${formatUnits(gasPrice1, 9)} gwei`);
   const cap = parseUnits("500000");
-  const setCap = await curve.setCap(cap, { gasLimit: 3000000, gasPrice: gasPrice1 });
+  const setCap = await curve.setCap(cap, {
+    gasLimit: isArbitrumNetwork() ? 30000000 : 3000000,
+    gasPrice: gasPrice1,
+  });
   console.log("Curve#setCap TX Hash: ", setCap.hash);
 
   return {
@@ -339,11 +342,18 @@ const createCurveAndSetParams = async function ({
 
   console.log(`Curve#setParams with gasPrice ${formatUnits(gasPrice, 9)} gwei`);
 
-  const tx = await curve.setParams(...params, { gasLimit: 3000000, gasPrice });
+  const tx = await curve.setParams(...params, {
+    gasLimit: isArbitrumNetwork() ? 30000000 : 3000000,
+    gasPrice,
+  });
   console.log("Curve#setParams TX Hash: ", tx.hash);
   await tx.wait();
   return {
     curve,
     curveLpToken,
   };
+};
+
+export const isArbitrumNetwork = () => {
+  return hre.network.name.includes("arbitrum");
 };

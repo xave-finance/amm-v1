@@ -10,10 +10,12 @@ async function main() {
   const MockTokenFactory = await ethers.getContractFactory("MockToken");
 
   const Token = await deployContract({
-    name: "ERC20",
+    name: "MockToken",
     deployer: user1,
     factory: MockTokenFactory,
-    args: ["Mock XIDR", "XIDR", 6],
+    // args: ["Mock USDC", "USDC", 6],
+    //args: ["Mock XIDR", "XIDR", 6],
+    args: ["Mock fxPHP", "fxPHP", 18],
   });
 
   await Token.mint(user1.address, parseUnits("1000000000"));

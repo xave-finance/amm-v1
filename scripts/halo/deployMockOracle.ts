@@ -10,14 +10,14 @@ async function main() {
   const MockAggregatorFactory = await ethers.getContractFactory("MockAggregator");
 
   const Oracle = await deployContract({
-    name: "Mock XIDR/USD Pricefeed",
+    name: "Mock fxPHP/USD Pricefeed",
     deployer: user1,
     factory: MockAggregatorFactory,
     args: [],
   });
 
-  //const amount = parseUnits("0.020", 8); // IDR rate (1 PHP = 0.020 USD)
-  const amount = parseUnits("0.000070", 8); // IDR rate (1 IDR = 0.000070 USD)
+  const amount = parseUnits("0.020", 8); // PHP rate (1 PHP = 0.020 USD)
+  // const amount = parseUnits("0.000070", 8); // IDR rate (1 IDR = 0.000070 USD)
 
   await Oracle.setAnswer(amount);
 
