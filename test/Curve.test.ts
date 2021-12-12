@@ -1215,7 +1215,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only(`EURS/USDC 50/50 - ${i}`, async function () {
+        it(`EURS/USDC 50/50 - ${i}`, async function () {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1235,7 +1235,7 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only(`XSGD/USDC 50/50 - ${i}`, async function () {
+        it(`XSGD/USDC 50/50 - ${i}`, async function () {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1255,7 +1255,7 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only(`CADC/USDC 50/50 - ${i}`, async function () {
+        it(`CADC/USDC 50/50 - ${i}`, async function () {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1275,27 +1275,7 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only(`CADC/USDC 50/50 - ${i}`, async function () {
-          await viewDepositWithSanityChecks({
-            amount: i.toString(),
-            name: NAME,
-            symbol: SYMBOL,
-            base: TOKENS.CADC.address,
-            quote: TOKENS.USDC.address,
-            baseWeight: parseUnits("0.5"),
-            quoteWeight: parseUnits("0.5"),
-            baseDecimals: TOKENS.CADC.decimals,
-            quoteDecimals: TOKENS.USDC.decimals,
-            baseAssimilator: assimilator["CADC"].address,
-            quoteAssimilator: quoteAssimilatorAddr.address,
-            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.CADC.address,
-          });
-        });
-      }
-
-      for (let i = 1; i <= 10000; i *= 100) {
-        it.only(`FXPHP/USDC 50/50 - ${i}`, async function () {
+        it(`FXPHP/USDC 50/50 - ${i}`, async function () {
           await viewDepositWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1315,154 +1295,174 @@ describe("Curve", function () {
       }
     });
 
-    // describe("viewWithdraw", function () {
-    //   const viewWithdrawWithSanityChecks = async ({
-    //     amount,
-    //     name,
-    //     symbol,
-    //     base,
-    //     quote,
-    //     baseWeight,
-    //     quoteWeight,
-    //     baseDecimals,
-    //     quoteDecimals,
-    //     baseAssimilator,
-    //     quoteAssimilator,
-    //     params,
-    //     oracle,
-    //   }: {
-    //     name: string;
-    //     symbol: string;
-    //     amount: string;
-    //     base: string;
-    //     quote: string;
-    //     baseWeight: BigNumberish;
-    //     quoteWeight: BigNumberish;
-    //     baseDecimals: number;
-    //     quoteDecimals: number;
-    //     baseAssimilator: string;
-    //     quoteAssimilator: string;
-    //     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-    //     oracle: string;
-    //   }) => {
-    //     const { curve, curveLpToken } = await createCurveAndSetParams({
-    //       name,
-    //       symbol,
-    //       base,
-    //       quote,
-    //       baseWeight,
-    //       quoteWeight,
-    //       baseAssimilator,
-    //       quoteAssimilator,
-    //       params,
-    //     });
+    describe("viewWithdraw", function () {
+      const viewWithdrawWithSanityChecks = async ({
+        amount,
+        name,
+        symbol,
+        base,
+        quote,
+        baseWeight,
+        quoteWeight,
+        baseDecimals,
+        quoteDecimals,
+        baseAssimilator,
+        quoteAssimilator,
+        params,
+        oracle,
+      }: {
+        name: string;
+        symbol: string;
+        amount: string;
+        base: string;
+        quote: string;
+        baseWeight: BigNumberish;
+        quoteWeight: BigNumberish;
+        baseDecimals: number;
+        quoteDecimals: number;
+        baseAssimilator: string;
+        quoteAssimilator: string;
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        oracle: string;
+      }) => {
+        const { curve, curveLpToken } = await createCurveAndSetParams({
+          name,
+          symbol,
+          base,
+          quote,
+          baseWeight,
+          quoteWeight,
+          baseAssimilator,
+          quoteAssimilator,
+          params,
+        });
 
-    //     // Mint tokens and approve
-    //     await multiMintAndApprove([
-    //       [base, user1, parseUnits("1000000", baseDecimals), curve.address],
-    //       [quote, user1, parseUnits("1000000", quoteDecimals), curve.address],
-    //       [base, user2, parseUnits(amount, baseDecimals), curve.address],
-    //       [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
-    //     ]);
+        // Mint tokens and approve
+        await multiMintAndApprove([
+          [base, user1, parseUnits("100000000", baseDecimals), curve.address],
+          [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
+          [base, user2, parseUnits("100000000", baseDecimals), curve.address],
+          [quote, user2, parseUnits("100000000", quoteDecimals), curve.address],
+        ]);
 
-    //     // Deposit user 1
-    //     await curve
-    //       .connect(user1)
-    //       .deposit(parseUnits("1000000"), await getFutureTime())
-    //       .then(x => x.wait());
+        // Deposit user 1
+        await curve
+          .connect(user1)
+          .deposit(parseUnits("1000000"), await getFutureTime())
+          .then(x => x.wait());
 
-    //     // Deposit for user 2
-    //     const beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
-    //     const beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-    //     const beforeLPBal = await curveLpToken.balanceOf(user2Address);
-    //     expectBNEq(beforeLPBal, ethers.constants.Zero);
+        // Deposit for user 2
+        const beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
+        const beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+        const beforeLPBal = await curveLpToken.balanceOf(user2Address);
+        expectBNEq(beforeLPBal, ethers.constants.Zero);
 
-    //     await curve
-    //       .connect(user2)
-    //       .deposit(parseUnits(amount), await getFutureTime())
-    //       .then(x => x.wait());
+        await curve
+          .connect(user2)
+          .deposit(parseUnits(amount), await getFutureTime())
+          .then(x => x.wait());
 
-    //     const afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
-    //     const afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+        const afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
+        const afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
-    //     const afterLPBal = await curveLpToken.balanceOf(user2Address);
+        const afterLPBal = await curveLpToken.balanceOf(user2Address);
 
-    //     const baseSupplied = beforeBaseBal.sub(afterBaseBal);
-    //     const quoteSupplied = beforeQuoteBal.sub(afterQuoteBal);
+        const baseSupplied = beforeBaseBal.sub(afterBaseBal);
+        const quoteSupplied = beforeQuoteBal.sub(afterQuoteBal);
 
-    //     // Withdraw should be the same regardless if oracle updates
-    //     const ORACLE_RATE = await getOracleAnswer(oracle);
-    //     await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        // Withdraw should be the same regardless if oracle updates
+        const ORACLE_RATE = await getOracleAnswer(oracle);
+        await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
 
-    //     const [viewBase, viewQuote] = await curve.viewWithdraw(afterLPBal);
+        const [viewBase, viewQuote] = await curve.viewWithdraw(afterLPBal);
 
-    //     // Fees take up small portion
-    //     expectBNAproxEq(viewBase, baseSupplied, baseSupplied.div(1500));
-    //     expectBNAproxEq(viewQuote, quoteSupplied, quoteSupplied.div(1500));
+        // Fees take up small portion
+        expectBNAproxEq(viewBase, baseSupplied, baseSupplied.div(1500));
+        expectBNAproxEq(viewQuote, quoteSupplied, quoteSupplied.div(1500));
 
-    //     await updateOracleAnswer(oracle, ORACLE_RATE);
-    //   };
+        await updateOracleAnswer(oracle, ORACLE_RATE);
+      };
 
-    //   for (let i = 1; i <= 10000; i *= 100) {
-    //     it.only("EURS/USDC 50/50 - " + i.toString(), async function () {
-    //       await viewWithdrawWithSanityChecks({
-    //         amount: "10000",
-    //         name: NAME,
-    //         symbol: SYMBOL,
-    //         base: TOKENS.EURS.address,
-    //         quote: TOKENS.USDC.address,
-    //         baseWeight: parseUnits("0.5"),
-    //         quoteWeight: parseUnits("0.5"),
-    //         baseDecimals: TOKENS.EURS.decimals,
-    //         quoteDecimals: TOKENS.USDC.decimals,
-    //         baseAssimilator: assimilator["EURS"].address,
-    //         quoteAssimilator: quoteAssimilatorAddr.address,
-    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-    //         oracle: ORACLES.EURS.address,
-    //       });
-    //     });
-    //   }
+      for (let i = 1; i <= 10000; i *= 100) {
+        it.only("EURS/USDC 50/50 - " + i.toString(), async function () {
+          await viewWithdrawWithSanityChecks({
+            amount: "10000",
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.EURS.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.EURS.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator["EURS"].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.EURS.address,
+          });
+        });
+      }
 
-    //   for (let i = 1; i <= 10000; i *= 100) {
-    //     it.only("XSGD/USDC 50/50 - " + i.toString(), async function () {
-    //       await viewWithdrawWithSanityChecks({
-    //         amount: i.toString(),
-    //         name: NAME,
-    //         symbol: SYMBOL,
-    //         base: TOKENS.XSGD.address,
-    //         quote: TOKENS.USDC.address,
-    //         baseWeight: parseUnits("0.5"),
-    //         quoteWeight: parseUnits("0.5"),
-    //         baseDecimals: TOKENS.XSGD.decimals,
-    //         quoteDecimals: TOKENS.USDC.decimals,
-    //         baseAssimilator: assimilator["XSGD"].address,
-    //         quoteAssimilator: quoteAssimilatorAddr.address,
-    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-    //         oracle: ORACLES.XSGD.address,
-    //       });
-    //     });
-    //   }
+      for (let i = 1; i <= 10000; i *= 100) {
+        it.only("XSGD/USDC 50/50 - " + i.toString(), async function () {
+          await viewWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.XSGD.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.XSGD.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator["XSGD"].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.XSGD.address,
+          });
+        });
+      }
 
-    //   for (let i = 1; i <= 10000; i *= 100) {
-    //     it.only(`CADC/USDC 50/50 - ${i}`, async function () {
-    //       await viewWithdrawWithSanityChecks({
-    //         amount: i.toString(),
-    //         name: NAME,
-    //         symbol: SYMBOL,
-    //         base: TOKENS.CADC.address,
-    //         quote: TOKENS.USDC.address,
-    //         baseWeight: parseUnits("0.5"),
-    //         quoteWeight: parseUnits("0.5"),
-    //         baseDecimals: TOKENS.CADC.decimals,
-    //         quoteDecimals: TOKENS.USDC.decimals,
-    //         baseAssimilator: assimilator["CADC"].address,
-    //         quoteAssimilator: quoteAssimilatorAddr.address,
-    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-    //         oracle: ORACLES.CADC.address,
-    //       });
-    //     });
-    //   }
-    // });
+      for (let i = 1; i <= 10000; i *= 100) {
+        it.only(`CADC/USDC 50/50 - ${i}`, async function () {
+          await viewWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.CADC.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.CADC.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator["CADC"].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.CADC.address,
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        it.only(`FXPHP/USDC 50/50 - ${i}`, async function () {
+          await viewWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.FXPHP.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.FXPHP.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator["FXPHP"].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.FXPHP.address,
+          });
+        });
+      }
+    });
 
     // describe("Add and remove liquidity", function () {
     //   const addAndRemoveLiquidityWithSanityChecks = async ({
