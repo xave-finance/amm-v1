@@ -196,7 +196,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(parseUnits("100"));
     });
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -334,7 +334,7 @@ describe("Curve Contract", () => {
       expect(result[0]).to.be.equal(parseUnits("100"));
     });
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -470,7 +470,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(parseUnits("100"));
     });
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -598,7 +598,7 @@ describe("Curve Contract", () => {
       expect(result[0]).to.be.equal(parseUnits("100"));
     });
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -738,7 +738,7 @@ describe("Curve Contract", () => {
       expect(lpAmountAfter).to.be.equal(0);
     });
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -894,7 +894,7 @@ describe("Curve Contract", () => {
       };
     });
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -1038,7 +1038,7 @@ describe("Curve Contract", () => {
       }
     })
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -1184,7 +1184,7 @@ describe("Curve Contract", () => {
       expect(txR.blockNumber).to.not.be.null;
     })
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -1368,7 +1368,7 @@ describe("Curve Contract", () => {
       expect(formatUnits(lpAmountAfter)).to.be.equal(formatUnits(parseUnits("0")));
     })
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
@@ -1630,7 +1630,7 @@ describe("Curve Contract", () => {
       expect(formatUnits(lpAmountB)).to.be.equal(formatUnits(amt));
     })
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
