@@ -454,7 +454,7 @@ describe("Curve", function () {
           const oracle = oracles[i];
           const quoteWeight = weights[j][0];
 
-          it.only(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
+          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
             const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['FXPHP']];
             const baseAssimilator = assimilators[i].address;
 
@@ -475,7 +475,7 @@ describe("Curve", function () {
             });
           });
 
-          it.only(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
+          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
             const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['FXPHP']];
             const baseAssimilator = assimilators[i].address;
 
@@ -500,630 +500,630 @@ describe("Curve", function () {
     }
   });
 
-  // describe("Pool Ratio changes between operations", function () {
-  //   describe("viewDeposit", function () {
-  //     const viewLPDepositWithSanityChecks = async ({
-  //       amount,
-  //       name,
-  //       symbol,
-  //       base,
-  //       quote,
-  //       baseWeight,
-  //       quoteWeight,
-  //       baseDecimals,
-  //       quoteDecimals,
-  //       baseAssimilator,
-  //       quoteAssimilator,
-  //       params,
-  //       oracle,
-  //     }: {
-  //       name: string;
-  //       symbol: string;
-  //       amount: string;
-  //       base: string;
-  //       quote: string;
-  //       baseWeight: BigNumberish;
-  //       quoteWeight: BigNumberish;
-  //       baseDecimals: number;
-  //       quoteDecimals: number;
-  //       baseAssimilator: string;
-  //       quoteAssimilator: string;
-  //       params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  //       oracle: string;
-  //     }) => {
-  //       const { curve } = await createCurveAndSetParams({
-  //         name,
-  //         symbol,
-  //         base,
-  //         quote,
-  //         baseWeight,
-  //         quoteWeight,
-  //         baseAssimilator,
-  //         quoteAssimilator,
-  //         params,
-  //       });
-
-  //       // Mint tokens and approve
-  //       await multiMintAndApprove([
-  //         [base, user1, parseUnits("100000000", baseDecimals), curve.address],
-  //         [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
-  //         [base, user2, parseUnits(amount, baseDecimals), curve.address],
-  //         [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
-  //       ]);
-
-  //       const depositAmount = parseUnits("1000000");
-
-  //       // Make sure initial amount is the oracle value
-  //       const ORACLE_RATE = await getOracleAnswer(oracle);
-
-  //       const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await curve.viewDeposit(depositAmount);
-  //       const expectedDepositAmountBase = parseUnits(formatUnits(depositAmount), baseDecimals)
-  //         .mul(1e8)
-  //         .div(ORACLE_RATE)
-  //         .div(2);
-  //       const expectedDepositAmountQuote = parseUnits(formatUnits(depositAmount), quoteDecimals).div(2);
-
-  //       expectBNAproxEq(baseViewUser1, expectedDepositAmountBase, expectedDepositAmountBase.div(2000));
-  //       expectBNAproxEq(quoteViewUser1, expectedDepositAmountQuote, expectedDepositAmountQuote.div(2000));
-
-  //       // Deposit user 1
-  //       await curve
-  //         .connect(user1)
-  //         .deposit(depositAmount, await getFutureTime())
-  //         .then(x => x.wait());
-
-  //       // User swaps a large chunk of QUOTE -> BASE
-  //       // Shortage of BASE (non-USDC) in the system
-  //       // Now, when user wants to deposit into the system
-  //       // with the same amount (say 100), he'll get less as
-  //       // he's depositing 50 QUOTE (USDC), and LESS BASE (non-usdc)
-  //       // Quote amount should remain the same
-
-  //       const amountA = "1000000";
-  //       await curve
-  //         .connect(user1)
-  //         .originSwap(quote, base, parseUnits(amountA, quoteDecimals).div(20), 0, await getFutureTime());
-
-  //       const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await curve.connect(user2).viewDeposit(depositAmount);
-
-  //       // Not "just" less than
-  //       expect(lpAmountUser2.mul(102).div(100).lt(lpAmountUser1)).to.be.true;
-  //       expectBNAproxEq(quoteViewUser2, quoteViewUser1, quoteViewUser2.div(2000));
-  //       expect(baseViewUser2.mul(104).div(100).lt(baseViewUser1)).to.be.true;
-
-  //       // User swaps a large chunk of BASE -> QUOTE now
-  //       // Shortage of QUOTE (USDC) in the system
-  //       // Now, when user wants to deposit into the system
-  //       // with the same amount (say 100), he'll get MORE
-  //       // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
-  //       // Quote amount should be the same
-
-  //       const amountB = "1000000";
-  //       await curve
-  //         .connect(user1)
-  //         .originSwap(base, quote, parseUnits(amountB, baseDecimals).div(10), 0, await getFutureTime());
-
-  //       const [lpAmountUser3, [baseViewUser3, quoteViewUser3]] = await curve.connect(user2).viewDeposit(depositAmount);
-
-  //       expectBNAproxEq(quoteViewUser3, quoteViewUser1, quoteViewUser2.div(2000));
-
-  //       const ORACLE_CHECK = Math.trunc(parseInt(formatUnits(ORACLE_RATE, quoteDecimals)));
-  //       // Test works when oracle value is 10 or more
-
-  //       if (ORACLE_CHECK >= 10) {
-  //         expect(lpAmountUser3.mul(100).div(102).gt(lpAmountUser1)).to.be.true; // TODO: NOT WORKING ON FXPHP
-  //         expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true; // TODO: NOT WORKING ON FXPHP
-  //       }
-  //     };
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "EURS";
-  //       const SYMBOL = "EURS";
-  //       it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPDepositWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.EURS.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.EURS.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['EURS'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.EURS.address,
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "XSGD";
-  //       const SYMBOL = "XSGD";
-  //       it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPDepositWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.XSGD.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.XSGD.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['XSGD'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.XSGD.address,
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "CADC";
-  //       const SYMBOL = "CADC";
-  //       it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPDepositWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.CADC.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.CADC.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['CADC'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.CADC.address,
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "FXPHP";
-  //       const SYMBOL = "FXPHP";
-  //       it.only(`${NAME}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPDepositWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.FXPHP.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.FXPHP.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['FXPHP'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.FXPHP.address,
-  //         });
-  //       });
-  //     }
-  //   });
-
-  //   describe("viewWithdraw", function () {
-  //     const viewLPWithdrawWithSanityChecks = async ({
-  //       amount,
-  //       name,
-  //       symbol,
-  //       base,
-  //       quote,
-  //       baseWeight,
-  //       quoteWeight,
-  //       baseDecimals,
-  //       quoteDecimals,
-  //       baseAssimilator,
-  //       quoteAssimilator,
-  //       params,
-  //     }: {
-  //       name;
-  //       symbol;
-  //       amount: string;
-  //       base: string;
-  //       quote: string;
-  //       baseWeight: BigNumberish;
-  //       quoteWeight: BigNumberish;
-  //       baseDecimals: number;
-  //       quoteDecimals: number;
-  //       baseAssimilator: string;
-  //       quoteAssimilator: string;
-  //       params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  //     }) => {
-  //       const { curve, curveLpToken } = await createCurveAndSetParams({
-  //         name,
-  //         symbol,
-  //         base,
-  //         quote,
-  //         baseWeight,
-  //         quoteWeight,
-  //         baseAssimilator,
-  //         quoteAssimilator,
-  //         params,
-  //       });
-
-  //       // Mint tokens and approve
-  //       await multiMintAndApprove([
-  //         [base, user1, parseUnits("100000000", baseDecimals), curve.address],
-  //         [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
-  //         [base, user2, parseUnits(amount, baseDecimals), curve.address],
-  //         [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
-  //       ]);
-
-  //       const depositAmount = parseUnits("1000000");
-
-  //       // Deposit user 1
-  //       await curve
-  //         .connect(user1)
-  //         .deposit(depositAmount, await getFutureTime())
-  //         .then(x => x.wait());
-  //       const lpAmount = await curveLpToken.balanceOf(user1Address);
-
-  //       const [baseViewUser1, quoteViewUser1] = await curve.connect(user1).viewWithdraw(lpAmount);
-
-  //       // User swaps a large chunk of QUOTE -> BASE
-  //       // Shortage of BASE (non-USDC) in the system
-  //       // Now, when user wants to withdraw from the system
-  //       // with the same amount of LP tokens, he'll get more
-  //       // QUOTE and less BASE
-  //       await curve
-  //         .connect(user1)
-  //         .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(20), 0, await getFutureTime());
-
-  //       const [baseViewUser2, quoteViewUser2] = await curve.connect(user1).viewWithdraw(lpAmount);
-
-  //       expect(quoteViewUser2.mul(100).div(104).gt(quoteViewUser1)).to.be.true;
-  //       expect(baseViewUser2.mul(104).div(100).lt(baseViewUser1)).to.be.true;
-
-  //       // User swaps a large chunk of BASE -> QUOTE now
-  //       // Shortage of QUOTE (USDC) in the system
-  //       // Now, when user wants to deposit into the system
-  //       // with the same amount (say 100), he'll get MORE
-  //       // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
-  //       // Quote amount should be the same
-  //       const amountB = symbol !== "FXPHP" ? "1000000" : "100000000";
-  //       await curve
-  //         .connect(user1)
-  //         .originSwap(base, quote, parseUnits(amountB, baseDecimals).div(10), 0, await getFutureTime());
-
-  //       const [baseViewUser3, quoteViewUser3] = await curve.connect(user1).viewWithdraw(lpAmount);
-
-  //       // Not "just" gt / lt
-  //       expect(quoteViewUser3.mul(104).div(100).lt(quoteViewUser1)).to.be.true;
-  //       expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true;
-  //     };
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "EURS";
-  //       const SYMBOL = "EURS";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPWithdrawWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.EURS.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.EURS.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['EURS'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "XSGD";
-  //       const SYMBOL = "XSGD";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPWithdrawWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.XSGD.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.XSGD.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['XSGD'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "FXPHP";
-  //       const SYMBOL = "FXPHP";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
-  //         await viewLPWithdrawWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.FXPHP.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.FXPHP.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['FXPHP'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //         });
-  //       });
-  //     }
-  //   });
-
-  //   describe("Add and remove liquidity", function () {
-  //     const addAndRemoveLiquidityWithSanityChecks = async ({
-  //       amount,
-  //       name,
-  //       symbol,
-  //       base,
-  //       quote,
-  //       baseWeight,
-  //       quoteWeight,
-  //       baseDecimals,
-  //       quoteDecimals,
-  //       baseAssimilator,
-  //       quoteAssimilator,
-  //       params,
-  //       oracle,
-  //     }: {
-  //       name: string;
-  //       symbol: string;
-  //       amount: string;
-  //       base: string;
-  //       quote: string;
-  //       baseWeight: BigNumberish;
-  //       quoteWeight: BigNumberish;
-  //       baseDecimals: number;
-  //       quoteDecimals: number;
-  //       baseAssimilator: string;
-  //       quoteAssimilator: string;
-  //       params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  //       oracle: string;
-  //     }) => {
-  //       const { curve, curveLpToken } = await createCurveAndSetParams({
-  //         base,
-  //         name,
-  //         symbol,
-  //         quote,
-  //         baseWeight,
-  //         quoteWeight,
-  //         baseAssimilator,
-  //         quoteAssimilator,
-  //         params,
-  //       });
-
-  //       const amountA = "100000000";
-
-  //       // Mint tokens and approve
-  //       await multiMintAndApprove([
-  //         [base, user1, parseUnits(amountA, baseDecimals), curve.address],
-  //         [quote, user1, parseUnits(amountA, quoteDecimals), curve.address],
-  //         [base, user2, parseUnits(amountA, baseDecimals), curve.address],
-  //         [quote, user2, parseUnits(amountA, quoteDecimals), curve.address],
-  //       ]);
-
-  //       // Deposit user 1
-  //       await curve
-  //         .connect(user1)
-  //         .deposit(parseUnits("1000000"), await getFutureTime())
-  //         .then(x => x.wait());
-
-  //       const ORACLE_RATE = await getOracleAnswer(oracle);
-
-  //       // 1st Deposit for user 2
-  //       let beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       let beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-  //       let beforeLPBal = await curveLpToken.balanceOf(user2Address);
-  //       expectBNEq(beforeLPBal, ethers.constants.Zero);
-
-  //       await curve
-  //         .connect(user2)
-  //         .deposit(parseUnits(amount), await getFutureTime())
-  //         .then(x => x.wait());
-
-  //       let afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       let afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-  //       let afterLPBal = await curveLpToken.balanceOf(user2Address);
-
-  //       const lpBal = afterLPBal.sub(beforeLPBal);
-  //       const baseSupplied = beforeBaseBal.sub(afterBaseBal);
-  //       const quoteSupplied = beforeQuoteBal.sub(afterQuoteBal);
-
-  //       expect(afterLPBal.gt(beforeLPBal)).to.be.true;
-  //       // TODO: NOT WORKING ON FXPHP
-  //       const amountB = symbol !== "FXPHP" ? "1000000" : amountA;
-  //       expectBNAproxEq(
-  //         baseSupplied,
-  //         parseUnits(amount, baseDecimals).mul(1e8).div(ORACLE_RATE).div(2), // oracle has 8 decimals, we also want to div 2 since we're supplying liquidity
-  //         parseUnits(amountB, Math.max(baseDecimals - 4, 0)),
-  //       );
-  //       expectBNAproxEq(quoteSupplied, parseUnits(amount, quoteDecimals).div(2), parseUnits("1", baseDecimals));
-
-  //       // Mint tokens and approve for 2nd deposit
-  //       await multiMintAndApprove([
-  //         [base, user2, parseUnits("10000000", baseDecimals), curve.address],
-  //         [quote, user2, parseUnits("10000000", quoteDecimals), curve.address],
-  //       ]);
-
-  //       beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-  //       beforeLPBal = await curveLpToken.balanceOf(user2Address);
-
-  //       // Update pool ratio
-  //       await curve
-  //         .connect(user1)
-  //         .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(20), 0, await getFutureTime());
-  //       await curve
-  //         .connect(user2)
-  //         .deposit(parseUnits(amount), await getFutureTime())
-  //         .then(x => x.wait());
-
-  //       afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-  //       afterLPBal = await curveLpToken.balanceOf(user2Address);
-
-  //       const lpBal2 = afterLPBal.sub(beforeLPBal);
-  //       const baseSupplied2 = beforeBaseBal.sub(afterBaseBal);
-  //       const quoteSupplied2 = beforeQuoteBal.sub(afterQuoteBal);
-
-  //       const ORACLE_CHECK = Math.trunc(parseInt(formatUnits(ORACLE_RATE, quoteDecimals)));
-  //       // Not "just" lt/gt
-
-  //       if (ORACLE_CHECK >= 10) {
-  //         // TODO: NOT WORKING ON FXPHP
-  //         expect(lpBal2.mul(100).div(102).gt(lpBal)).to.be.true;
-  //         // TODO: NOT WORKING ON FXPHP
-  //         expect(baseSupplied2.mul(100).div(104).gt(baseSupplied)).to.be.true;
-  //       }
-
-  //       expectBNAproxEq(quoteSupplied2, quoteSupplied, quoteSupplied2.div(2000));
-
-  //       const totalReceivedLP = lpBal.add(lpBal2);
-
-  //       // 1st Withdrawal
-  //       beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-
-  //       await curve
-  //         .connect(user2)
-  //         .withdraw(totalReceivedLP.div(2), await getFutureTime())
-  //         .then(x => x.wait());
-
-  //       afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-
-  //       const baseReceived = afterBaseBal.sub(beforeBaseBal);
-  //       const quoteReceived = afterQuoteBal.sub(beforeQuoteBal);
-
-  //       // 2nd Withdrawal
-  //       await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
-  //       beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-
-  //       try {
-  //         await curve
-  //           .connect(user1)
-  //           .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(10), 0, await getFutureTime());
-  //       } catch (e) {
-  //         expect(e.toString()).to.include("Curve/swap-convergence-failed");
-  //       }
-
-  //       // TODO: NOT WORKING ON FXPHP
-  //       await curve
-  //         .connect(user2)
-  //         .withdraw(totalReceivedLP.div(2), await getFutureTime())
-  //         .then(x => x.wait());
-
-  //       afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
-  //       afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
-
-  //       const baseReceived2 = afterBaseBal.sub(beforeBaseBal);
-  //       const quoteReceived2 = afterQuoteBal.sub(beforeQuoteBal);
-
-  //       // Not 'just' gt/lt
-  //       expect(quoteReceived2.mul(100).div(104).gt(quoteReceived)).to.be.true;
-  //       expect(baseReceived2.mul(104).div(100).lt(baseReceived)).to.be.true;
-  //     };
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "EURS";
-  //       const SYMBOL = "EURS";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
-  //         await addAndRemoveLiquidityWithSanityChecks({
-  //           amount: "1",
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.EURS.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.EURS.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['EURS'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.EURS.address,
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "XSGD";
-  //       const SYMBOL = "XSGD";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
-  //         await addAndRemoveLiquidityWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.XSGD.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.XSGD.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['XSGD'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.XSGD.address,
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "CADC";
-  //       const SYMBOL = "CADC";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
-  //         await addAndRemoveLiquidityWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.CADC.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.CADC.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['CADC'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.CADC.address,
-  //         });
-  //       });
-  //     }
-
-  //     for (let i = 1; i <= 10000; i *= 100) {
-  //       const NAME = "FXPHP";
-  //       const SYMBOL = "FXPHP";
-  //       it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
-  //         await addAndRemoveLiquidityWithSanityChecks({
-  //           amount: i.toString(),
-  //           name: NAME,
-  //           symbol: SYMBOL,
-  //           base: TOKENS.FXPHP.address,
-  //           quote: TOKENS.USDC.address,
-  //           baseWeight: parseUnits("0.5"),
-  //           quoteWeight: parseUnits("0.5"),
-  //           baseDecimals: TOKENS.FXPHP.decimals,
-  //           quoteDecimals: TOKENS.USDC.decimals,
-  //           baseAssimilator: assimilator['FXPHP'].address,
-  //           quoteAssimilator: quoteAssimilatorAddr.address,
-  //           params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-  //           oracle: ORACLES.FXPHP.address,
-  //         });
-  //       });
-  //     }
-  //   });
-  // });
+  describe("Pool Ratio changes between operations", function () {
+    describe("viewDeposit", function () {
+      const viewLPDepositWithSanityChecks = async ({
+        amount,
+        name,
+        symbol,
+        base,
+        quote,
+        baseWeight,
+        quoteWeight,
+        baseDecimals,
+        quoteDecimals,
+        baseAssimilator,
+        quoteAssimilator,
+        params,
+        oracle,
+      }: {
+        name: string;
+        symbol: string;
+        amount: string;
+        base: string;
+        quote: string;
+        baseWeight: BigNumberish;
+        quoteWeight: BigNumberish;
+        baseDecimals: number;
+        quoteDecimals: number;
+        baseAssimilator: string;
+        quoteAssimilator: string;
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+        oracle: string;
+      }) => {
+        const { curve } = await createCurveAndSetParams({
+          name,
+          symbol,
+          base,
+          quote,
+          baseWeight,
+          quoteWeight,
+          baseAssimilator,
+          quoteAssimilator,
+          params,
+        });
+
+        // Mint tokens and approve
+        await multiMintAndApprove([
+          [base, user1, parseUnits("100000000", baseDecimals), curve.address],
+          [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+        ]);
+
+        const depositAmount = parseUnits("1000000");
+
+        // Make sure initial amount is the oracle value
+        const ORACLE_RATE = await getOracleAnswer(oracle);
+
+        const [lpAmountUser1, [baseViewUser1, quoteViewUser1]] = await curve.viewDeposit(depositAmount);
+        const expectedDepositAmountBase = parseUnits(formatUnits(depositAmount), baseDecimals)
+          .mul(1e8)
+          .div(ORACLE_RATE)
+          .div(2);
+        const expectedDepositAmountQuote = parseUnits(formatUnits(depositAmount), quoteDecimals).div(2);
+
+        expectBNAproxEq(baseViewUser1, expectedDepositAmountBase, expectedDepositAmountBase.div(2000));
+        expectBNAproxEq(quoteViewUser1, expectedDepositAmountQuote, expectedDepositAmountQuote.div(2000));
+
+        // Deposit user 1
+        await curve
+          .connect(user1)
+          .deposit(depositAmount, await getFutureTime())
+          .then(x => x.wait());
+
+        // User swaps a large chunk of QUOTE -> BASE
+        // Shortage of BASE (non-USDC) in the system
+        // Now, when user wants to deposit into the system
+        // with the same amount (say 100), he'll get less as
+        // he's depositing 50 QUOTE (USDC), and LESS BASE (non-usdc)
+        // Quote amount should remain the same
+
+        const amountA = "1000000";
+        await curve
+          .connect(user1)
+          .originSwap(quote, base, parseUnits(amountA, quoteDecimals).div(20), 0, await getFutureTime());
+
+        const [lpAmountUser2, [baseViewUser2, quoteViewUser2]] = await curve.connect(user2).viewDeposit(depositAmount);
+
+        // Not "just" less than
+        expect(lpAmountUser2.mul(102).div(100).lt(lpAmountUser1)).to.be.true;
+        expectBNAproxEq(quoteViewUser2, quoteViewUser1, quoteViewUser2.div(2000));
+        expect(baseViewUser2.mul(104).div(100).lt(baseViewUser1)).to.be.true;
+
+        // User swaps a large chunk of BASE -> QUOTE now
+        // Shortage of QUOTE (USDC) in the system
+        // Now, when user wants to deposit into the system
+        // with the same amount (say 100), he'll get MORE
+        // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
+        // Quote amount should be the same
+
+        const amountB = "1000000";
+        await curve
+          .connect(user1)
+          .originSwap(base, quote, parseUnits(amountB, baseDecimals).div(10), 0, await getFutureTime());
+
+        const [lpAmountUser3, [baseViewUser3, quoteViewUser3]] = await curve.connect(user2).viewDeposit(depositAmount);
+
+        expectBNAproxEq(quoteViewUser3, quoteViewUser1, quoteViewUser2.div(2000));
+
+        const ORACLE_CHECK = Math.trunc(parseInt(formatUnits(ORACLE_RATE, quoteDecimals)));
+        // Test works when oracle value is 10 or more
+
+        if (ORACLE_CHECK >= 10) {
+          expect(lpAmountUser3.mul(100).div(102).gt(lpAmountUser1)).to.be.true; // TODO: NOT WORKING ON FXPHP
+          expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true; // TODO: NOT WORKING ON FXPHP
+        }
+      };
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "EURS";
+        const SYMBOL = "EURS";
+        it(`${NAME}/USDC 50/50 - ${i}`, async function () {
+          await viewLPDepositWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.EURS.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.EURS.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['EURS'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.EURS.address,
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "XSGD";
+        const SYMBOL = "XSGD";
+        it(`${NAME}/USDC 50/50 - ${i}`, async function () {
+          await viewLPDepositWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.XSGD.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.XSGD.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['XSGD'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.XSGD.address,
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "CADC";
+        const SYMBOL = "CADC";
+        it(`${NAME}/USDC 50/50 - ${i}`, async function () {
+          await viewLPDepositWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.CADC.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.CADC.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['CADC'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.CADC.address,
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "FXPHP";
+        const SYMBOL = "FXPHP";
+        it(`${NAME}/USDC 50/50 - ${i}`, async function () {
+          await viewLPDepositWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.FXPHP.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.FXPHP.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['FXPHP'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+            oracle: ORACLES.FXPHP.address,
+          });
+        });
+      }
+    });
+
+    describe("viewWithdraw", function () {
+      const viewLPWithdrawWithSanityChecks = async ({
+        amount,
+        name,
+        symbol,
+        base,
+        quote,
+        baseWeight,
+        quoteWeight,
+        baseDecimals,
+        quoteDecimals,
+        baseAssimilator,
+        quoteAssimilator,
+        params,
+      }: {
+        name;
+        symbol;
+        amount: string;
+        base: string;
+        quote: string;
+        baseWeight: BigNumberish;
+        quoteWeight: BigNumberish;
+        baseDecimals: number;
+        quoteDecimals: number;
+        baseAssimilator: string;
+        quoteAssimilator: string;
+        params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+      }) => {
+        const { curve, curveLpToken } = await createCurveAndSetParams({
+          name,
+          symbol,
+          base,
+          quote,
+          baseWeight,
+          quoteWeight,
+          baseAssimilator,
+          quoteAssimilator,
+          params,
+        });
+
+        // Mint tokens and approve
+        await multiMintAndApprove([
+          [base, user1, parseUnits("100000000", baseDecimals), curve.address],
+          [quote, user1, parseUnits("100000000", quoteDecimals), curve.address],
+          [base, user2, parseUnits(amount, baseDecimals), curve.address],
+          [quote, user2, parseUnits(amount, quoteDecimals), curve.address],
+        ]);
+
+        const depositAmount = parseUnits("1000000");
+
+        // Deposit user 1
+        await curve
+          .connect(user1)
+          .deposit(depositAmount, await getFutureTime())
+          .then(x => x.wait());
+        const lpAmount = await curveLpToken.balanceOf(user1Address);
+
+        const [baseViewUser1, quoteViewUser1] = await curve.connect(user1).viewWithdraw(lpAmount);
+
+        // User swaps a large chunk of QUOTE -> BASE
+        // Shortage of BASE (non-USDC) in the system
+        // Now, when user wants to withdraw from the system
+        // with the same amount of LP tokens, he'll get more
+        // QUOTE and less BASE
+        await curve
+          .connect(user1)
+          .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(20), 0, await getFutureTime());
+
+        const [baseViewUser2, quoteViewUser2] = await curve.connect(user1).viewWithdraw(lpAmount);
+
+        expect(quoteViewUser2.mul(100).div(104).gt(quoteViewUser1)).to.be.true;
+        expect(baseViewUser2.mul(104).div(100).lt(baseViewUser1)).to.be.true;
+
+        // User swaps a large chunk of BASE -> QUOTE now
+        // Shortage of QUOTE (USDC) in the system
+        // Now, when user wants to deposit into the system
+        // with the same amount (say 100), he'll get MORE
+        // as he's depositing 50 QUOTE (USDC) and MORE BASE (non-usdc)
+        // Quote amount should be the same
+        const amountB = symbol !== "FXPHP" ? "1000000" : "100000000";
+        await curve
+          .connect(user1)
+          .originSwap(base, quote, parseUnits(amountB, baseDecimals).div(10), 0, await getFutureTime());
+
+        const [baseViewUser3, quoteViewUser3] = await curve.connect(user1).viewWithdraw(lpAmount);
+
+        // Not "just" gt / lt
+        expect(quoteViewUser3.mul(104).div(100).lt(quoteViewUser1)).to.be.true;
+        expect(baseViewUser3.mul(100).div(104).gt(baseViewUser1)).to.be.true;
+      };
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "EURS";
+        const SYMBOL = "EURS";
+        it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
+          await viewLPWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.EURS.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.EURS.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['EURS'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "XSGD";
+        const SYMBOL = "XSGD";
+        it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
+          await viewLPWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.XSGD.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.XSGD.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['XSGD'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "FXPHP";
+        const SYMBOL = "FXPHP";
+        it.only(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
+          await viewLPWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.FXPHP.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.FXPHP.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['FXPHP'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          });
+        });
+      }
+    });
+
+    // describe("Add and remove liquidity", function () {
+    //   const addAndRemoveLiquidityWithSanityChecks = async ({
+    //     amount,
+    //     name,
+    //     symbol,
+    //     base,
+    //     quote,
+    //     baseWeight,
+    //     quoteWeight,
+    //     baseDecimals,
+    //     quoteDecimals,
+    //     baseAssimilator,
+    //     quoteAssimilator,
+    //     params,
+    //     oracle,
+    //   }: {
+    //     name: string;
+    //     symbol: string;
+    //     amount: string;
+    //     base: string;
+    //     quote: string;
+    //     baseWeight: BigNumberish;
+    //     quoteWeight: BigNumberish;
+    //     baseDecimals: number;
+    //     quoteDecimals: number;
+    //     baseAssimilator: string;
+    //     quoteAssimilator: string;
+    //     params: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+    //     oracle: string;
+    //   }) => {
+    //     const { curve, curveLpToken } = await createCurveAndSetParams({
+    //       base,
+    //       name,
+    //       symbol,
+    //       quote,
+    //       baseWeight,
+    //       quoteWeight,
+    //       baseAssimilator,
+    //       quoteAssimilator,
+    //       params,
+    //     });
+
+    //     const amountA = "100000000";
+
+    //     // Mint tokens and approve
+    //     await multiMintAndApprove([
+    //       [base, user1, parseUnits(amountA, baseDecimals), curve.address],
+    //       [quote, user1, parseUnits(amountA, quoteDecimals), curve.address],
+    //       [base, user2, parseUnits(amountA, baseDecimals), curve.address],
+    //       [quote, user2, parseUnits(amountA, quoteDecimals), curve.address],
+    //     ]);
+
+    //     // Deposit user 1
+    //     await curve
+    //       .connect(user1)
+    //       .deposit(parseUnits("1000000"), await getFutureTime())
+    //       .then(x => x.wait());
+
+    //     const ORACLE_RATE = await getOracleAnswer(oracle);
+
+    //     // 1st Deposit for user 2
+    //     let beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     let beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+    //     let beforeLPBal = await curveLpToken.balanceOf(user2Address);
+    //     expectBNEq(beforeLPBal, ethers.constants.Zero);
+
+    //     await curve
+    //       .connect(user2)
+    //       .deposit(parseUnits(amount), await getFutureTime())
+    //       .then(x => x.wait());
+
+    //     let afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     let afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+    //     let afterLPBal = await curveLpToken.balanceOf(user2Address);
+
+    //     const lpBal = afterLPBal.sub(beforeLPBal);
+    //     const baseSupplied = beforeBaseBal.sub(afterBaseBal);
+    //     const quoteSupplied = beforeQuoteBal.sub(afterQuoteBal);
+
+    //     expect(afterLPBal.gt(beforeLPBal)).to.be.true;
+    //     // TODO: NOT WORKING ON FXPHP
+    //     const amountB = symbol !== "FXPHP" ? "1000000" : amountA;
+    //     expectBNAproxEq(
+    //       baseSupplied,
+    //       parseUnits(amount, baseDecimals).mul(1e8).div(ORACLE_RATE).div(2), // oracle has 8 decimals, we also want to div 2 since we're supplying liquidity
+    //       parseUnits(amountB, Math.max(baseDecimals - 4, 0)),
+    //     );
+    //     expectBNAproxEq(quoteSupplied, parseUnits(amount, quoteDecimals).div(2), parseUnits("1", baseDecimals));
+
+    //     // Mint tokens and approve for 2nd deposit
+    //     await multiMintAndApprove([
+    //       [base, user2, parseUnits("10000000", baseDecimals), curve.address],
+    //       [quote, user2, parseUnits("10000000", quoteDecimals), curve.address],
+    //     ]);
+
+    //     beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+    //     beforeLPBal = await curveLpToken.balanceOf(user2Address);
+
+    //     // Update pool ratio
+    //     await curve
+    //       .connect(user1)
+    //       .originSwap(base, quote, parseUnits("1000000", baseDecimals).div(20), 0, await getFutureTime());
+    //     await curve
+    //       .connect(user2)
+    //       .deposit(parseUnits(amount), await getFutureTime())
+    //       .then(x => x.wait());
+
+    //     afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+    //     afterLPBal = await curveLpToken.balanceOf(user2Address);
+
+    //     const lpBal2 = afterLPBal.sub(beforeLPBal);
+    //     const baseSupplied2 = beforeBaseBal.sub(afterBaseBal);
+    //     const quoteSupplied2 = beforeQuoteBal.sub(afterQuoteBal);
+
+    //     const ORACLE_CHECK = Math.trunc(parseInt(formatUnits(ORACLE_RATE, quoteDecimals)));
+    //     // Not "just" lt/gt
+
+    //     if (ORACLE_CHECK >= 10) {
+    //       // TODO: NOT WORKING ON FXPHP
+    //       expect(lpBal2.mul(100).div(102).gt(lpBal)).to.be.true;
+    //       // TODO: NOT WORKING ON FXPHP
+    //       expect(baseSupplied2.mul(100).div(104).gt(baseSupplied)).to.be.true;
+    //     }
+
+    //     expectBNAproxEq(quoteSupplied2, quoteSupplied, quoteSupplied2.div(2000));
+
+    //     const totalReceivedLP = lpBal.add(lpBal2);
+
+    //     // 1st Withdrawal
+    //     beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+
+    //     await curve
+    //       .connect(user2)
+    //       .withdraw(totalReceivedLP.div(2), await getFutureTime())
+    //       .then(x => x.wait());
+
+    //     afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+
+    //     const baseReceived = afterBaseBal.sub(beforeBaseBal);
+    //     const quoteReceived = afterQuoteBal.sub(beforeQuoteBal);
+
+    //     // 2nd Withdrawal
+    //     await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+    //     beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+
+    //     try {
+    //       await curve
+    //         .connect(user1)
+    //         .originSwap(quote, base, parseUnits("1000000", quoteDecimals).div(10), 0, await getFutureTime());
+    //     } catch (e) {
+    //       expect(e.toString()).to.include("Curve/swap-convergence-failed");
+    //     }
+
+    //     // TODO: NOT WORKING ON FXPHP
+    //     await curve
+    //       .connect(user2)
+    //       .withdraw(totalReceivedLP.div(2), await getFutureTime())
+    //       .then(x => x.wait());
+
+    //     afterBaseBal = await erc20.attach(base).balanceOf(user2Address);
+    //     afterQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
+
+    //     const baseReceived2 = afterBaseBal.sub(beforeBaseBal);
+    //     const quoteReceived2 = afterQuoteBal.sub(beforeQuoteBal);
+
+    //     // Not 'just' gt/lt
+    //     expect(quoteReceived2.mul(100).div(104).gt(quoteReceived)).to.be.true;
+    //     expect(baseReceived2.mul(104).div(100).lt(baseReceived)).to.be.true;
+    //   };
+
+    //   for (let i = 1; i <= 10000; i *= 100) {
+    //     const NAME = "EURS";
+    //     const SYMBOL = "EURS";
+    //     it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+    //       await addAndRemoveLiquidityWithSanityChecks({
+    //         amount: "1",
+    //         name: NAME,
+    //         symbol: SYMBOL,
+    //         base: TOKENS.EURS.address,
+    //         quote: TOKENS.USDC.address,
+    //         baseWeight: parseUnits("0.5"),
+    //         quoteWeight: parseUnits("0.5"),
+    //         baseDecimals: TOKENS.EURS.decimals,
+    //         quoteDecimals: TOKENS.USDC.decimals,
+    //         baseAssimilator: assimilator['EURS'].address,
+    //         quoteAssimilator: quoteAssimilatorAddr.address,
+    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+    //         oracle: ORACLES.EURS.address,
+    //       });
+    //     });
+    //   }
+
+    //   for (let i = 1; i <= 10000; i *= 100) {
+    //     const NAME = "XSGD";
+    //     const SYMBOL = "XSGD";
+    //     it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+    //       await addAndRemoveLiquidityWithSanityChecks({
+    //         amount: i.toString(),
+    //         name: NAME,
+    //         symbol: SYMBOL,
+    //         base: TOKENS.XSGD.address,
+    //         quote: TOKENS.USDC.address,
+    //         baseWeight: parseUnits("0.5"),
+    //         quoteWeight: parseUnits("0.5"),
+    //         baseDecimals: TOKENS.XSGD.decimals,
+    //         quoteDecimals: TOKENS.USDC.decimals,
+    //         baseAssimilator: assimilator['XSGD'].address,
+    //         quoteAssimilator: quoteAssimilatorAddr.address,
+    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+    //         oracle: ORACLES.XSGD.address,
+    //       });
+    //     });
+    //   }
+
+    //   for (let i = 1; i <= 10000; i *= 100) {
+    //     const NAME = "CADC";
+    //     const SYMBOL = "CADC";
+    //     it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+    //       await addAndRemoveLiquidityWithSanityChecks({
+    //         amount: i.toString(),
+    //         name: NAME,
+    //         symbol: SYMBOL,
+    //         base: TOKENS.CADC.address,
+    //         quote: TOKENS.USDC.address,
+    //         baseWeight: parseUnits("0.5"),
+    //         quoteWeight: parseUnits("0.5"),
+    //         baseDecimals: TOKENS.CADC.decimals,
+    //         quoteDecimals: TOKENS.USDC.decimals,
+    //         baseAssimilator: assimilator['CADC'].address,
+    //         quoteAssimilator: quoteAssimilatorAddr.address,
+    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+    //         oracle: ORACLES.CADC.address,
+    //       });
+    //     });
+    //   }
+
+    //   for (let i = 1; i <= 10000; i *= 100) {
+    //     const NAME = "FXPHP";
+    //     const SYMBOL = "FXPHP";
+    //     it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+    //       await addAndRemoveLiquidityWithSanityChecks({
+    //         amount: i.toString(),
+    //         name: NAME,
+    //         symbol: SYMBOL,
+    //         base: TOKENS.FXPHP.address,
+    //         quote: TOKENS.USDC.address,
+    //         baseWeight: parseUnits("0.5"),
+    //         quoteWeight: parseUnits("0.5"),
+    //         baseDecimals: TOKENS.FXPHP.decimals,
+    //         quoteDecimals: TOKENS.USDC.decimals,
+    //         baseAssimilator: assimilator['FXPHP'].address,
+    //         quoteAssimilator: quoteAssimilatorAddr.address,
+    //         params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+    //         oracle: ORACLES.FXPHP.address,
+    //       });
+    //     });
+    //   }
+    // });
+  });
 
   // describe("Oracle updates between operations", function () {
   //   describe("viewDeposit", function () {
