@@ -313,7 +313,6 @@ describe("Curve", function () {
       const targetDeltaQuote = afterQuote.sub(beforeQuote);
 
       // Target swap works as intended
-      // TODO: NOT WORKING ON FXPHP
       expectBNAproxEq(targetDeltaBase, targetExpectedBase, targetExpectedBase.div(1500));
       expectBNAproxEq(targetDeltaQuote, targetExpectedQuote, targetExpectedQuote.div(1500));
     };
@@ -1544,13 +1543,12 @@ describe("Curve", function () {
         const quoteSupplied = beforeQuoteBal.sub(afterQuoteBal);
 
         expect(afterLPBal.gt(beforeLPBal)).to.be.true;
-
-        // TODO: FXPHP PROBLEM
-        // expectBNAproxEq(
-        //   baseSupplied,
-        //   parseUnits(amount, baseDecimals).mul(1e8).div(ORACLE_RATE).div(2), // oracle has 8 decimals, we also want to div 2 since we're supplying liquidity
-        //   parseUnits(amount, Math.max(baseDecimals - 4, 0)),
-        // );
+        const amountB = symbol !== "FXPHP" ? amount : "100000000";
+        expectBNAproxEq(
+          baseSupplied,
+          parseUnits(amount, baseDecimals).mul(1e8).div(ORACLE_RATE).div(2), // oracle has 8 decimals, we also want to div 2 since we're supplying liquidity
+          parseUnits(amountB, Math.max(baseDecimals - 4, 0)),
+        );
         expectBNAproxEq(quoteSupplied, parseUnits(amount, quoteDecimals).div(2), parseUnits("1", baseDecimals));
 
         // Mint tokens and approve for 2nd deposit
@@ -1624,7 +1622,6 @@ describe("Curve", function () {
         // In = Out, regardless of Oracle price
         // As its dependent on LP ratio
         // Has a small fee (0.05%)
-
         if (baseDecimals === 2) {
           expectBNAproxEq(baseSupplied, baseReceived, baseReceived.div(ethers.BigNumber.from("20")));
           expectBNAproxEq(quoteSupplied, quoteReceived, quoteReceived.div(ethers.BigNumber.from("20")));
@@ -1641,7 +1638,9 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only("EURS/USDC 50/50 - " + i.toString(), async function () {
+        const NAME = "XSGD";
+        const SYMBOL = "XSGD";
+        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: "1",
             name: NAME,
@@ -1661,7 +1660,9 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only("XSGD/USDC 50/50 - " + i.toString(), async function () {
+        const NAME = "XSGD";
+        const SYMBOL = "XSGD";
+        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1681,7 +1682,9 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only("CADC/USDC 50/50 - " + i.toString(), async function () {
+        const NAME = "CADC";
+        const SYMBOL = "CADC";
+        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1701,7 +1704,9 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it.only("FXPHP/USDC 50/50 - " + i.toString(), async function () {
+        const NAME = "FXPHP";
+        const SYMBOL = "FXPHP";
+        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
