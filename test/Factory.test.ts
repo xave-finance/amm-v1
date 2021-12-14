@@ -27,9 +27,6 @@ const DIMENSION = {
   lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
 }
 
-const NAME = "DFX V1";
-const SYMBOL = "DFX V1";
-
 describe("Factory", function () {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];

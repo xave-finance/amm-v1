@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import path from "path";
 import { ethers } from "hardhat";
 import { Signer, Contract, ContractFactory, BigNumber, BigNumberish } from "ethers";
 import chai from "chai";
@@ -9,7 +10,7 @@ import { Curve } from "../typechain/Curve";
 import { ERC20 } from "../typechain/ERC20";
 import { Router } from "../typechain/Router";
 
-import { ORACLES, TOKENS } from "./Constants";
+const { ORACLES, TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 import { getFutureTime, expectBNAproxEq, getOracleAnswer } from "./Utils";
 
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
@@ -20,20 +21,27 @@ const { parseUnits } = ethers.utils;
 
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
-const ALPHA = parseUnits("0.5");
-const BETA = parseUnits("0.35");
-const MAX = parseUnits("0.15");
-const EPSILON = parseUnits("0.0004");
-const LAMBDA = parseUnits("0.3");
+import { CONFIG } from "./Config";
+const DIMENSION = {
+  alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
+  beta: parseUnits(CONFIG.DIMENSION_BETA),
+  max: parseUnits(CONFIG.DIMENSION_MAX),
+  epsilon: parseUnits(CONFIG.DIMENSION_EPSILON),
+  lambda: parseUnits(CONFIG.DIMENSION_LAMBDA)
+}
 
 describe("Router", function () {
   let [user1, user2]: Signer[] = [];
   let [user1Address, user2Address]: string[] = [];
 
+  let assimilator = {};
+  let quoteAssimilatorAddr;
+
   let cadcToUsdAssimilator: Contract;
   let usdcToUsdAssimilator: Contract;
   let eursToUsdAssimilator: Contract;
   let xsgdToUsdAssimilator: Contract;
+  let fxphpToUsdAssimilator: Contract;
 
   let CurveFactory: ContractFactory;
   let RouterFactory: ContractFactory;
@@ -45,6 +53,7 @@ describe("Router", function () {
   let cadc: ERC20;
   let eurs: ERC20;
   let xsgd: ERC20;
+  let fxphp: ERC20;
   let erc20: ERC20;
 
   let createCurveAndSetParams: ({
@@ -81,19 +90,29 @@ describe("Router", function () {
       userAddresses: [user1Address, user2Address],
 
       usdcToUsdAssimilator,
+      eursToUsdAssimilator,
       xsgdToUsdAssimilator,
+      cadcToUsdAssimilator,
+      fxphpToUsdAssimilator,
 
-      // cadcToUsdAssimilator,
-      // eursToUsdAssimilator,
+      usdc,
+      eurs,
+      xsgd,
+      fxphp,
+      erc20,
 
       CurveFactory,
       RouterFactory,
-      usdc,
-      // cadc,
-      // eurs,
-      xsgd,
-      erc20,
     } = await scaffoldTest());
+
+    assimilator = {
+      'EURS': eursToUsdAssimilator,
+      'XSGD': xsgdToUsdAssimilator,
+      'CADC': cadcToUsdAssimilator,
+      'FXPHP': fxphpToUsdAssimilator,
+    };
+
+    quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`));
   });
 
   beforeEach(async function () {
@@ -106,64 +125,80 @@ describe("Router", function () {
     }));
   });
   beforeEach(async function () {
-    const { curve: curveCADC } = await createCurveAndSetParams({
+    const { curve: curveEURS } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
-      base: cadc.address,
-      quote: usdc.address,
+      base: TOKENS.EURS.address,
+      quote: TOKENS.USDC.address,
       baseWeight: parseUnits("0.4"),
       quoteWeight: parseUnits("0.6"),
-      baseAssimilator: cadcToUsdAssimilator.address,
-      quoteAssimilator: usdcToUsdAssimilator.address,
-      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      baseAssimilator: assimilator["EURS"].address,
+      quoteAssimilator: quoteAssimilatorAddr.address,
+      params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
     });
 
     const { curve: curveXSGD } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
-      base: xsgd.address,
-      quote: usdc.address,
+      base: TOKENS.XSGD.address,
+      quote: TOKENS.USDC.address,
       baseWeight: parseUnits("0.4"),
       quoteWeight: parseUnits("0.6"),
-      baseAssimilator: xsgdToUsdAssimilator.address,
-      quoteAssimilator: usdcToUsdAssimilator.address,
-      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      baseAssimilator: assimilator["XSGD"].address,
+      quoteAssimilator: quoteAssimilatorAddr.address,
+      params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
     });
 
-    const { curve: curveEURS } = await createCurveAndSetParams({
+    const { curve: curveCADC } = await createCurveAndSetParams({
       name: NAME,
       symbol: SYMBOL,
-      base: eurs.address,
-      quote: usdc.address,
+      base: TOKENS.CADC.address,
+      quote: TOKENS.USDC.address,
       baseWeight: parseUnits("0.4"),
       quoteWeight: parseUnits("0.6"),
-      baseAssimilator: eursToUsdAssimilator.address,
-      quoteAssimilator: usdcToUsdAssimilator.address,
-      params: [ALPHA, BETA, MAX, EPSILON, LAMBDA],
+      baseAssimilator: assimilator["CADC"].address,
+      quoteAssimilator: quoteAssimilatorAddr.address,
+      params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+    });
+
+    const { curve: curveFXPHP } = await createCurveAndSetParams({
+      name: NAME,
+      symbol: SYMBOL,
+      base: TOKENS.FXPHP.address,
+      quote: TOKENS.USDC.address,
+      baseWeight: parseUnits("0.4"),
+      quoteWeight: parseUnits("0.6"),
+      baseAssimilator: assimilator["FXPHP"].address,
+      quoteAssimilator: quoteAssimilatorAddr.address,
+      params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
     });
 
     // Supply liquidity to the pools
     // Mint tokens and approve
     await multiMintAndApprove([
-      [TOKENS.USDC.address, user1, parseUnits("100000", TOKENS.USDC.decimals), curveCADC.address],
-      [TOKENS.CADC.address, user1, parseUnits("100000", TOKENS.CADC.decimals), curveCADC.address],
-      [TOKENS.USDC.address, user1, parseUnits("100000", TOKENS.USDC.decimals), curveXSGD.address],
-      [TOKENS.XSGD.address, user1, parseUnits("100000", TOKENS.XSGD.decimals), curveXSGD.address],
       [TOKENS.USDC.address, user1, parseUnits("100000", TOKENS.USDC.decimals), curveEURS.address],
       [TOKENS.EURS.address, user1, parseUnits("100000", TOKENS.EURS.decimals), curveEURS.address],
+      [TOKENS.USDC.address, user1, parseUnits("100000", TOKENS.USDC.decimals), curveXSGD.address],
+      [TOKENS.XSGD.address, user1, parseUnits("100000", TOKENS.XSGD.decimals), curveXSGD.address],
+      [TOKENS.USDC.address, user1, parseUnits("100000", TOKENS.USDC.decimals), curveCADC.address],
+      [TOKENS.CADC.address, user1, parseUnits("100000", TOKENS.CADC.decimals), curveCADC.address],
+      [TOKENS.USDC.address, user1, parseUnits("10000000", TOKENS.USDC.decimals), curveFXPHP.address],
+      [TOKENS.FXPHP.address, user1, parseUnits("10000000", TOKENS.FXPHP.decimals), curveFXPHP.address],
     ]);
 
-    await curveCADC
+    await curveEURS
       .connect(user1)
       .deposit(parseUnits("50000"), await getFutureTime())
       .then(x => x.wait());
-
     await curveXSGD
       .connect(user1)
       .deposit(parseUnits("50000"), await getFutureTime())
       .then(x => x.wait());
-
-    await curveEURS
+    await curveCADC
+      .connect(user1)
+      .deposit(parseUnits("50000"), await getFutureTime())
+      .then(x => x.wait());
+    await curveFXPHP
       .connect(user1)
       .deposit(parseUnits("50000"), await getFutureTime())
       .then(x => x.wait());
@@ -215,6 +250,8 @@ describe("Router", function () {
   };
 
   const routerViewTargetSwapAndCheck = async ({
+    fromSymbol,
+    toSymbol,
     user,
     fromToken,
     toToken,
@@ -224,6 +261,8 @@ describe("Router", function () {
     fromDecimals,
     toDecimals,
   }: {
+    fromSymbol: string;
+    toSymbol: string;
     user: Signer;
     fromToken: string;
     toToken: string;
@@ -247,63 +286,15 @@ describe("Router", function () {
       expected = expected.div(parseUnits("1", toDecimals - fromDecimals));
     }
 
-    expectBNAproxEq(sent, expected, parseUnits("2", fromDecimals));
+    const delta = fromSymbol === "FXPHP" || toSymbol === "FXPHP" ? parseUnits("100", fromDecimals) : parseUnits("2", fromDecimals);
+
+    expectBNAproxEq(sent, expected, delta);
   };
-
-  it("CADC -> USDC targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.USDC.address,
-      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.USDC.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.USDC.decimals,
-    });
-  });
-
-  it("USDC -> CADC targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.USDC.address,
-      toToken: TOKENS.CADC.address,
-      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
-      fromOracle: ORACLES.USDC.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.USDC.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
-
-  it("CADC -> XSGD targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.XSGD.address,
-      targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
-
-  it("CADC -> EURS targetSwap", async function () {
-    await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.CADC.address,
-      toToken: TOKENS.EURS.address,
-      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.CADC.address,
-      toOracle: ORACLES.EURS.address,
-      fromDecimals: TOKENS.CADC.decimals,
-      toDecimals: TOKENS.EURS.decimals,
-    });
-  });
 
   it("EURS -> XSGD targetSwap", async function () {
     await routerViewTargetSwapAndCheck({
+      fromSymbol: "EURS",
+      toSymbol: "XSGD",
       user: user2,
       fromToken: TOKENS.EURS.address,
       toToken: TOKENS.XSGD.address,
@@ -315,8 +306,25 @@ describe("Router", function () {
     });
   });
 
+  it("EURS -> CADC targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "EURS",
+      toSymbol: "CADC",
+      user: user2,
+      fromToken: TOKENS.EURS.address,
+      toToken: TOKENS.CADC.address,
+      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
+      fromOracle: ORACLES.EURS.address,
+      toOracle: ORACLES.CADC.address,
+      fromDecimals: TOKENS.EURS.decimals,
+      toDecimals: TOKENS.CADC.decimals,
+    });
+  });
+
   it("XSGD -> EURS targetSwap", async function () {
     await routerViewTargetSwapAndCheck({
+      fromSymbol: "XSGD",
+      toSymbol: "EURS",
       user: user2,
       fromToken: TOKENS.XSGD.address,
       toToken: TOKENS.EURS.address,
@@ -330,6 +338,8 @@ describe("Router", function () {
 
   it("XSGD -> CADC targetSwap", async function () {
     await routerViewTargetSwapAndCheck({
+      fromSymbol: "XSGD",
+      toSymbol: "CADC",
       user: user2,
       fromToken: TOKENS.XSGD.address,
       toToken: TOKENS.CADC.address,
@@ -341,25 +351,14 @@ describe("Router", function () {
     });
   });
 
-  it("EURS -> CADC targetSwap", async function () {
+  it("CADC -> USDC targetSwap", async function () {
     await routerViewTargetSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.EURS.address,
-      toToken: TOKENS.CADC.address,
-      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
-      fromOracle: ORACLES.EURS.address,
-      toOracle: ORACLES.CADC.address,
-      fromDecimals: TOKENS.EURS.decimals,
-      toDecimals: TOKENS.CADC.decimals,
-    });
-  });
-
-  it("CADC -> USDC originSwap", async function () {
-    await routerOriginSwapAndCheck({
+      fromSymbol: "CADC",
+      toSymbol: "USDC",
       user: user2,
       fromToken: TOKENS.CADC.address,
       toToken: TOKENS.USDC.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
       fromOracle: ORACLES.CADC.address,
       toOracle: ORACLES.USDC.address,
       fromDecimals: TOKENS.CADC.decimals,
@@ -367,25 +366,14 @@ describe("Router", function () {
     });
   });
 
-  it("USDC -> XSGD originSwap", async function () {
-    await routerOriginSwapAndCheck({
-      user: user2,
-      fromToken: TOKENS.USDC.address,
-      toToken: TOKENS.XSGD.address,
-      amount: parseUnits("1000", TOKENS.USDC.decimals),
-      fromOracle: ORACLES.USDC.address,
-      toOracle: ORACLES.XSGD.address,
-      fromDecimals: TOKENS.USDC.decimals,
-      toDecimals: TOKENS.XSGD.decimals,
-    });
-  });
-
-  it("CADC -> XSGD originSwap", async function () {
-    await routerOriginSwapAndCheck({
+  it("CADC -> XSGD targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "CADC",
+      toSymbol: "XSGD",
       user: user2,
       fromToken: TOKENS.CADC.address,
       toToken: TOKENS.XSGD.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
       fromOracle: ORACLES.CADC.address,
       toOracle: ORACLES.XSGD.address,
       fromDecimals: TOKENS.CADC.decimals,
@@ -393,16 +381,93 @@ describe("Router", function () {
     });
   });
 
-  it("CADC -> EURS originSwap", async function () {
-    await routerOriginSwapAndCheck({
+  it("CADC -> EURS targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "CADC",
+      toSymbol: "EURS",
       user: user2,
       fromToken: TOKENS.CADC.address,
       toToken: TOKENS.EURS.address,
-      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
       fromOracle: ORACLES.CADC.address,
       toOracle: ORACLES.EURS.address,
       fromDecimals: TOKENS.CADC.decimals,
       toDecimals: TOKENS.EURS.decimals,
+    });
+  });
+
+  it("USDC -> CADC targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "USDC",
+      toSymbol: "CADC",
+      user: user2,
+      fromToken: TOKENS.USDC.address,
+      toToken: TOKENS.CADC.address,
+      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
+      fromOracle: ORACLES.USDC.address,
+      toOracle: ORACLES.CADC.address,
+      fromDecimals: TOKENS.USDC.decimals,
+      toDecimals: TOKENS.CADC.decimals,
+    });
+  });
+
+  it("FXPHP -> EURS targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "FXPHP",
+      toSymbol: "EURS",
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.EURS.address,
+      targetAmount: parseUnits("900", TOKENS.EURS.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.EURS.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.EURS.decimals,
+    });
+  });
+
+  it("FXPHP -> XSGD targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "FXPHP",
+      toSymbol: "XSGD",
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.XSGD.address,
+      targetAmount: parseUnits("900", TOKENS.XSGD.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.XSGD.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.XSGD.decimals,
+    });
+  });
+
+  it("FXPHP -> CADC targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "FXPHP",
+      toSymbol: "CADC",
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.CADC.address,
+      targetAmount: parseUnits("900", TOKENS.CADC.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.CADC.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.CADC.decimals,
+    });
+  });
+
+  it("FXPHP -> USDC targetSwap", async function () {
+    await routerViewTargetSwapAndCheck({
+      fromSymbol: "FXPHP",
+      toSymbol: "USDC",
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.USDC.address,
+      targetAmount: parseUnits("900", TOKENS.USDC.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.USDC.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.USDC.decimals,
     });
   });
 
@@ -455,6 +520,110 @@ describe("Router", function () {
       toOracle: ORACLES.CADC.address,
       fromDecimals: TOKENS.XSGD.decimals,
       toDecimals: TOKENS.CADC.decimals,
+    });
+  });
+
+  it("CADC -> USDC originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.CADC.address,
+      toToken: TOKENS.USDC.address,
+      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      fromOracle: ORACLES.CADC.address,
+      toOracle: ORACLES.USDC.address,
+      fromDecimals: TOKENS.CADC.decimals,
+      toDecimals: TOKENS.USDC.decimals,
+    });
+  });
+
+  it("CADC -> XSGD originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.CADC.address,
+      toToken: TOKENS.XSGD.address,
+      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      fromOracle: ORACLES.CADC.address,
+      toOracle: ORACLES.XSGD.address,
+      fromDecimals: TOKENS.CADC.decimals,
+      toDecimals: TOKENS.XSGD.decimals,
+    });
+  });
+
+  it("CADC -> EURS originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.CADC.address,
+      toToken: TOKENS.EURS.address,
+      amount: parseUnits("1000", TOKENS.CADC.decimals),
+      fromOracle: ORACLES.CADC.address,
+      toOracle: ORACLES.EURS.address,
+      fromDecimals: TOKENS.CADC.decimals,
+      toDecimals: TOKENS.EURS.decimals,
+    });
+  });
+
+  it("USDC -> XSGD originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.USDC.address,
+      toToken: TOKENS.XSGD.address,
+      amount: parseUnits("1000", TOKENS.USDC.decimals),
+      fromOracle: ORACLES.USDC.address,
+      toOracle: ORACLES.XSGD.address,
+      fromDecimals: TOKENS.USDC.decimals,
+      toDecimals: TOKENS.XSGD.decimals,
+    });
+  });
+
+  it("FXPHP -> EURS originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.EURS.address,
+      amount: parseUnits("1000", TOKENS.FXPHP.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.EURS.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.EURS.decimals,
+    });
+  });
+
+  it("FXPHP -> XSGD originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.XSGD.address,
+      amount: parseUnits("1000", TOKENS.FXPHP.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.XSGD.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.XSGD.decimals,
+    });
+  });
+
+  it("FXPHP -> CADC originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.CADC.address,
+      amount: parseUnits("1000", TOKENS.FXPHP.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.CADC.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.CADC.decimals,
+    });
+  });
+
+  it("FXPHP -> USDC originSwap", async function () {
+    await routerOriginSwapAndCheck({
+      user: user2,
+      fromToken: TOKENS.FXPHP.address,
+      toToken: TOKENS.USDC.address,
+      amount: parseUnits("1000", TOKENS.FXPHP.decimals),
+      fromOracle: ORACLES.FXPHP.address,
+      toOracle: ORACLES.USDC.address,
+      fromDecimals: TOKENS.FXPHP.decimals,
+      toDecimals: TOKENS.USDC.decimals,
     });
   });
 });
