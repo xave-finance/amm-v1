@@ -1640,7 +1640,7 @@ describe("Curve", function () {
       for (let i = 1; i <= 10000; i *= 100) {
         const NAME = "XSGD";
         const SYMBOL = "XSGD";
-        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+        it(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: "1",
             name: NAME,
@@ -1662,7 +1662,7 @@ describe("Curve", function () {
       for (let i = 1; i <= 10000; i *= 100) {
         const NAME = "XSGD";
         const SYMBOL = "XSGD";
-        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+        it(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1684,7 +1684,7 @@ describe("Curve", function () {
       for (let i = 1; i <= 10000; i *= 100) {
         const NAME = "CADC";
         const SYMBOL = "CADC";
-        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+        it(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,
@@ -1706,7 +1706,7 @@ describe("Curve", function () {
       for (let i = 1; i <= 10000; i *= 100) {
         const NAME = "FXPHP";
         const SYMBOL = "FXPHP";
-        it.only(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
+        it(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: i.toString(),
             name: NAME,

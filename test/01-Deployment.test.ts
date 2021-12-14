@@ -191,7 +191,7 @@ describe("Deployment", () => {
       expect(curveAddrA).to.be.equal(curveAddrB);
     })
 
-    it.only("CADC:USDC", async () => {
+    it("CADC:USDC", async () => {
       const NAME = "CADC";
       const SYMBOL = "CADC";
 
