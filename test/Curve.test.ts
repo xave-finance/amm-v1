@@ -88,7 +88,7 @@ describe("Curve", function () {
   let multiMintAndApprove: (requests: [string, Signer, BigNumberish, string][]) => Promise<void>;
 
   let rates: BigNumber[];
-  const oracles = [ORACLES.EURS.address, ORACLES.XSGD.address, ORACLES.FXPHP.address];
+  const oracles = [ORACLES.EUR.address, ORACLES.SGD.address, ORACLES.PHP.address];
 
   beforeEach(async () => {
     rates = await Promise.all(oracles.map(x => getOracleAnswer(x)));
@@ -437,7 +437,7 @@ describe("Curve", function () {
 
     const bases = [TOKENS.EURS.address, TOKENS.XSGD.address, TOKENS.FXPHP.address];
     const decimals = [TOKENS.EURS.decimals, TOKENS.XSGD.decimals, TOKENS.FXPHP.decimals];
-    const oracles = [ORACLES.EURS.address, ORACLES.XSGD.address, ORACLES.FXPHP.address];
+    const oracles = [ORACLES.EUR.address, ORACLES.SGD.address, ORACLES.PHP.address];
     const weights = [["0.5", "0.5"]];
     const baseName = ["EURS", "XSGD", "FXPHP"];
 
@@ -632,7 +632,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['EURS'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.EURS.address,
+            oracle: ORACLES.EUR.address,
           });
         });
       }
@@ -654,7 +654,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['XSGD'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.XSGD.address,
+            oracle: ORACLES.SGD.address,
           });
         });
       }
@@ -676,7 +676,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['CADC'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.CADC.address,
+            oracle: ORACLES.CAD.address,
           });
         });
       }
@@ -698,7 +698,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['FXPHP'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.FXPHP.address,
+            oracle: ORACLES.PHP.address,
           });
         });
       }
@@ -1051,7 +1051,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['EURS'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.EURS.address,
+            oracle: ORACLES.EUR.address,
           });
         });
       }
@@ -1073,7 +1073,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['XSGD'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.XSGD.address,
+            oracle: ORACLES.SGD.address,
           });
         });
       }
@@ -1095,7 +1095,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['CADC'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.CADC.address,
+            oracle: ORACLES.CAD.address,
           });
         });
       }
@@ -1117,7 +1117,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['FXPHP'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.FXPHP.address,
+            oracle: ORACLES.PHP.address,
           });
         });
       }
@@ -1228,7 +1228,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator['EURS'].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.EURS.address,
+            oracle: ORACLES.EUR.address,
           });
         });
       }
@@ -1248,7 +1248,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["XSGD"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.XSGD.address,
+            oracle: ORACLES.SGD.address,
           });
         });
       }
@@ -1268,7 +1268,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["CADC"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.CADC.address,
+            oracle: ORACLES.CAD.address,
           });
         });
       }
@@ -1288,7 +1288,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["FXPHP"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.FXPHP.address,
+            oracle: ORACLES.PHP.address,
           });
         });
       }
@@ -1397,7 +1397,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["EURS"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.EURS.address,
+            oracle: ORACLES.EUR.address,
           });
         });
       }
@@ -1417,7 +1417,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["XSGD"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.XSGD.address,
+            oracle: ORACLES.SGD.address,
           });
         });
       }
@@ -1437,7 +1437,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["CADC"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.CADC.address,
+            oracle: ORACLES.CAD.address,
           });
         });
       }
@@ -1457,7 +1457,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["FXPHP"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.FXPHP.address,
+            oracle: ORACLES.PHP.address,
           });
         });
       }
@@ -1654,7 +1654,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["EURS"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.EURS.address,
+            oracle: ORACLES.EUR.address,
           });
         });
       }
@@ -1676,7 +1676,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["XSGD"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.XSGD.address,
+            oracle: ORACLES.SGD.address,
           });
         });
       }
@@ -1698,7 +1698,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["CADC"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.CADC.address,
+            oracle: ORACLES.CAD.address,
           });
         });
       }
@@ -1720,7 +1720,7 @@ describe("Curve", function () {
             baseAssimilator: assimilator["FXPHP"].address,
             quoteAssimilator: quoteAssimilatorAddr.address,
             params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
-            oracle: ORACLES.FXPHP.address,
+            oracle: ORACLES.PHP.address,
           });
         });
       }

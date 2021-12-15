@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import path from "path";
 import { ethers } from "hardhat";
 import { Signer, Contract, ContractFactory, BigNumber, BigNumberish } from "ethers";
 import chai, { expect } from "chai";
@@ -6,7 +7,7 @@ import chaiBigNumber from "chai-bignumber";
 
 import { Zap, Curve, CurveFactory, ERC20, Router } from "../../typechain";
 
-import { ORACLES, TOKENS } from "../Constants";
+const { ORACLES, TOKENS } = require(path.resolve(__dirname, `../tokens/${process.env.NETWORK}/Constants.ts`));
 import {
   getFutureTime,
   updateOracleAnswer,
@@ -126,13 +127,13 @@ describe("Zap", function () {
     }
   };
 
-  it("CADC", async function () {
+  it.skip("CADC", async function () {
     const base = TOKENS.CADC.address;
     const quote = TOKENS.USDC.address;
     const baseDecimals = TOKENS.CADC.decimals;
     const quoteDecimals = TOKENS.USDC.decimals;
     const curve = curveCADC;
-    const oracle = ORACLES.EURS.address;
+    const oracle = ORACLES.EUR.address;
 
     await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
     await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
@@ -144,7 +145,7 @@ describe("Zap", function () {
     const baseDecimals = TOKENS.XSGD.decimals;
     const quoteDecimals = TOKENS.USDC.decimals;
     const curve = curveXSGD;
-    const oracle = ORACLES.EURS.address;
+    const oracle = ORACLES.EUR.address;
 
     await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
     await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);
@@ -156,7 +157,7 @@ describe("Zap", function () {
     const baseDecimals = TOKENS.EURS.decimals;
     const quoteDecimals = TOKENS.USDC.decimals;
     const curve = curveEURS;
-    const oracle = ORACLES.EURS.address;
+    const oracle = ORACLES.EUR.address;
 
     await testZapFunctionality(base, quote, baseDecimals, quoteDecimals, curve, oracle);
     await testZapCalcDepositLogic(base, quote, baseDecimals, quoteDecimals, curve, oracle);

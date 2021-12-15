@@ -16,16 +16,16 @@ let BLOCK_NO;
 
 if (process.env.NETWORK === 'mainnet') {
   RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = CONFIG.BLOCK_NO;
+  BLOCK_NO = CONFIG.BLOCK_NO.MAINNET;
 } else if (process.env.NETWORK === 'matic') {
   RPC_URL = `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = CONFIG.BLOCK_NO;
+  BLOCK_NO = CONFIG.BLOCK_NO.MATIC;
 } else if (process.env.NETWORK === 'kovan') {
   RPC_URL = `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = CONFIG.BLOCK_NO;
+  BLOCK_NO = CONFIG.BLOCK_NO.KOVAN;
 } else {
   RPC_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_PROJECT_ID}`;
-  BLOCK_NO = CONFIG.BLOCK_NO;
+  BLOCK_NO = CONFIG.BLOCK_NO.MAINNET;
 }
 
 // You need to export an object to set up your config
