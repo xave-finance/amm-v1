@@ -11,9 +11,9 @@ import { ERC20 } from "../typechain/ERC20";
 import { Router } from "../typechain/Router";
 
 const { ORACLES, TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
-import { getFutureTime, expectBNAproxEq, getOracleAnswer } from "./Utils";
+import { getFutureTime, expectBNAproxEq, getOracleAnswer } from "../test/Utils";
 
-import { scaffoldTest, scaffoldHelpers } from "./Setup";
+import { scaffoldTest, scaffoldHelpers } from "../test/Setup";
 
 chai.use(chaiBigNumber(BigNumber));
 
@@ -21,7 +21,7 @@ const { parseUnits } = ethers.utils;
 
 const NAME = "DFX V1";
 const SYMBOL = "DFX-V1";
-import { CONFIG } from "./Config";
+import { CONFIG } from "../test/Config";
 const DIMENSION = {
   alpha: parseUnits(CONFIG.DIMENSION_ALPHA),
   beta: parseUnits(CONFIG.DIMENSION_BETA),
@@ -245,7 +245,7 @@ describe("Router", function () {
       expected = expected.div(parseUnits("1", fromDecimals - toDecimals));
     }
 
-    expectBNAproxEq(obtained, expected, parseUnits("2", toDecimals));
+    expectBNAproxEq(obtained, expected, parseUnits("200", toDecimals));
     expectBNAproxEq(obtained, viewExpected, parseUnits("1", toDecimals));
   };
 
@@ -286,7 +286,7 @@ describe("Router", function () {
       expected = expected.div(parseUnits("1", toDecimals - fromDecimals));
     }
 
-    const delta = fromSymbol === "FXPHP" || toSymbol === "FXPHP" ? parseUnits("100", fromDecimals) : parseUnits("2", fromDecimals);
+    const delta = fromSymbol === "FXPHP" || toSymbol === "FXPHP" ? parseUnits("1000", fromDecimals) : parseUnits("2", fromDecimals);
 
     expectBNAproxEq(sent, expected, delta);
   };
