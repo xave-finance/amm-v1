@@ -2,7 +2,7 @@
 import path from "path";
 import { ethers } from "hardhat";
 import { CONFIG } from "./Config";
-const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
+const { ORACLES, TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 import { getAccounts, deployContract } from "../scripts/common";
 
 import { ERC20, Curve, CurveFactory } from "../typechain";
@@ -41,8 +41,18 @@ export const scaffoldTest = async () => {
   const viewLiquidityLib = await ViewLiquidityLib.deploy();
 
   const UsdcToUsdAssimilator = await ethers.getContractFactory("UsdcToUsdAssimilator");
-  const usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy();
+  let usdcToUsdAssimilator: any;
   const BaseToUsdAssimilator = await ethers.getContractFactory("BaseToUsdAssimilator");
+
+  if (process.env.NETWORK === "mainnet") {
+    usdcToUsdAssimilator = await UsdcToUsdAssimilator.deploy();
+  } else {
+    const MockUsdcToUsdAssimilator = await ethers.getContractFactory("MockUsdcToUsdAssimilator");
+    usdcToUsdAssimilator = await MockUsdcToUsdAssimilator.deploy(
+      TOKENS.USDC.address,
+      ORACLES.USDC.address
+    );
+  }
 
   const eursToUsdAssimilator = await BaseToUsdAssimilator.deploy(
     parseUnits("1", EURS_USDC_ASSIM.baseDecimals),
@@ -213,24 +223,26 @@ export const scaffoldHelpers = async ({ curveFactory, erc20 }: { curveFactory: C
   ) {
     const minterAddress = await minter.getAddress();
 
-    if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
-      await mintUSDC(minterAddress, amount);
-    }
+    if (process.env.NETWORK === "mainnet") {
+      if (tokenAddress.toLowerCase() === TOKENS.USDC.address.toLowerCase()) {
+        await mintUSDC(minterAddress, amount);
+      }
 
-    if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
-      await mintEURS(minterAddress, amount);
-    }
+      if (tokenAddress.toLowerCase() === TOKENS.EURS.address.toLowerCase()) {
+        await mintEURS(minterAddress, amount);
+      }
 
-    if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
-      await mintXSGD(minterAddress, amount);
-    }
+      if (tokenAddress.toLowerCase() === TOKENS.XSGD.address.toLowerCase()) {
+        await mintXSGD(minterAddress, amount);
+      }
 
-    if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
-      await mintCADC(minterAddress, amount);
-    }
+      if (tokenAddress.toLowerCase() === TOKENS.CADC.address.toLowerCase()) {
+        await mintCADC(minterAddress, amount);
+      }
 
-    if (tokenAddress.toLowerCase() === TOKENS.FXPHP.address.toLowerCase()) {
-      await mintFXPHP(minterAddress, amount);
+      if (tokenAddress.toLowerCase() === TOKENS.FXPHP.address.toLowerCase()) {
+        await mintFXPHP(minterAddress, amount);
+      }
     }
 
     await erc20.attach(tokenAddress).connect(minter).approve(recipient, amount);

@@ -9,9 +9,7 @@ import EACAggregatorProxyABI from "./abi/EACAggregatorProxy.json";
 import EURSABI from "./abi/EURSABI.json";
 import FiatTokenV1ABI from "./abi/FiatTokenV1ABI.json";
 import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
-import TCADABI from "./abi/TCADABI.json";
 import FXPHPABI from "./abi/FXPHPABI.json";
-import TAGPHPABI from "./abi/TAGPHPABI.json";
 import { Result } from "ethers/lib/utils";
 import { Curve } from "../typechain/Curve";
 
@@ -80,39 +78,12 @@ export const mintXSGD = async (recipient: string, amount: BigNumberish | number)
   await XSGD.mint(recipient, amount);
 };
 
-export const mintTCAD = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
-  // Send minter some ETH
-  // await sendETH(TOKENS.TCAD.masterMinter);
-  // console.log("TOKENS.TCAD.masterMinter: ", TOKENS.TCAD.masterMinter);
-
-  // const owner = await unlockAccountAndGetSigner(TOKENS.TCAD.masterMinter);
-
-  const TCAD = new ethers.Contract(TOKENS.TCAD.address, TCADABI);
-  // await TCAD.transferOwnership(owner.address);
-
-  // const signer = await provider.getSigner(0);
-  // console.log("signer[0]: ", signer._address)
-  // await TCAD.mint(recipient, amount);
-};
-
 export const mintFXPHP = async (recipient: string, amount: BigNumberish | number): Promise<void> => {
   await sendETH(TOKENS.FXPHP.masterMinter);
 
   const owner = await unlockAccountAndGetSigner(TOKENS.FXPHP.masterMinter);
   const FXPHP = new ethers.Contract(TOKENS.FXPHP.address, FXPHPABI, owner);
   await FXPHP.mint(recipient, amount);
-}
-
-export const mintTAGPHP = async (sender: string, recipient: string, amount: BigNumberish | number): Promise<void> => {
-  await sendETH(TOKENS.TAGPHP.masterMinter);
-
-  const owner = await unlockAccountAndGetSigner(TOKENS.TAGPHP.masterMinter);
-  const TAGPHP = new ethers.Contract(TOKENS.TAGPHP.address, TAGPHPABI, owner);
-
-  await TAGPHP.addWhitelistAddress(sender, parseUnits("10000000", 18));
-  await TAGPHP.addWhitelistAddress(recipient, parseUnits("10000000", 18));
-
-  await TAGPHP.mint(sender, amount);
 }
 
 export const mintCADC = async (recipient: string, amount: BigNumberish | number): Promise<void> => {

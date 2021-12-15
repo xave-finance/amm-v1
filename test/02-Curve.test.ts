@@ -13,7 +13,7 @@ import { Router } from "../typechain/Router";
 import { scaffoldTest, scaffoldHelpers } from "./Setup";
 import { assert } from "console";
 
-const { TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
+const { ORACLES, TOKENS } = require(path.resolve(__dirname, `tokens/${process.env.NETWORK}/Constants.ts`));
 
 import { getFutureTime } from "./Utils";
 import { formatUnits } from "ethers/lib/utils";
@@ -122,7 +122,8 @@ describe("Curve Contract", () => {
       erc20,
     }));
 
-    quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`));
+    const mainnetUsdcAssimilator = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`));
+    quoteAssimilatorAddr = process.env.NETWORK === 'mainnet' ? mainnetUsdcAssimilator : usdcToUsdAssimilator;
   });
 
   describe("Should still deposit if under cap", async () => {
