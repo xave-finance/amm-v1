@@ -6,6 +6,7 @@ import { BigNumber, BigNumberish, ContractReceipt, Signer } from "ethers";
 import { expect } from "chai";
 
 import EACAggregatorProxyABI from "./abi/EACAggregatorProxy.json";
+import MockAggregatorABI from "./abi/MockAggregatorABI.json";
 import EURSABI from "./abi/EURSABI.json";
 import FiatTokenV1ABI from "./abi/FiatTokenV1ABI.json";
 import FiatTokenV2ABI from "./abi/FiatTokenV2ABI.json";
@@ -112,9 +113,17 @@ export const getOracleAnswer = async (oracleAddress: string): Promise<BigNumber>
     return parseUnits("1", 8);
   }
 
-  const oracle = await ethers.getContractAt(EACAggregatorProxyABI, oracleAddress);
+  let oracle;
+
+  if (process.env.NETWORK === "mainnet") {
+    oracle = await ethers.getContractAt(EACAggregatorProxyABI, oracleAddress);
+  } else {
+    oracle = await ethers.getContractAt(MockAggregatorABI, oracleAddress);
+  }
+
   const roundData = await oracle.latestRoundData();
-  return roundData.answer;
+
+  return process.env.NETWORK === "mainnet" ? roundData.answer : roundData[1];
 };
 
 export const updateOracleAnswer = async (oracleAddress: string, amount: BigNumberish | number): Promise<void> => {

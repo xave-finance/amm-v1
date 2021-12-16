@@ -95,7 +95,9 @@ describe("Curve", function () {
   });
 
   afterEach(async () => {
-    await Promise.all(rates.map((x, i) => updateOracleAnswer(oracles[i], x)));
+    if (process.env.NETWORK === "mainnet") {
+      await Promise.all(rates.map((x, i) => updateOracleAnswer(oracles[i], x)));
+    }
   });
 
   before(async function () {
@@ -126,7 +128,8 @@ describe("Curve", function () {
       'FXPHP': fxphpToUsdAssimilator,
     };
 
-    quoteAssimilatorAddr = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`));
+    const mainnetUsdcAssimilator = require(path.resolve(__dirname, `../scripts/config/usdcassimilator/${process.env.NETWORK}.json`));
+    quoteAssimilatorAddr = process.env.NETWORK === 'mainnet' ? mainnetUsdcAssimilator : usdcToUsdAssimilator;
   });
 
   beforeEach(async function () {
@@ -159,53 +162,56 @@ describe("Curve", function () {
       await multiMintAndApprove([
         [base, user1, parseUnits("100000000", baseDecimals), c.address],
         [TOKENS.USDC.address, user1, parseUnits("100000000", TOKENS.USDC.decimals), c.address],
-        [base, user2, parseUnits("100000000", baseDecimals), c.address],
-        [TOKENS.USDC.address, user2, parseUnits("100000000", TOKENS.USDC.decimals), c.address],
       ]);
+
       await c.deposit(parseUnits("1000000"), await getFutureTime());
 
       await c
-        .connect(user2)
+        .connect(user1)
         .originSwap(base, TOKENS.USDC.address, parseUnits("1000", baseDecimals), 0, await getFutureTime());
       await c
-        .connect(user2)
+        .connect(user1)
         .originSwap(base, TOKENS.USDC.address, parseUnits("1000", baseDecimals), 0, await getFutureTime());
       await c
-        .connect(user2)
+        .connect(user1)
         .originSwap(base, TOKENS.USDC.address, parseUnits("1000", baseDecimals), 0, await getFutureTime());
       await c
-        .connect(user2)
+        .connect(user1)
         .originSwap(base, TOKENS.USDC.address, parseUnits("1000", baseDecimals), 0, await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
-      await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("1"), await getFutureTime());
-      await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("10"), await getFutureTime());
-      await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("15"), await getFutureTime());
-      await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
-      await c.connect(user2).withdraw(parseUnits("30"), await getFutureTime());
-      await c.connect(user2).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
-      await c.connect(user2).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
+      await c.connect(user1).withdraw(parseUnits("1"), await getFutureTime());
+      await c.connect(user1).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
+      await c.connect(user1).withdraw(parseUnits("10"), await getFutureTime());
+      await c.connect(user1).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
+      await c.connect(user1).withdraw(parseUnits("15"), await getFutureTime());
+      await c.connect(user1).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
+      await c.connect(user1).withdraw(parseUnits("30"), await getFutureTime());
+      await c.connect(user1).originSwap(TOKENS.USDC.address, base, parseUnits("1000", TOKENS.USDC.decimals), 0, await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
+      await c.connect(user1).deposit(parseUnits("100"), await getFutureTime());
 
-      const bal = await c.balanceOf(user2Address);
-      await c.connect(user2).withdraw(bal, await getFutureTime());
+      const bal = await c.balanceOf(user1Address);
+      await c.connect(user1).withdraw(bal, await getFutureTime());
     };
 
-    it("EURS", async function () {
+    it(`EURS`, async function () {
       await checkInvariant(TOKENS.EURS.address, assimilator['EURS'].address, TOKENS.EURS.decimals);
     });
 
-    it("XSGD", async function () {
+    it(`XSGD`, async function () {
       await checkInvariant(TOKENS.XSGD.address, assimilator['XSGD'].address, TOKENS.XSGD.decimals);
     });
 
-    it("FXPHP", async function () {
+    it(`CADC`, async function () {
+      await checkInvariant(TOKENS.CADC.address, assimilator['CADC'].address, TOKENS.CADC.decimals);
+    });
+
+    it(`FXPHP`, async function () {
       await checkInvariant(TOKENS.FXPHP.address, assimilator['FXPHP'].address, TOKENS.FXPHP.decimals);
     });
   });
@@ -453,7 +459,7 @@ describe("Curve", function () {
           const oracle = oracles[i];
           const quoteWeight = weights[j][0];
 
-          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
+          it.only(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
             const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['FXPHP']];
             const baseAssimilator = assimilators[i].address;
 
@@ -474,7 +480,7 @@ describe("Curve", function () {
             });
           });
 
-          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
+          it.only(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
             const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['FXPHP']];
             const baseAssimilator = assimilators[i].address;
 
@@ -1383,7 +1389,7 @@ describe("Curve", function () {
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("EURS/USDC 50/50 - " + i.toString(), async function () {
+        it(`EURS/USDC 50/50 - ` + i.toString(), async function () {
           await viewWithdrawWithSanityChecks({
             amount: "10000",
             name: NAME,
@@ -1403,7 +1409,7 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
-        it("XSGD/USDC 50/50 - " + i.toString(), async function () {
+        it(`XSGD/USDC 50/50 - ` + i.toString(), async function () {
           await viewWithdrawWithSanityChecks({
             amount: i.toString(),
             name: NAME,
