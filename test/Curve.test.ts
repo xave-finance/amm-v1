@@ -441,11 +441,11 @@ describe("Curve", function () {
       }
     };
 
-    const bases = [TOKENS.EURS.address, TOKENS.XSGD.address, TOKENS.FXPHP.address];
-    const decimals = [TOKENS.EURS.decimals, TOKENS.XSGD.decimals, TOKENS.FXPHP.decimals];
-    const oracles = [ORACLES.EUR.address, ORACLES.SGD.address, ORACLES.PHP.address];
+    const bases = [TOKENS.EURS.address, TOKENS.XSGD.address, TOKENS.CADC.address, TOKENS.FXPHP.address];
+    const decimals = [TOKENS.EURS.decimals, TOKENS.XSGD.decimals, TOKENS.CADC.decimals, TOKENS.FXPHP.decimals];
+    const oracles = [ORACLES.EUR.address, ORACLES.SGD.address, ORACLES.CAD.address, ORACLES.PHP.address];
     const weights = [["0.5", "0.5"]];
-    const baseName = ["EURS", "XSGD", "FXPHP"];
+    const baseName = ["EURS", "XSGD", "CADC", "FXPHP"];
 
     for (let i = 0; i < bases.length; i++) {
       for (let j = 0; j < weights.length; j++) {
@@ -459,8 +459,8 @@ describe("Curve", function () {
           const oracle = oracles[i];
           const quoteWeight = weights[j][0];
 
-          it.only(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
-            const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['FXPHP']];
+          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (${baseName[i]} -> USDC)`, async function () {
+            const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['CADC'], assimilator['FXPHP']];
             const baseAssimilator = assimilators[i].address;
 
             await originAndTargetSwapAndCheckSanity({
@@ -480,8 +480,8 @@ describe("Curve", function () {
             });
           });
 
-          it.only(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
-            const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['FXPHP']];
+          it(`${name}/USDC ${weightInInt}/${100 - weightInInt} - ${k} (USDC -> ${baseName[i]})`, async function () {
+            const assimilators = [assimilator['EURS'], assimilator['XSGD'], assimilator['CADC'], assimilator['FXPHP']];
             const baseAssimilator = assimilators[i].address;
 
             await originAndTargetSwapAndCheckSanityInverse({
@@ -844,6 +844,27 @@ describe("Curve", function () {
       }
 
       for (let i = 1; i <= 10000; i *= 100) {
+        const NAME = "CADC";
+        const SYMBOL = "CADC";
+        it(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
+          await viewLPWithdrawWithSanityChecks({
+            amount: i.toString(),
+            name: NAME,
+            symbol: SYMBOL,
+            base: TOKENS.CADC.address,
+            quote: TOKENS.USDC.address,
+            baseWeight: parseUnits("0.5"),
+            quoteWeight: parseUnits("0.5"),
+            baseDecimals: TOKENS.CADC.decimals,
+            quoteDecimals: TOKENS.USDC.decimals,
+            baseAssimilator: assimilator['CADC'].address,
+            quoteAssimilator: quoteAssimilatorAddr.address,
+            params: [DIMENSION.alpha, DIMENSION.beta, DIMENSION.max, DIMENSION.epsilon, DIMENSION.lambda],
+          });
+        });
+      }
+
+      for (let i = 1; i <= 10000; i *= 100) {
         const NAME = "FXPHP";
         const SYMBOL = "FXPHP";
         it(`${SYMBOL}/USDC 50/50 - ${i}`, async function () {
@@ -1011,7 +1032,9 @@ describe("Curve", function () {
         const quoteReceived = afterQuoteBal.sub(beforeQuoteBal);
 
         // 2nd Withdrawal
-        await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        }
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
@@ -1204,7 +1227,9 @@ describe("Curve", function () {
 
         // Update oracle
         const newOracleRate = ORACLE_RATE.mul(100).div(125);
-        await updateOracleAnswer(oracle, newOracleRate);
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, newOracleRate);
+        }
 
         // View for user 2 should be similar to user 1
         // Regardless of Oracle price
@@ -1216,7 +1241,9 @@ describe("Curve", function () {
         expectBNAproxEq(quoteViewUser2, quoteViewUser1, quoteViewUser2.div(2000));
         expectBNAproxEq(baseViewUser2, baseViewUser1, baseViewUser2.div(2000));
 
-        await updateOracleAnswer(oracle, ORACLE_RATE);
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE);
+        }
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
@@ -1377,7 +1404,9 @@ describe("Curve", function () {
 
         // Withdraw should be the same regardless if oracle updates
         const ORACLE_RATE = await getOracleAnswer(oracle);
-        await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        }
 
         const [viewBase, viewQuote] = await curve.viewWithdraw(afterLPBal);
 
@@ -1385,7 +1414,9 @@ describe("Curve", function () {
         expectBNAproxEq(viewBase, baseSupplied, baseSupplied.div(1500));
         expectBNAproxEq(viewQuote, quoteSupplied, quoteSupplied.div(1500));
 
-        await updateOracleAnswer(oracle, ORACLE_RATE);
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE);
+        }
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
@@ -1562,7 +1593,9 @@ describe("Curve", function () {
           [base, user2, parseUnits(approvalAmount, baseDecimals), curve.address],
           [quote, user2, parseUnits(approvalAmount, quoteDecimals), curve.address],
         ]);
-        await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        }
 
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
@@ -1586,7 +1619,9 @@ describe("Curve", function () {
         expectBNAproxEq(quoteSupplied2, quoteSupplied, quoteSupplied2.div(2000));
 
         // 1st Withdrawal
-        await updateOracleAnswer(oracle, ORACLE_RATE);
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE);
+        }
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
@@ -1602,7 +1637,9 @@ describe("Curve", function () {
         const quoteReceived = afterQuoteBal.sub(beforeQuoteBal);
 
         // 2nd Withdrawal
-        await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE.mul(2));
+        }
         beforeBaseBal = await erc20.attach(base).balanceOf(user2Address);
         beforeQuoteBal = await erc20.attach(quote).balanceOf(user2Address);
 
@@ -1640,12 +1677,14 @@ describe("Curve", function () {
           expectBNAproxEq(quoteSupplied2, quoteReceived2, quoteReceived2.div(ethers.BigNumber.from("1500")));
         }
 
-        await updateOracleAnswer(oracle, ORACLE_RATE);
+        if (process.env.NETWORK === "mainnet") {
+          await updateOracleAnswer(oracle, ORACLE_RATE);
+        }
       };
 
       for (let i = 1; i <= 10000; i *= 100) {
-        const NAME = "XSGD";
-        const SYMBOL = "XSGD";
+        const NAME = "EURS";
+        const SYMBOL = "EURS";
         it(`${SYMBOL}/USDC 50/50 - ` + i.toString(), async function () {
           await addAndRemoveLiquidityWithSanityChecks({
             amount: "1",

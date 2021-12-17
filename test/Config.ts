@@ -2,7 +2,7 @@ export const CONFIG = {
   BLOCK_NO: {
     MAINNET: 13617346,
     MATIC: 0,
-    KOVAN: 28793393
+    KOVAN: 28797253
   },
   DIMENSION_ALPHA: "0.8",
   DIMENSION_BETA: "0.48",
