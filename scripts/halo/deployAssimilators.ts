@@ -16,6 +16,13 @@ async function main() {
   const contractName = "BaseToUsdAssimilator";
   let output = {};
 
+  const assimilatorKeys = [
+    'baseDecimals',
+    'baseTokenAddress',
+    'quoteTokenAddress',
+    'oracleAddress'
+  ];
+
   let assimilatorConfigs: {
     baseDecimals: number;
     baseTokenAddress: string;
@@ -28,6 +35,13 @@ async function main() {
   pairs.forEach(pair => {
     let data = fs.readFileSync(path.join(__dirname, `./assimilatorConfigs/${NETWORK}/${pair}.json`));
     let config = JSON.parse(data.toString());
+
+    //Validate if config has all the properties
+    for (const key of assimilatorKeys) {
+      const configKeys = Object.keys(config)
+      if (!configKeys.includes(key)) throw new Error(`${key} key doesn't exist in ${NETWORK}/${pair}.json`);
+    }
+
     assimilatorConfigs.push(config);
   });
 

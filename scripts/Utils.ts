@@ -111,6 +111,22 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
   }
 }
 
+const paramsKeys = [
+  'token_symbol',
+  'token_name',
+  'weights',
+  'lpt-name',
+  'dimensions'
+];
+
+const dimensionKeys = [
+  'alpha',
+  'beta',
+  'max',
+  'epsilon',
+  'lambda'
+];
+
 export const curveHelper = async (fileName) => {
   let tokenSymbols: String = "";
   let tokenNames: String = "";
@@ -121,6 +137,20 @@ export const curveHelper = async (fileName) => {
   for (let index = 0; index < fileName.length; index++) {
     const row = fileName[index];
     const params = require(path.resolve(__dirname, `./halo/curve/${NETWORK}/${row}.json`));
+
+    //Validate if params object has all the keys from paramsKeys array
+    for (const paramKey of paramsKeys) {
+      const extractedParamsKeys = Object.keys(params);
+      if (!extractedParamsKeys.includes(paramKey)) throw new Error(`${key} key doesn't exist in ${NETWORK}/${row}.json`);
+
+      //Validate if dimension object in params has all the keys from dimensionKeys array
+      if (extractedParamsKeys.includes('dimensions') && paramKey === 'dimensions') {
+        const extractedDimensionKeys = Object.keys(params.dimensions);
+        for (const dimensionKey of dimensionKeys) {
+          if (!extractedDimensionKeys.includes(dimensionKey)) throw new Error(`${key} key doesn't exist in ${NETWORK}/${row}.json's "dimension" object keys`);
+        }
+      }
+    }
 
     tokenSymbols += `${params.token_symbol},`;
     tokenNames += `${params.token_name},`;
