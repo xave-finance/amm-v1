@@ -49,11 +49,11 @@ You can download the full `.env` from 1password.
     > yarn deploy:<network>:2
     ```
 
-    **Post deployment:** add the newly deployed UsdcToUsd assimilator address in `./scripts/config/usdcassimilator/<network>.json`. Be sure to commit this change on source control as this needs to end up in our repo.
+    **Post deployment:** add the newly deployed USDC assimilator address to `./scripts/config/usdcassimilator/<network>.json`. Be sure to commit this change on source control as this needs to end up in our repo.
 
 2. Deploy base assimilator(s)
 
-    **Pre deployment:** specify the base assimilators you wish to deploy on the `ASSIMILATOR_PAIRS` var on the `.env` file first before running the below command
+    **Pre deployment:** specify the base assimilators you wish to deploy on the `ASSIMILATOR_PAIRS` var in the `.env` file first before running the below command
 
     ```
     > yarn deploy:<network>:assimilators
@@ -63,9 +63,9 @@ You can download the full `.env` from 1password.
 
     **Pre deployment:**
     
-    - specify the curves you wish to deploy on the `ASSIMILATOR_PAIRS` var on the `.env` file first before running the below command
+    - specify the curves you wish to deploy on the `ASSIMILATOR_PAIRS` var in the `.env` file first before running the below command
 
-    - correct curve tokens address and decimals should also be specified on the `.env` file represented by `TOKEN_ADDR_<SYMBOL>` & `TOKEN_<SYMBOL>_DECIMALS` accordingly
+    - correct curve tokens address and decimals should also be specified in the `.env` file represented by `TOKEN_ADDR_<SYMBOL>` & `TOKEN_<SYMBOL>_DECIMALS` accordingly
 
     ```
     > yarn deploy:<network>:3
@@ -76,7 +76,7 @@ You can download the full `.env` from 1password.
 Simply run the following command
 
 ```
-> yarn deploy:kovan:verify
+> yarn deploy:<network>:verify
 ```
 
 # Adding new curve to an existing AMM
@@ -93,7 +93,7 @@ Simply run the following command
 2. Before deploying, be sure that you have the following files in `scripts/config/`:
 
     - `<network>/factory_deployed.json` -> this contains the contract addresses from the previous deployment
-    - `usdcassimilator/<network>.json` -> contains the UsdcToUsdAssimilator address from the previous deployment
+    - `usdcassimilator/<network>.json` -> contains the USDC assimilator address from the previous deployment
 
     Please refer to https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/137330714/Rewards+AMM+mapping for the zip files of the previous deployments
 
