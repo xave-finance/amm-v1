@@ -86,9 +86,9 @@ Simply run the following command
     - `scripts/halo/assimilatorConfigs/<network>/<base_token_symbol>_USDC.json`
     - `scripts/halo/curveConfigs/<network>/<base_token_symbol>_USDC.json`
 
-    You can refer to the existing config files as template for the 2 files above. Other stuff like curve params needs be coordinated with the team.
+    You can refer to the existing config files on each respective folders above as template for the config file you will be creating - change the value accordingly like token addresses, decimals, etc. Other stuff like curve params needs be coordinated with the team.
 
-    **IMPORTANT:** Raise a PR with the new config files, this needs to be reviewed by at least 2 peers before we can proceed with the next step
+    **IMPORTANT:** Raise a PR with the new config file(s), this needs to be reviewed by at least 2 peers before we can proceed with the next step
 
 2. Before deploying, be sure that you have the following files in `scripts/config/`:
 
@@ -98,6 +98,16 @@ Simply run the following command
     Please refer to https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/137330714/Rewards+AMM+mapping for the zip files of the previous deployments
 
     All contract addresses can also be found & reviewed here: https://halodao.atlassian.net/wiki/spaces/HALODAO/pages/1048659/Contract+Addresses
+
+3. Ensure that your `.env` has the necessary vars for this deployment
+
+    As an example, deploying a FXPHP_USDC curve on arbitrum should have the following env vars:
+
+    ```
+    TOKEN_ADDR_FXPHP=0x3d147cD9aC957B2a5F968dE9d1c6B9d0872286a0
+    TOKENS_FXPHP_DECIMALS=18
+    ASSIMILATOR_PAIRS=FXPHP_USDC
+    ```
 
 3. Deploy the base assimilator(s)
 
