@@ -35,7 +35,7 @@ You can download the full `.env` from 1password.
 
 1. Deploy core contracts (Factory + Libs + Zap)
 
-    **Pre deployment:** if deploying to other networks aside from mainnet, update the hardcoded USDC address in `Zap.sol` first with the correct USDC address on the chosen network before running the below command
+    **Pre deployment:** if deploying to other networks aside from mainnet, update the hardcoded USDC address (in checksum format) in `Zap.sol` first with the correct USDC address on the chosen network before running the below command
 
     ```
     > yarn deploy:<network>:1
@@ -43,7 +43,7 @@ You can download the full `.env` from 1password.
 
 2. Deploy USDC assimilator
 
-    **Pre deployment:** if deploying to other networks aside from mainnet, update the hardcoded USDC & orcle address in `UsdcToUsdAssimilator.sol` first with the correct USDC address on the chosen network before running the below command
+    **Pre deployment:** if deploying to other networks aside from mainnet, update the hardcoded USDC & orcle address (in checksum format) in `UsdcToUsdAssimilator.sol` first with the correct USDC address on the chosen network before running the below command
 
     ```
     > yarn deploy:<network>:2
