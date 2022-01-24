@@ -9,6 +9,7 @@ import { BigNumberish } from "ethers";
 import { ERC20 } from "../typechain/ERC20";
 import { CurveFactory, Curve } from "../typechain";
 import { deployContract, getFastGasPrice } from "./common";
+import { validateCurveConfig } from "./ConfigValidator";
 
 const NETWORK = hre.network.name;
 const QUOTED_TOKEN = "TOKEN_ADDR_USDC";
@@ -107,38 +108,6 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
     }
   }
 };
-
-const validateCurveConfig = params => {
-  const dimensionKeys = [
-    'alpha',
-    'beta',
-    'max',
-    'epsilon',
-    'lambda'
-  ];
-
-  const paramsKeys = [
-    'token_symbol',
-    'token_name',
-    'weights',
-    'lpt-name',
-    'dimensions'
-  ];
-
-  for (const paramKey of paramsKeys) {
-    const extractedParamsKeys = Object.keys(params);
-    if (!extractedParamsKeys.includes(paramKey)) return false;
-
-    if (extractedParamsKeys.includes('dimensions') && paramKey === 'dimensions') {
-      const extractedDimensionKeys = Object.keys(params.dimensions);
-      for (const dimensionKey of dimensionKeys) {
-        if (!extractedDimensionKeys.includes(dimensionKey)) return false;
-      }
-    }
-  }
-
-  return true;
-}
 
 export const curveHelper = async (fileName) => {
   let tokenSymbols: String = "";
