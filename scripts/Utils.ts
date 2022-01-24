@@ -108,21 +108,53 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
   }
 };
 
-const paramsKeys = [
-  'token_symbol',
-  'token_name',
-  'weights',
-  'lpt-name',
-  'dimensions'
-];
+export const validateAssimilatorConfig = config => {
+  const assimilatorKeys = [
+    'baseDecimals',
+    'baseTokenAddress',
+    'quoteTokenAddress',
+    'oracleAddress'
+  ];
 
-const dimensionKeys = [
-  'alpha',
-  'beta',
-  'max',
-  'epsilon',
-  'lambda'
-];
+  for (const key of assimilatorKeys) {
+    const configKeys = Object.keys(config)
+    if (!configKeys.includes(key)) return false;
+  }
+
+  return true;
+}
+
+const validateCurveConfig = params => {
+  const dimensionKeys = [
+    'alpha',
+    'beta',
+    'max',
+    'epsilon',
+    'lambda'
+  ];
+
+  const paramsKeys = [
+    'token_symbol',
+    'token_name',
+    'weights',
+    'lpt-name',
+    'dimensions'
+  ];
+
+  for (const paramKey of paramsKeys) {
+    const extractedParamsKeys = Object.keys(params);
+    if (!extractedParamsKeys.includes(paramKey)) return false;
+
+    if (extractedParamsKeys.includes('dimensions') && paramKey === 'dimensions') {
+      const extractedDimensionKeys = Object.keys(params.dimensions);
+      for (const dimensionKey of dimensionKeys) {
+        if (!extractedDimensionKeys.includes(dimensionKey)) return false;
+      }
+    }
+  }
+
+  return true;
+}
 
 export const curveHelper = async (fileName) => {
   let tokenSymbols: String = "";
@@ -135,18 +167,8 @@ export const curveHelper = async (fileName) => {
     const row = fileName[index];
     const params = require(path.resolve(__dirname, `./halo/curveConfigs/${NETWORK}/${row}.json`));
 
-    //Validate if params object has all the keys from paramsKeys array
-    for (const paramKey of paramsKeys) {
-      const extractedParamsKeys = Object.keys(params);
-      if (!extractedParamsKeys.includes(paramKey)) throw new Error(`${key} key doesn't exist in ${NETWORK}/${row}.json`);
-
-      //Validate if dimension object in params has all the keys from dimensionKeys array
-      if (extractedParamsKeys.includes('dimensions') && paramKey === 'dimensions') {
-        const extractedDimensionKeys = Object.keys(params.dimensions);
-        for (const dimensionKey of dimensionKeys) {
-          if (!extractedDimensionKeys.includes(dimensionKey)) throw new Error(`${key} key doesn't exist in ${NETWORK}/${row}.json's "dimension" object keys`);
-        }
-      }
+    if (!validateCurveConfig(params)) {
+      throw new Error(`Invalid curve config for ${NETWORK}/${row}.json`)
     }
 
     tokenSymbols += `${params.token_symbol},`;

@@ -1,7 +1,7 @@
 import hre from "hardhat";
 const { ethers } = hre;
 import { getAccounts } from "../common";
-import { configFileHelper, isArbitrumNetwork } from "../Utils";
+import { configFileHelper, isArbitrumNetwork, validateAssimilatorConfig } from "../Utils";
 import { deployContract } from "../common";
 import fs from "fs";
 import path from "path";
@@ -16,13 +16,6 @@ async function main() {
   const contractName = "BaseToUsdAssimilator";
   let output = {};
 
-  const assimilatorKeys = [
-    'baseDecimals',
-    'baseTokenAddress',
-    'quoteTokenAddress',
-    'oracleAddress'
-  ];
-
   let assimilatorConfigs: {
     baseDecimals: number;
     baseTokenAddress: string;
@@ -36,10 +29,8 @@ async function main() {
     let data = fs.readFileSync(path.join(__dirname, `./assimilatorConfigs/${NETWORK}/${pair}.json`));
     let config = JSON.parse(data.toString());
 
-    //Validate if config has all the properties
-    for (const key of assimilatorKeys) {
-      const configKeys = Object.keys(config)
-      if (!configKeys.includes(key)) throw new Error(`${key} key doesn't exist in ${NETWORK}/${pair}.json`);
+    if (!validateAssimilatorConfig(config)) {
+      throw new Error(`Invalid assimilator config for ${NETWORK}/${pair}.json`)
     }
 
     assimilatorConfigs.push(config);
