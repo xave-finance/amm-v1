@@ -1,7 +1,8 @@
 import hre from "hardhat";
 const { ethers } = hre;
 import { getAccounts } from "../common";
-import { configFileHelper, isArbitrumNetwork, validateAssimilatorConfig } from "../Utils";
+import { configFileHelper, isArbitrumNetwork } from "../Utils";
+import { validateAssimilatorConfig } from "../ConfigValidator";
 import { deployContract } from "../common";
 import fs from "fs";
 import path from "path";
