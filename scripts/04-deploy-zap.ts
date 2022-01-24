@@ -4,7 +4,7 @@ import chalk from "chalk";
 const { ethers } = hre;
 
 import { getAccounts, deployContract } from "./common";
-import { deployedLogs } from "./Utils";
+import { deployedLogs, isArbitrumNetwork } from "./Utils";
 
 async function main() {
   const users = await getAccounts();
@@ -21,7 +21,7 @@ async function main() {
     factory: Factory,
     args: [],
     opts: {
-      gasLimit: 3000000,
+      gasLimit: isArbitrumNetwork() ? 300000000 : 3000000,
     },
   });
 
@@ -30,7 +30,7 @@ async function main() {
   };
 
   // Deployed contracts log
-  await deployedLogs('zap_deployed', output);
+  await deployedLogs("zap_deployed", output);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -129,10 +129,10 @@ typechain
 
 
 # Contract config
-scripts/deployed_contract_logs/localhost
-scripts/deployed_contract_logs/kovan
-scripts/deployed_contract_logs/hardhat
+scripts/deployed_contract_logs/
 
 scripts/config/kovan
 scripts/config/localhost
 scripts/config/hardhat
+scripts/config/arbitrum
+scripts/config/arbitrumTestnet
