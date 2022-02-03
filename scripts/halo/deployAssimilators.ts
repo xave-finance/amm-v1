@@ -2,6 +2,7 @@ import hre from "hardhat";
 const { ethers } = hre;
 import { getAccounts } from "../common";
 import { configFileHelper, isArbitrumNetwork } from "../Utils";
+import { validateAssimilatorConfig } from "../ConfigValidator";
 import { deployContract } from "../common";
 import fs from "fs";
 import path from "path";
@@ -28,6 +29,11 @@ async function main() {
   pairs.forEach(pair => {
     let data = fs.readFileSync(path.join(__dirname, `./assimilatorConfigs/${NETWORK}/${pair}.json`));
     let config = JSON.parse(data.toString());
+
+    if (!validateAssimilatorConfig(config)) {
+      throw new Error(`Invalid assimilator config for ${NETWORK}/${pair}.json`)
+    }
+
     assimilatorConfigs.push(config);
   });
 

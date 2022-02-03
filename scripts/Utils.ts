@@ -9,6 +9,7 @@ import { BigNumberish } from "ethers";
 import { ERC20 } from "../typechain/ERC20";
 import { CurveFactory, Curve } from "../typechain";
 import { deployContract, getFastGasPrice } from "./common";
+import { validateCurveConfig } from "./ConfigValidator";
 
 const NETWORK = hre.network.name;
 const QUOTED_TOKEN = "TOKEN_ADDR_USDC";
@@ -108,7 +109,7 @@ export const curveConfig = async (tokenSymbol, tokenName, curveWeights, lptNames
   }
 };
 
-export const curveHelper = async fileName => {
+export const curveHelper = async (fileName) => {
   let tokenSymbols: String = "";
   let tokenNames: String = "";
   let weights: String = "";
@@ -118,6 +119,10 @@ export const curveHelper = async fileName => {
   for (let index = 0; index < fileName.length; index++) {
     const row = fileName[index];
     const params = require(path.resolve(__dirname, `./halo/curveConfigs/${NETWORK}/${row}.json`));
+
+    if (!validateCurveConfig(params)) {
+      throw new Error(`Invalid curve config for ${NETWORK}/${row}.json`)
+    }
 
     tokenSymbols += `${params.token_symbol},`;
     tokenNames += `${params.token_name},`;
