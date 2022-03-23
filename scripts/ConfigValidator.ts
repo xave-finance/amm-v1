@@ -27,7 +27,7 @@ export const validateCurveConfig = params => {
     'token_symbol',
     'token_name',
     'weights',
-    'lpt-name',
+    'lpt_name',
     'dimensions'
   ];
 
