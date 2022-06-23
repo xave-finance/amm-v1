@@ -1,13 +1,13 @@
 {
-    "token_name": "STASIS EURS Token",
-    "token_symbol": "EURS",
-    "weights": "50/50",
-    "lpt_name": "HLP-EURS-USDC",
-    "dimensions": {
-        "alpha": "0.8",
-        "beta": "0.48",
-        "max": "0.175",
-        "epsilon": "0.0005",
-        "lambda": "0.3"
-    }
+  "token_name": "EURS-USDC HaloDAO LP Token",
+  "token_symbol": "EURS",
+  "weights": "50/50",
+  "lpt_name": "HLP-EURS-USDC",
+  "dimensions": {
+    "alpha": "0.8",
+    "beta": "0.5",
+    "max": "0.15",
+    "epsilon": "0.0004",
+    "lambda": "0.3"
+  }
 }
