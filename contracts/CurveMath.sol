@@ -19,6 +19,7 @@ import "./Storage.sol";
 
 import "./lib/UnsafeMath64x64.sol";
 import "./lib/ABDKMath64x64.sol";
+import "hardhat/console.sol";
 
 library CurveMath {
     int128 private constant ONE = 0x10000000000000000;
@@ -205,14 +206,26 @@ library CurveMath {
         int128 _nGLiq,
         int128 _omega,
         int128 _psi
-    ) internal pure {
+    ) internal view {
         if (_totalShells == 0 || 0 == _totalShells + _newShells) return;
 
         int128 _prevUtilPerShell = _oGLiq.sub(_omega).div(_totalShells);
+        console.log("_prevUtilPerShell: ", ABDKMath64x64.toUInt(_prevUtilPerShell.abs() * 1e18));
 
         int128 _nextUtilPerShell = _nGLiq.sub(_psi).div(_totalShells.add(_newShells));
 
+        console.log("_nextUtilPerShell: ", ABDKMath64x64.toUInt(_nextUtilPerShell.abs() * 1e18));
+
         int128 _diff = _nextUtilPerShell - _prevUtilPerShell;
+
+        console.log("Padding 18 zeroes");
+        console.log(0 < _diff ? "+" : "-");
+        console.log(
+            "_diff: ",
+            0 < _diff ? ABDKMath64x64.toUInt(_diff * 1e18) : ABDKMath64x64.toUInt(_diff.abs() * 1e18)
+        );
+        console.log("0 < _diff: ", 0 < _diff);
+        console.log(" _diff >= MAX_DIFF: ", _diff >= MAX_DIFF);
 
         require(0 < _diff || _diff >= MAX_DIFF, "Curve/liquidity-invariant-violation");
     }

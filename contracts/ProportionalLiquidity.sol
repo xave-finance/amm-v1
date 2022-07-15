@@ -10,6 +10,7 @@ import "./lib/UnsafeMath64x64.sol";
 import "./lib/ABDKMath64x64.sol";
 
 import "./CurveMath.sol";
+import "hardhat/console.sol";
 
 library ProportionalLiquidity {
     using ABDKMath64x64 for uint256;
@@ -200,6 +201,8 @@ library ProportionalLiquidity {
 
         uint256[] memory withdrawals_ = new uint256[](_length);
 
+        console.log("Total supply ", curve.totalSupply);
+
         int128 _multiplier = _withdrawal.divu(1e18).div(curve.totalSupply.divu(1e18));
 
         for (uint256 i = 0; i < _length; i++) {
@@ -258,6 +261,8 @@ library ProportionalLiquidity {
     ) private view {
         (int128 _nGLiq, int128[] memory _nBals) = getGrossLiquidityAndBalances(curve);
 
+        console.log(ABDKMath64x64.toUInt(_oGLiq.abs()));
+        console.log(ABDKMath64x64.toUInt(_nGLiq.abs()));
         int128 _beta = curve.beta;
         int128 _delta = curve.delta;
         int128[] memory _weights = curve.weights;
