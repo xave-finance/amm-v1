@@ -26,16 +26,25 @@ library ProportionalLiquidity {
         external
         returns (uint256 curves_, uint256[] memory)
     {
-        int128 __deposit = _deposit.divu(1e18);
+        int128 __deposit = _deposit.divu(1e18); // convert to ether value
 
         uint256 _length = curve.assets.length;
 
         uint256[] memory deposits_ = new uint256[](_length);
 
+        // rate = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
         (int128 _oGLiq, int128[] memory _oBals) = getGrossLiquidityAndBalancesForDeposit(curve);
-
+        console.log("In proportionalDeposit");
         // Needed to calculate liquidity invariant
+        // rate = getRate() from chainlink
         (int128 _oGLiqProp, int128[] memory _oBalsProp) = getGrossLiquidityAndBalances(curve);
+
+        console.log("Before intake oGLiq: ", ABDKMath64x64.toUInt(_oGLiq.abs()));
+        console.log("Before intake oBals[0]: ", ABDKMath64x64.toUInt(_oBals[0]));
+        console.log("Before intake oBals[1]: ", ABDKMath64x64.toUInt(_oBals[1]));
+        console.log("Before intake oGLiqProp: ", ABDKMath64x64.toUInt(_oGLiqProp.abs()));
+        console.log("Before intake oBalsProp[0]: ", ABDKMath64x64.toUInt(_oBalsProp[0]));
+        console.log("Before intake oBalsProp[1]: ", ABDKMath64x64.toUInt(_oBalsProp[1]));
 
         // No liquidity, oracle sets the ratio
         if (_oGLiq == 0) {
@@ -58,18 +67,22 @@ library ProportionalLiquidity {
                     _baseWeight,
                     _quoteWeight,
                     _oBals[i].mul(_multiplier).add(ONE_WEI)
-                );
+                ); // intake balances first
             }
         }
 
         int128 _totalShells = curve.totalSupply.divu(1e18);
 
-        int128 _newShells = __deposit;
+        console.log("Total shells: ", ABDKMath64x64.toUInt(_totalShells));
+
+        int128 _newShells = __deposit; // __deposit is not changed from L29
 
         if (_totalShells > 0) {
-            _newShells = __deposit.div(_oGLiq);
+            _newShells = __deposit.div(_oGLiq); // inputNumeraire / _oGLiq
             _newShells = _newShells.mul(_totalShells);
         }
+
+        console.log("New shells: ", ABDKMath64x64.toUInt(_newShells));
 
         requireLiquidityInvariant(curve, _totalShells, _newShells, _oGLiqProp, _oBalsProp);
 
@@ -229,7 +242,7 @@ library ProportionalLiquidity {
             balances_[i] = _bal;
             grossLiquidity_ += _bal;
         }
-
+        console.log("getGrossLiquidityAndBalancesDeposit: ", ABDKMath64x64.toUInt(grossLiquidity_.abs()));
         return (grossLiquidity_, balances_);
     }
 
@@ -249,6 +262,7 @@ library ProportionalLiquidity {
             grossLiquidity_ += _bal;
         }
 
+        console.log("getGrossLiquidityAndBalances: ", ABDKMath64x64.toUInt(grossLiquidity_.abs()));
         return (grossLiquidity_, balances_);
     }
 
@@ -259,18 +273,25 @@ library ProportionalLiquidity {
         int128 _oGLiq,
         int128[] memory _oBals
     ) private view {
+        console.log("In requireLiqudiityInvariant");
         (int128 _nGLiq, int128[] memory _nBals) = getGrossLiquidityAndBalances(curve);
 
-        console.log(ABDKMath64x64.toUInt(_oGLiq.abs()));
-        console.log(ABDKMath64x64.toUInt(_nGLiq.abs()));
         int128 _beta = curve.beta;
         int128 _delta = curve.delta;
         int128[] memory _weights = curve.weights;
 
         int128 _omega = CurveMath.calculateFee(_oGLiq, _oBals, _beta, _delta, _weights);
+        console.log("_omega: ", ABDKMath64x64.toUInt(_omega));
 
         int128 _psi = CurveMath.calculateFee(_nGLiq, _nBals, _beta, _delta, _weights);
+        console.log("_psi: ", ABDKMath64x64.toUInt(_psi));
 
+        console.log("LiqInvariant  oGLiq: ", ABDKMath64x64.toUInt(_oGLiq));
+        console.log("LiqInvariant oBals[0]: ", ABDKMath64x64.toUInt(_oBals[0]));
+        console.log("LiqInvariant oBals[1]: ", ABDKMath64x64.toUInt(_oBals[1]));
+        console.log("LiqInvariant nGLiq: ", ABDKMath64x64.toUInt(_nGLiq));
+        console.log("LiqInvariant nBals[0]: ", ABDKMath64x64.toUInt(_nBals[0]));
+        console.log("LiqInvariant nBals[1]: ", ABDKMath64x64.toUInt(_nBals[1]));
         CurveMath.enforceLiquidityInvariant(_curves, _newShells, _oGLiq, _nGLiq, _omega, _psi);
     }
 

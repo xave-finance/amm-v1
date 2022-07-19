@@ -21,6 +21,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../lib/ABDKMath64x64.sol";
 import "../interfaces/IAssimilator.sol";
 import "../interfaces/IOracle.sol";
+import "hardhat/console.sol";
 
 contract BaseToUsdAssimilator is IAssimilator {
     using ABDKMath64x64 for int128;
@@ -33,7 +34,12 @@ contract BaseToUsdAssimilator is IAssimilator {
     IERC20 public immutable baseToken;
     uint256 public immutable baseDecimals;
 
-    constructor(uint256 _baseDecimals, IERC20 _baseToken, IERC20 _quoteToken, IOracle _oracle) {
+    constructor(
+        uint256 _baseDecimals,
+        IERC20 _baseToken,
+        IERC20 _quoteToken,
+        IOracle _oracle
+    ) {
         baseDecimals = _baseDecimals;
         baseToken = _baseToken;
         usdc = _quoteToken;
@@ -42,6 +48,7 @@ contract BaseToUsdAssimilator is IAssimilator {
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
+
         return uint256(price);
     }
 
@@ -196,6 +203,9 @@ contract BaseToUsdAssimilator is IAssimilator {
 
         uint256 _balance = baseToken.balanceOf(_addr);
 
+        console.log("For addr: ", _addr);
+        console.log("Base tokebalance : ", _balance);
+
         if (_balance <= 0) return ABDKMath64x64.fromUInt(0);
 
         balance_ = ((_balance * _rate) / 1e8).divu(baseDecimals);
@@ -227,12 +237,16 @@ contract BaseToUsdAssimilator is IAssimilator {
     ) external view override returns (int128 balance_) {
         uint256 _baseTokenBal = baseToken.balanceOf(_addr);
 
+        console.log("Base token balance: ", _baseTokenBal);
         if (_baseTokenBal <= 0) return ABDKMath64x64.fromUInt(0);
 
         uint256 _usdcBal = usdc.balanceOf(_addr).mul(1e18).div(_quoteWeight);
+        console.log("usdc token balance: ", _baseTokenBal);
 
         // Rate is in 1e6
         uint256 _rate = _usdcBal.mul(1e18).div(_baseTokenBal.mul(1e18).div(_baseWeight));
+
+        console.log("LP Ratio rate: ", _rate);
 
         balance_ = ((_baseTokenBal * _rate) / 1e6).divu(1e18);
     }
