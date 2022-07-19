@@ -48,7 +48,7 @@ contract BaseToUsdAssimilator is IAssimilator {
 
     function getRate() public view override returns (uint256) {
         (, int256 price, , , ) = oracle.latestRoundData();
-
+        console.log(uint256(price));
         return uint256(price);
     }
 
